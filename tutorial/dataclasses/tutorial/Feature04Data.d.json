@@ -1,0 +1,10 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "Feature04Data",
+  "namespace" : "tutorial",
+  "fields" : [ {
+    "name" : "invoiceResult",
+    "type" : "tutorial.InvoiceData",
+    "comment" : "Structured invoice data extracted from the document by the agent"
+  } ]
+}

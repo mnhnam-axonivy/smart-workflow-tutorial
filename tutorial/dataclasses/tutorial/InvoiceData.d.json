@@ -1,0 +1,20 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "InvoiceData",
+  "namespace" : "tutorial",
+  "fields" : [ {
+    "name" : "invoiceNumber"
+  }, {
+    "name" : "supplierName"
+  }, {
+    "name" : "totalAmount",
+    "type" : "java.math.BigDecimal",
+    "modifiers" : [ ]
+  }, {
+    "name" : "currency"
+  }, {
+    "name" : "invoiceDate",
+    "type" : "java.time.LocalDate",
+    "modifiers" : [ ]
+  } ]
+}

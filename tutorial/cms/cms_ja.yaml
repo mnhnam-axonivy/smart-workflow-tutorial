@@ -1,0 +1,59 @@
+Dialogs:
+  tutorial:
+    TutorialPages:
+      AdvancedDesc: パターンとオーケストレーション — 高度なワークフローを設計
+      AdvancedTitle: 上級
+      BackButton: ← 一覧に戻る
+      BeginnerDesc: コアコンセプト — ここから始めましょう
+      BeginnerTitle: 初級
+      ExpertDesc: 高度な統合 — 限界に挑戦
+      ExpertTitle: エキスパート
+      Feature01Desc: システムプロンプトを使ってAgenticProcessCall要素を設定し、初めてのAIエージェントを作成します。
+      Feature01Title: エージェントの基本設定
+      Feature02Desc: 6つのサポートされるAIプロバイダーから選択し、変数で設定します。
+      Feature02Title: モデルプロバイダーの選択
+      Feature03Desc: エージェントがフリーテキストの代わりに型付きJavaオブジェクトとして応答するよう指示します。
+      Feature03Title: 構造化出力
+      Feature04Desc: 画像やPDFを添付し、モデルが視覚的に読み取って構造化データを抽出します。
+      Feature04Title: ファイル抽出
+      Feature05Desc: タグ1つでIvyの呼び出し可能サブプロセスをAIが発見できるツールに変えます。
+      Feature05Title: 呼び出し可能プロセスツール
+      Feature06Desc: JavaでSmartWorkflowToolを実装し、SPIで登録されるコードのみのツールロジック。
+      Feature06Title: Javaツール
+      Feature07Desc: DuckDuckGo経由でエージェントがインターネット検索できる組み込みツール。
+      Feature07Title: ウェブ検索ツール
+      Feature08Desc: 組み込みのプロンプトインジェクション検出と機密データブロックを有効化します。
+      Feature08Title: ガードレール（基本）
+      Feature09Desc: すべての会話をIvy履歴に記録し、Arize PhoenixでLLM呼び出しをトレース。
+      Feature09Title: 観測可能性と履歴
+      Feature10Desc: IvyMemoryまたはBusinessDataMemoryを使用して会話コンテキストを保持します。
+      Feature10Title: メモリと状態
+      Feature11Desc: 重要な判断でエージェントの実行を一時停止し、人間のレビュータスクを割り当て、再開します。
+      Feature11Title: ヒューマン・イン・ザ・ループ
+      Feature12Desc: 複数の専門エージェントを連鎖 — 各エージェントが前のエージェントの出力を受け取ります。
+      Feature12Title: エージェントパイプラインパターン
+      Feature13Desc: GuardrailProvider SPIを実装してドメイン固有の検証ルールを追加します。
+      Feature13Title: カスタムガードレール
+      Feature14Desc: LLMに送信する前に個人データを仮名化し、出力で復元します。
+      Feature14Title: PIIマスキングガードレール
+      Feature15Desc: OpenSearchベクターストアを接続し、エージェントがビジネス文書をセマンティック検索できるようにします。
+      Feature15Title: RAG / セマンティック検索
+      Feature16Desc: 複数の専門エージェントを調整して複雑なビジネスタスクを完遂します。
+      Feature16Title: マルチエージェントオーケストレーション
+      Feature17Desc: エージェントのプロンプト・ツール・モデルをプロセスデータから実行時に設定します。
+      Feature17Title: ダイナミックエージェント
+      Feature18Desc: 'エンドツーエンド: ドキュメントのアップロード・埋め込み・チャット — 4ステップガイド付き。'
+      Feature18Title: RAGチャットボットパイプライン
+      Feature19Desc: ChatModelProvider SPIを実装してあらゆるLLMをSmart Workflowに統合します。
+      Feature19Title: カスタムモデルプロバイダー
+      Feature20Desc: 自然言語クエリを構造化された条件と複数の検索バリアントに分解します。
+      Feature20Title: クエリ拡張
+      HeroSubtitle: 20の機能 — 初めてのエージェントからRAGパイプラインまで
+      HeroTitle: Smart Workflow 機能ガイド
+      IntermediateDesc: ツールと安全性 — エージェントを実用的で安全に
+      IntermediateTitle: 中級
+      NavAdvanced: 上級
+      NavBeginner: 初級
+      NavExpert: エキスパート
+      NavIntermediate: 中級
+      PageTitle: Smart Workflow 機能ガイド

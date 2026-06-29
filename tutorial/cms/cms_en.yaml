@@ -1,0 +1,59 @@
+Dialogs:
+  tutorial:
+    TutorialPages:
+      AdvancedDesc: Patterns & Orchestration — design sophisticated workflows
+      AdvancedTitle: Advanced
+      BackButton: ← All Features
+      BeginnerDesc: Core concepts — start here
+      BeginnerTitle: Beginner
+      ExpertDesc: Advanced Integration — push the boundaries
+      ExpertTitle: Expert
+      Feature01Desc: Configure the AgenticProcessCall element with a system prompt to create your first AI agent.
+      Feature01Title: Basic Agent Setup
+      Feature02Desc: Choose from 6 supported AI providers and configure them via variables.
+      Feature02Title: Model Provider Selection
+      Feature03Desc: Instruct the agent to respond as a typed Java object instead of free text.
+      Feature03Title: Structured Output
+      Feature04Desc: Attach images or PDFs and let the model visually read and extract structured data.
+      Feature04Title: File Extraction
+      Feature05Desc: Turn any Ivy callable subprocess into an AI-discoverable tool with a single tag.
+      Feature05Title: Callable Process Tools
+      Feature06Desc: Implement SmartWorkflowTool in Java for pure-code tool logic, registered via SPI.
+      Feature06Title: Java Tools
+      Feature07Desc: Built-in tool that lets agents search the internet via DuckDuckGo for up-to-date info.
+      Feature07Title: Web Search Tool
+      Feature08Desc: Enable built-in prompt injection detection and sensitive data blocking.
+      Feature08Title: Guardrails (Basic)
+      Feature09Desc: Record every conversation to Ivy history and trace LLM calls in Arize Phoenix.
+      Feature09Title: Observability & History
+      Feature10Desc: Preserve conversation context across turns using IvyMemory or BusinessDataMemory.
+      Feature10Title: Memory & State
+      Feature11Desc: Pause agent execution at critical decisions, assign a human review task, then resume.
+      Feature11Title: Human-in-the-Loop
+      Feature12Desc: Chain multiple specialised agents — each receives the previous agent's output.
+      Feature12Title: Agent Pipeline Pattern
+      Feature13Desc: Implement GuardrailProvider SPI to add domain-specific validation rules.
+      Feature13Title: Custom Guardrails
+      Feature14Desc: Pseudonymise personal data before sending to the LLM, restore in the output.
+      Feature14Title: PII Masking Guardrail
+      Feature15Desc: Connect an OpenSearch vector store to let agents semantically search business documents.
+      Feature15Title: RAG / Semantic Search
+      Feature16Desc: Coordinate multiple specialised agents to complete a complex business task.
+      Feature16Title: Multi-Agent Orchestration
+      Feature17Desc: Configure agent prompt, tools, and model at runtime from process data.
+      Feature17Title: Dynamic Agents
+      Feature18Desc: 'End-to-end: upload docs, embed into OpenSearch, chat — guided 4-step wizard.'
+      Feature18Title: RAG Chatbot Pipeline
+      Feature19Desc: Plug any LLM into Smart Workflow by implementing the ChatModelProvider SPI.
+      Feature19Title: Custom Model Provider
+      Feature20Desc: Decompose natural language queries into structured criteria and multiple search variants.
+      Feature20Title: Query Expansion
+      HeroSubtitle: 20 features from first agent to full RAG pipeline
+      HeroTitle: Smart Workflow Feature Guide
+      IntermediateDesc: Tools & Safety — make agents useful and safe
+      IntermediateTitle: Intermediate
+      NavAdvanced: Advanced
+      NavBeginner: Beginner
+      NavExpert: Expert
+      NavIntermediate: Intermediate
+      PageTitle: Smart Workflow Feature Guide

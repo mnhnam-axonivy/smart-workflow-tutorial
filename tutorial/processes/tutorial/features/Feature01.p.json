@@ -1,0 +1,129 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/process.json",
+  "id" : "19EFE795311DA223",
+  "config" : {
+    "data" : "tutorial.Feature01Data"
+  },
+  "elements" : [ {
+      "id" : "f0",
+      "type" : "RequestStart",
+      "name" : "Acme Corp invoice processing",
+      "config" : {
+        "signature" : "start",
+        "request" : {
+          "name" : "Tutorial Feature 01: Invoice Summary process"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f2", "to" : "f7" }
+      ]
+    }, {
+      "id" : "f1",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 800, "y" : 64 }
+      }
+    }, {
+      "id" : "f3",
+      "type" : "TaskSwitchEvent",
+      "name" : "Import Invoice",
+      "config" : {
+        "task" : {
+          "skipTasklist" : true
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 392, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f4", "to" : "f5", "color" : "default" }
+      ]
+    }, {
+      "id" : "f5",
+      "type" : "ProgramInterface",
+      "name" : "Invoice Summary Agent",
+      "config" : {
+        "javaClass" : "com.axonivy.utils.smart.workflow.AgenticProcessCall",
+        "userConfig" : {
+          "resultMapping" : "in.summary",
+          "system" : "You are an invoice summary agent for Acme Corp.\r\nRead the invoice text and return a single sentence summary containing:\r\nthe invoice number, supplier name, total amount, and due date.\r\nDo not add any other commentary.",
+          "query" : "<%=in.invoiceText%>"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 520, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f6", "to" : "f9", "color" : "default" }
+      ]
+    }, {
+      "id" : "f7",
+      "type" : "Script",
+      "name" : "Mock data",
+      "config" : {
+        "output" : {
+          "code" : [
+            "in.invoiceText = \"INVOICE\\n\" +",
+            "\"Invoice Number: INV-2024-00123\\n\" +",
+            "\"Date: 2024-06-01\\n\" +",
+            "\"Due Date: 2024-06-30\\n\" +",
+            "\"\\n\" +",
+            "\"Supplier:\\n\" +",
+            "\"Acme Supplies Ltd.\\n\" +",
+            "\"123 Commerce Street, Tokyo, Japan\\n\" +",
+            "\"\\n\" +",
+            "\"Bill To:\\n\" +",
+            "\"Acme Corp\\n\" +",
+            "\"456 Business Avenue, Osaka, Japan\\n\" +",
+            "\"\\n\" +",
+            "\"Description                  Qty   Unit Price   Total\\n\" +",
+            "\"Office Supplies              10    500.00       5,000.00\\n\" +",
+            "\"Printer Paper (A4, 500 pcs)   5    800.00       4,000.00\\n\" +",
+            "\"Desk Organizer                3    200.00         600.00\\n\" +",
+            "\"\\n\" +",
+            "\"Subtotal: JPY 9,600.00\\n\" +",
+            "\"Tax (10%): JPY 960.00\\n\" +",
+            "\"Total Amount Due: JPY 10,560.00\\n\" +",
+            "\"\\n\" +",
+            "\"Payment Terms: Net 30\\n\" +",
+            "\"Bank: Sumitomo Mitsui Banking Corporation\\n\" +",
+            "\"Account Number: 1234567890\\n\";"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 264, "y" : 64 },
+        "color" : "yellow"
+      },
+      "connect" : [
+        { "id" : "f8", "to" : "f3", "color" : "default" }
+      ]
+    }, {
+      "id" : "f9",
+      "type" : "Script",
+      "name" : "Show result from AI",
+      "config" : {
+        "output" : {
+          "code" : "ivy.log.error(out.summary);"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 680, "y" : 64 },
+        "color" : "yellow"
+      },
+      "connect" : [
+        { "id" : "f10", "to" : "f1", "color" : "default" }
+      ]
+    } ],
+  "layout" : {
+    "colors" : {
+      "red" : "#ff0000",
+      "green" : "#1eff00",
+      "yellow" : "#fbff00",
+      "pink" : "#fb00ff"
+    }
+  }
+}

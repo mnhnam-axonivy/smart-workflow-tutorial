@@ -1,0 +1,21 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "Feature05ToolsData",
+  "namespace" : "tutorial",
+  "fields" : [ {
+    "name" : "amount",
+    "comment" : "Invoice amount — shared input for lookupApprovalPolicy and chooseApprover"
+  }, {
+    "name" : "currency",
+    "comment" : "Invoice currency code — input for calculateEffectiveTaxRate"
+  }, {
+    "name" : "policy",
+    "comment" : "Output of lookupApprovalPolicy: STANDARD or REQUIRES_APPROVAL"
+  }, {
+    "name" : "taxRate",
+    "comment" : "Output of calculateEffectiveTaxRate: effective tax rate as a percentage string"
+  }, {
+    "name" : "approver",
+    "comment" : "Output of chooseApprover: approver role for the invoice amount"
+  } ]
+}

@@ -1,0 +1,155 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+<h:body>
+  <ui:composition template="/layouts/frame-10-full-width.xhtml">
+    <ui:define name="title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/PageTitle')}</ui:define>
+    <ui:define name="content">
+
+      <h:outputStylesheet library="css" name="tutorial-pages.css" />
+      <h:outputStylesheet library="css" name="highlight-github-dark.min.css" />
+      <h:outputScript library="js" name="highlight.min.js" />
+      <h:outputScript library="js" name="marked.min.js" />
+      <h:outputScript library="js" name="tutorial-pages.js" />
+
+      <!-- EN markdown content (hidden) -->
+      <div style="display:none">
+        <div id="sw-md-01">#{tutorialPagesBean.getFeature('01')}</div>
+        <div id="sw-md-02">#{tutorialPagesBean.getFeature('02')}</div>
+        <div id="sw-md-03">#{tutorialPagesBean.getFeature('03')}</div>
+        <div id="sw-md-04">#{tutorialPagesBean.getFeature('04')}</div>
+        <div id="sw-md-05">#{tutorialPagesBean.getFeature('05')}</div>
+        <div id="sw-md-06">#{tutorialPagesBean.getFeature('06')}</div>
+        <div id="sw-md-07">#{tutorialPagesBean.getFeature('07')}</div>
+      </div>
+
+      <!-- JP markdown content (hidden) -->
+      <div style="display:none">
+        <div id="sw-md-jp-01">#{tutorialPagesBean.getJpFeature('01')}</div>
+        <div id="sw-md-jp-02">#{tutorialPagesBean.getJpFeature('02')}</div>
+        <div id="sw-md-jp-03">#{tutorialPagesBean.getJpFeature('03')}</div>
+        <div id="sw-md-jp-04">#{tutorialPagesBean.getJpFeature('04')}</div>
+        <div id="sw-md-jp-05">#{tutorialPagesBean.getJpFeature('05')}</div>
+        <div id="sw-md-jp-06">#{tutorialPagesBean.getJpFeature('06')}</div>
+        <div id="sw-md-jp-07">#{tutorialPagesBean.getJpFeature('07')}</div>
+      </div>
+
+      <!-- CMS image URL bridge: JSF resolves each path → JS reads the rendered src -->
+      <div id="sw-cms-img-data" style="display:none">
+        <ui:repeat value="#{tutorialPagesBean.cmsImagePaths}" var="imgPath">
+          <span data-cms-path="#{imgPath}">
+            <p:graphicImage library="ivy-cms" name="#{imgPath}" />
+          </span>
+        </ui:repeat>
+      </div>
+
+      <div class="sw-guide">
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- INDEX VIEW                                   -->
+        <!-- ═══════════════════════════════════════════ -->
+        <div id="view-index">
+
+          <div class="sw-hero">
+            <h1>#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/HeroTitle')}</h1>
+            <p>#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/HeroSubtitle')}</p>
+          </div>
+
+          <div class="sw-level-nav-bar">
+            <div class="sw-level-nav">
+              <a class="sw-level-pill" data-lv="begin" href="#sw-begin">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/NavBeginner')}</a>
+              <a class="sw-level-pill" data-lv="mid"   href="#sw-mid">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/NavIntermediate')}</a>
+            </div>
+            <div class="sw-lang-toggle">
+              <button class="sw-lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+              <button class="sw-lang-btn" data-lang="jp" onclick="setLang('jp')">JP</button>
+            </div>
+          </div>
+
+          <!-- BEGINNER -->
+          <div class="sw-level-section" id="sw-begin" data-lv="begin">
+            <div class="sw-level-header">
+              <div class="sw-level-kanji">初</div>
+              <div class="sw-level-header-text">
+                <h2>#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/BeginnerTitle')}</h2>
+                <p class="sw-level-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/BeginnerDesc')}</p>
+              </div>
+              <span class="sw-level-count">4 features</span>
+            </div>
+            <div class="sw-feature-grid">
+              <button class="sw-card beginner" onclick="showFeature('01')">
+                <div class="sw-card-num">NO. 01</div>
+                <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature01Title')}</div>
+                <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature01Desc')}</div>
+              </button>
+              <button class="sw-card beginner" onclick="showFeature('02')">
+                <div class="sw-card-num">NO. 02</div>
+                <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature03Title')}</div>
+                <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature03Desc')}</div>
+              </button>
+              <button class="sw-card beginner" onclick="showFeature('03')">
+                <div class="sw-card-num">NO. 03</div>
+                <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature02Title')}</div>
+                <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature02Desc')}</div>
+              </button>
+              <button class="sw-card beginner" onclick="showFeature('04')">
+                <div class="sw-card-num">NO. 04</div>
+                <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature04Title')}</div>
+                <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature04Desc')}</div>
+              </button>
+            </div>
+          </div>
+
+          <!-- INTERMEDIATE -->
+          <div class="sw-level-section" id="sw-mid" data-lv="mid">
+            <div class="sw-level-header">
+              <div class="sw-level-kanji">中</div>
+              <div class="sw-level-header-text">
+                <h2>#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/IntermediateTitle')}</h2>
+                <p class="sw-level-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/IntermediateDesc')}</p>
+              </div>
+              <span class="sw-level-count">3 features</span>
+            </div>
+            <div class="sw-feature-grid">
+              <button class="sw-card intermediate" onclick="showFeature('05')">
+                <div class="sw-card-num">NO. 05</div>
+                <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature05Title')}</div>
+                <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature05Desc')}</div>
+              </button>
+              <button class="sw-card intermediate" onclick="showFeature('06')">
+                <div class="sw-card-num">NO. 06</div>
+                <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature06Title')}</div>
+                <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature06Desc')}</div>
+              </button>
+              <button class="sw-card intermediate" onclick="showFeature('07')">
+                <div class="sw-card-num">NO. 07</div>
+                <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature07Title')}</div>
+                <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature07Desc')}</div>
+              </button>
+            </div>
+          </div>
+
+        </div><!-- /view-index -->
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- DETAIL VIEW                                  -->
+        <!-- ═══════════════════════════════════════════ -->
+        <div id="view-detail" style="display:none">
+          <div class="feature-layout">
+            <div class="sidebar" id="feature-toc">
+              <!-- JS-generated TOC -->
+            </div>
+            <div id="feature-article" class="feature-md-content">
+              <!-- JS-rendered markdown from CMS -->
+            </div>
+          </div>
+        </div><!-- /view-detail -->
+
+      </div><!-- /sw-guide -->
+
+    </ui:define>
+  </ui:composition>
+</h:body>
+</html>

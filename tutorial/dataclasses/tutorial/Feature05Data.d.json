@@ -1,0 +1,13 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "Feature05Data",
+  "namespace" : "tutorial",
+  "fields" : [ {
+    "name" : "invoiceText",
+    "comment" : "Raw invoice text pasted by the employee"
+  }, {
+    "name" : "invoiceDecision",
+    "type" : "tutorial.InvoiceDecision",
+    "comment" : "Structured approval decision produced by the Invoice Approval Agent"
+  } ]
+}

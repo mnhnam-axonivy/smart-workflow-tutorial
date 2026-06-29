@@ -1,0 +1,175 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/process.json",
+  "id" : "19F0D75A2B2874CD",
+  "config" : {
+    "data" : "tutorial.Feature05Data"
+  },
+  "elements" : [ {
+      "id" : "f0",
+      "type" : "RequestStart",
+      "name" : "Acme Corp invoice approval",
+      "config" : {
+        "signature" : "start",
+        "request" : {
+          "name" : "Tutorial Feature 05: Invoice Approval Assistant"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f2", "to" : "fA" }
+      ]
+    }, {
+      "id" : "f1",
+      "type" : "TaskEnd",
+      "name" : "Auto-approved",
+      "visual" : {
+        "at" : { "x" : 1040, "y" : 64 }
+      }
+    }, {
+      "id" : "f3",
+      "type" : "TaskSwitchEvent",
+      "name" : "Import Invoice",
+      "config" : {
+        "task" : {
+          "skipTasklist" : true
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 368, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f4", "to" : "f5", "color" : "default" }
+      ]
+    }, {
+      "id" : "f5",
+      "type" : "ProgramInterface",
+      "name" : "Invoice Approval Agent",
+      "config" : {
+        "javaClass" : "com.axonivy.utils.smart.workflow.AgenticProcessCall",
+        "userConfig" : {
+          "system" : "You are an invoice approval assistant for Acme Corp.\r\nGiven invoice text:\r\n1. Extract the total amount as a plain number string (digits and decimal point only) and the ISO 4217 currency code.\r\n2. Call calculateEffectiveTaxRate with the currency code — use the result as effectiveTaxRate.\r\n3. Call lookupApprovalPolicy with the total amount — set isAutoApprove to true if the result is STANDARD, false if REQUIRES_APPROVAL.\r\n4. Call chooseApprover with the total amount — use the result as approverUsername.\r\n5. Return a structured InvoiceDecision with all three fields populated.",
+          "tools" : "[\"lookupApprovalPolicy\", \"calculateEffectiveTaxRate\", \"chooseApprover\"]",
+          "resultType" : "tutorial.InvoiceDecision.class",
+          "resultMapping" : "in.invoiceDecision",
+          "query" : "<%=in.invoiceText%>"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 536, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f6", "to" : "fB", "color" : "default" }
+      ]
+    }, {
+      "id" : "fG",
+      "type" : "Alternative",
+      "name" : "Approval required?",
+      "config" : {
+        "conditions" : {
+          "cG2" : "in.invoiceDecision.isAutoApprove == false",
+          "cG1" : ""
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 872, "y" : 64 },
+        "labelOffset" : { "y" : -24 }
+      },
+      "connect" : [
+        { "id" : "cG1", "to" : "f1", "color" : "default" },
+        { "id" : "cG2", "to" : "f8" }
+      ]
+    }, {
+      "id" : "f8",
+      "type" : "TaskSwitchEvent",
+      "name" : "Manager Review",
+      "config" : {
+        "task" : {
+          "responsible" : {
+            "type" : "USER_FROM_ATTRIBUTE",
+            "script" : "in1.invoiceDecision.approverUsername"
+          }
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 872, "y" : 192 }
+      },
+      "connect" : [
+        { "id" : "f10", "to" : "f9", "color" : "default" }
+      ]
+    }, {
+      "id" : "f9",
+      "type" : "TaskEnd",
+      "name" : "Reviewed",
+      "visual" : {
+        "at" : { "x" : 1040, "y" : 192 }
+      }
+    }, {
+      "id" : "fA",
+      "type" : "Script",
+      "name" : "Mock data",
+      "config" : {
+        "output" : {
+          "code" : [
+            "in.invoiceText = \"INVOICE\\n\" +",
+            "\"Invoice Number: INV-2024-00123\\n\" +",
+            "\"Date: 2024-06-01\\n\" +",
+            "\"Due Date: 2024-06-30\\n\" +",
+            "\"\\n\" +",
+            "\"Supplier:\\n\" +",
+            "\"Acme Supplies Ltd.\\n\" +",
+            "\"123 Commerce Street, Tokyo, Japan\\n\" +",
+            "\"\\n\" +",
+            "\"Bill To:\\n\" +",
+            "\"Acme Corp\\n\" +",
+            "\"456 Business Avenue, Osaka, Japan\\n\" +",
+            "\"\\n\" +",
+            "\"Description                  Qty   Unit Price   Total\\n\" +",
+            "\"Office Supplies              10    500.00       5,000.00\\n\" +",
+            "\"Printer Paper (A4, 500 pcs)   5    800.00       4,000.00\\n\" +",
+            "\"Desk Organizer                3    200.00         600.00\\n\" +",
+            "\"\\n\" +",
+            "\"Subtotal: JPY 9,600.00\\n\" +",
+            "\"Tax (10%): JPY 960.00\\n\" +",
+            "\"Total Amount Due: JPY 10,560.00\\n\" +",
+            "\"\\n\" +",
+            "\"Payment Terms: Net 30\\n\" +",
+            "\"Bank: Sumitomo Mitsui Banking Corporation\\n\" +",
+            "\"Account Number: 1234567890\\n\";"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 240, "y" : 64 },
+        "color" : "yellow"
+      },
+      "connect" : [
+        { "id" : "fC", "to" : "f3", "color" : "default" }
+      ]
+    }, {
+      "id" : "fB",
+      "type" : "Script",
+      "name" : "Show result from AI",
+      "config" : {
+        "output" : {
+          "code" : "ivy.log.error(dev.langchain4j.internal.Json.toJson(in.invoiceDecision));"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 704, "y" : 64 },
+        "color" : "yellow"
+      },
+      "connect" : [
+        { "id" : "fD", "to" : "fG", "color" : "default" }
+      ]
+    } ],
+  "layout" : {
+    "colors" : {
+      "red" : "#ff0000",
+      "green" : "#1eff00",
+      "yellow" : "#fbff00",
+      "pink" : "#fb00ff"
+    }
+  }
+}

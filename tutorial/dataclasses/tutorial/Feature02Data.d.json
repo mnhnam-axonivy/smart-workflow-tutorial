@@ -1,0 +1,14 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "Feature02Data",
+  "namespace" : "tutorial",
+  "fields" : [ {
+    "name" : "invoiceText",
+    "comment" : "Raw invoice text pasted by the employee"
+  }, {
+    "name" : "result",
+    "type" : "tutorial.InvoiceData",
+    "modifiers" : [ ],
+    "comment" : "Structured extraction result produced by the Invoice Analysis Agent"
+  } ]
+}

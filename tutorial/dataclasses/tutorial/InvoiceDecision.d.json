@@ -1,0 +1,16 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "InvoiceDecision",
+  "namespace" : "tutorial",
+  "fields" : [ {
+    "name" : "approverUsername",
+    "comment" : "Username or role of the approver chosen for this invoice"
+  }, {
+    "name" : "effectiveTaxRate",
+    "comment" : "Effective tax rate for the invoice (e.g. 21%)"
+  }, {
+    "name" : "isAutoApprove",
+    "type" : "Boolean",
+    "comment" : "True if the invoice can be auto-approved; false if it requires manual approval"
+  } ]
+}
