@@ -1,131 +1,268 @@
 # Java Tools
 
-Implement the `SmartWorkflowTool` interface in Java for pure-code tool logic, then register via SPI so any agent can discover and call it.
+A **Java Tool** is a class that implements `SmartWorkflowTool` and exposes a named, typed operation to AI agents. The framework discovers Java Tools through the Java SPI mechanism and makes them available to any agent alongside Callable Process Tools.
 
-## What is it?
+---
 
-A **Java Tool** is a class that implements `SmartWorkflowTool` and exposes a named, typed operation to AI agents. The framework discovers Java Tools through the SPI mechanism and makes them available to agents alongside Callable Process Tools.
+> **This builds on [Callable Process Tools].** The agent configuration is identical — the only difference is that the tool logic lives in Java code instead of an Axon Ivy callable sub-process.
+>
+> **Example used in this guide: Acme Corp FX conversion**
+>
+> Acme Corp receives invoices in JPY. The agent reads the invoice, extracts the total amount and currency, calls a Java tool (`convertToUSD`) to calculate the USD equivalent using fixed exchange rates, and returns a one-sentence summary combining the invoice details with the converted amount.
+>
+> The finished process is at `tutorial/processes/tutorial/features/Feature06.p.json` — open it in the Designer to follow along as you read.
 
-Java Tools are best for logic that is entirely computational — no workflow steps, no user dialogs, no Ivy-specific APIs needed. Think tax calculators, data transformers, or third-party SDK wrappers.
+---
+
+## Before you start
+
+In [Callable Process Tools] you saw how to give an agent access to live business logic by implementing tools as callable sub-processes inside the Axon Ivy Designer — no Java required.
+
+**Java Tools are a different approach for a different situation.** Use them when the tool logic is purely computational — no workflow steps, no user dialogs, no Axon Ivy-specific APIs — and where plain Java expresses the logic more cleanly, or where you need to wrap a third-party Java SDK.
+
+| | Callable Process Tools | Java Tools |
+|---|---|---|
+| **Implemented in** | Axon Ivy Designer | Java class |
+| **Can use Ivy elements** | Yes | No |
+| **Unit testable without runtime** | No | Yes |
+| **Wraps third-party Java SDKs** | Awkward | Clean |
+| **Reusable across projects** | Copy process | JAR dependency |
+| **Recommended for** | Application development | Library authors, pure computation |
+
+**Prefer Callable Process Tools whenever possible.** Java Tools are for logic that has no workflow steps and is better expressed in plain Java.
+
+---
+
+## What is a Java tool?
+
+A Java Tool is a class that implements the `SmartWorkflowTool` interface. It has four methods:
+
+| Method | Purpose |
+|---|---|
+| `name()` | The tool name the agent uses in the `Tools` list |
+| `description()` | Tells the LLM what the tool does and when to call it |
+| `parameters()` | Declares the typed inputs the agent must provide |
+| `execute()` | Receives the arguments and returns the result |
+
+The framework discovers Java Tools via Java SPI: you register a `SmartWorkflowToolsProvider` in `META-INF/services/`, and the framework loads it at startup.
+
+---
 
 ## Why use it?
 
-- Full Java type system for complex parameter structures (custom classes, Lists)
-- Unit-testable without an Ivy runtime
-- Wraps third-party Java SDKs cleanly
-- Reusable across multiple projects via JAR dependency
+- **Full Java type system** — parameters can be custom classes or `List<T>`, not just strings
+- **Unit-testable** — no Ivy runtime needed; test `execute()` with a plain `Map`
+- **Wraps third-party SDKs** — integrate any Java library cleanly inside `execute()`
+- **Reusable** — package the tool as a JAR and share it across multiple Axon Ivy projects
 
-> **Prefer Callable Process Tools (#05)** over Java Tools whenever possible. Use Java Tools only when the logic has no workflow steps and is better expressed in plain Java.
+---
 
-## How it works
+## Step 1 — Implement SmartWorkflowTool
 
-1. Implement `SmartWorkflowTool` with `name()`, `description()`, `parameters()`, and `execute()`.
-2. Create a `SmartWorkflowToolsProvider` that returns your tool(s).
-3. Register the provider via Java SPI in `META-INF/services/`.
-4. Add the tool name to the agent's `Tools` list.
-5. At runtime the framework loads all providers, builds tool schemas, and passes them to the LLM.
+Create a Java class that implements `com.axonivy.utils.smart.workflow.tools.provider.SmartWorkflowTool`:
 
-## Example
-
-A tax calculator tool from the demo project:
-
-Step 1 — Implement SmartWorkflowTool
+**Example — `FxRateConverterTool`:**
 
 ```java
-public class TaxCalculatorTool implements SmartWorkflowTool {
+public class FxRateConverterTool implements SmartWorkflowTool {
+
+  private static final Map<String, Double> RATES_TO_USD = Map.of(
+      "USD", 1.0, "EUR", 1.09, "GBP", 1.27, "JPY", 0.0067
+  );
 
   @Override
   public String name() {
-    return "calculateTax";
+    return "convertToUSD";
   }
 
   @Override
   public String description() {
     return """
-        Calculate the tax amount for each line item of an invoice.
-        Pass the full invoice object and receive per-item tax calculations.
-        Use this tool when the user asks about tax, VAT, or price breakdown.""";
+        Convert an invoice amount from its original currency to USD using fixed exchange rates.
+        Pass the total amount as a plain number string and the ISO 4217 currency code.
+        Returns the converted amount as a formatted string showing the original, USD equivalent, and rate.""";
   }
 
   @Override
   public List<ToolParameter> parameters() {
     return List.of(
-        new ToolParameter("invoice", "The invoice to calculate tax for",
-            "com.axonivy.utils.ai.Invoice")
+        new ToolParameter("amount",
+            "Invoice total amount as a plain number string (digits and decimal point only)",
+            "String"),
+        new ToolParameter("currency",
+            "ISO 4217 currency code of the invoice (e.g. JPY, EUR, GBP, USD)",
+            "String")
     );
   }
 
   @Override
   public Object execute(Map<String, Object> args) {
-    // The framework deserializes the JSON argument to Invoice automatically
-    Invoice invoice = (Invoice) args.get("invoice");
-    List<TaxLineItem> taxItems = invoice.lineItems().stream()
-        .map(item -> new TaxLineItem(
-            item.description(),
-            item.unitPrice().multiply(BigDecimal.valueOf(0.19))
-        ))
-        .toList();
-    return new TaxCalculationResult(invoice.invoiceNumber(), taxItems);
+    String amountStr = (String) args.get("amount");
+    String currency = ((String) args.get("currency")).toUpperCase().trim();
+    double amount = Double.parseDouble(amountStr.replaceAll("[^0-9.]", ""));
+    double rate = RATES_TO_USD.getOrDefault(currency, 1.0);
+    double usd = amount * rate;
+    return String.format("%.2f %s = %.2f USD (rate: %.4f)", amount, currency, usd, rate);
   }
-
-  public record TaxCalculationResult(String invoiceNumber, List<TaxLineItem> items) {}
-  public record TaxLineItem(String description, BigDecimal taxAmount) {}
 }
 ```
 
-Step 2 — Create provider
+**`name()`** is the identifier the agent uses. It must exactly match the string in the agent's `Tools` list.
+
+**`description()`** is sent verbatim to the LLM. Write it as an instruction: what the tool does, when to use it, and what format to expect in the result. The clearer it is, the more reliably the agent calls the tool correctly.
+
+**`parameters()`** declares each input. The `type` field of `ToolParameter` must be the fully qualified Java class name (or a primitive name). The framework serialises the argument from the LLM's JSON into that type automatically before calling `execute()`.
+
+**`execute()`** receives a `Map<String, Object>` where each key is a parameter name. Cast the value to the declared type and return any Java object — the framework serialises it to JSON and feeds it back to the LLM.
+
+---
+
+## Step 2 — Create a SmartWorkflowToolsProvider
+
+Create a class that implements `SmartWorkflowToolsProvider` and lists the tools you want to expose:
 
 ```java
-public class DemoToolProvider implements SmartWorkflowToolsProvider {
+public class TutorialToolProvider implements SmartWorkflowToolsProvider {
+
   @Override
   public List<SmartWorkflowTool> getTools() {
-    return List.of(new TaxCalculatorTool());
+    return List.of(new FxRateConverterTool());
   }
 }
 ```
 
-Step 3 — Register via SPI
+One provider can expose multiple tools. The framework calls `getTools()` at startup and registers all returned tools globally.
+
+---
+
+## Step 3 — Register via SPI
+
+Create the file `src/META-INF/services/com.axonivy.utils.smart.workflow.tools.provider.SmartWorkflowToolsProvider` and add your provider's fully qualified class name:
 
 ```text
-// File: src/META-INF/services/com.axonivy.utils.smart.workflow.tools.provider.SmartWorkflowToolsProvider
-com.example.DemoToolProvider
+tutorial.tool.TutorialToolProvider
 ```
 
-Supported parameter types
+Without this file the framework will never load your provider and the tool will be invisible to all agents — regardless of whether the class is on the classpath.
+
+---
+
+## Step 4 — Add to agent Tools list
+
+In the `AgenticProcessCall` configuration, add the tool's `name()` to the **Tools** field:
+
+```json
+["convertToUSD"]
+```
+
+Registering a tool makes it globally *available*, but an agent only uses the tools listed in its own configuration. This keeps agents focused and prevents unintended tool calls.
+
+---
+
+## Example — Acme Corp FX conversion
+
+### Mock data
+
+The process pre-fills the invoice text using a **Mock data** Script element so you can run it without any manual data entry:
+
+```text
+INVOICE
+Invoice Number: INV-2024-00123
+Date: 2024-06-01
+Due Date: 2024-06-30
+
+Supplier:
+Acme Supplies Ltd.
+123 Commerce Street, Tokyo, Japan
+
+Bill To:
+Acme Corp
+456 Business Avenue, Osaka, Japan
+
+Description                  Qty   Unit Price   Total
+Office Supplies              10    500.00       5,000.00
+Printer Paper (A4, 500 pcs)   5    800.00       4,000.00
+Desk Organizer                3    200.00         600.00
+
+Subtotal: JPY 9,600.00
+Tax (10%): JPY 960.00
+Total Amount Due: JPY 10,560.00
+
+Payment Terms: Net 30
+Bank: Sumitomo Mitsui Banking Corporation
+Account Number: 1234567890
+```
+
+### System Prompt
+
+```text
+You are an invoice analyst for Acme Corp.
+Given an invoice text:
+1. Extract the total amount as a plain number string (digits and decimal point only) and the ISO 4217 currency code.
+2. Call convertToUSD with the amount and currency code.
+3. Return a single sentence summary containing: the invoice number, supplier name, original total amount with currency, and the USD equivalent returned by convertToUSD.
+```
+
+**Query:** `<%=in.invoiceText%>`
+
+**Tools:** `["convertToUSD"]`
+
+**Map result to:** `in.summary`
+
+### Result
+
+After the agent element, `in.summary` is a plain String. The **Show result** Script element logs it to the Axon Ivy Runtime Log:
+
+```javascript
+ivy.log.error(in.summary);
+```
+
+An example output:
+
+```text
+Invoice INV-2024-00123 from Acme Supplies Ltd. totals JPY 10,560.00,
+which is equivalent to approximately 70.75 USD at a rate of 0.0067.
+```
+
+---
+
+## Supported parameter types
 
 | Kind | Type string example |
 |---|---|
-| Primitive | `"int"`, `"boolean"`, `"double"` |
-| Java class | `"java.lang.String"`, `"com.example.Invoice"` |
+| Primitive | `"String"`, `"int"`, `"boolean"`, `"double"` |
+| Java class | `"java.math.BigDecimal"`, `"com.example.MyClass"` |
 | List | `"java.util.List<java.lang.String>"` |
 
-Arrays are not supported — use `List` instead. The framework deserializes JSON arguments to the declared Java type automatically.
+Arrays are not supported — use `List` instead. The framework deserialises JSON arguments to the declared Java type automatically before `execute()` is called.
 
-## Where to find it
-
-- `smart-workflow/src/com/axonivy/utils/smart/workflow/tools/provider/SmartWorkflowTool.java`
-- `smart-workflow/src/com/axonivy/utils/smart/workflow/tools/provider/SmartWorkflowToolsProvider.java`
-- `smart-workflow-demo/src/com/axonivy/utils/smart/workflow/demo/tool/TaxCalculatorTool.java`
-- `smart-workflow-demo/src/com/axonivy/utils/smart/workflow/demo/tool/DemoToolProvider.java`
-- `doc/TOOLS.md`
-
-## Key configuration
-
-| Step | Location | What to do |
-|---|---|---|
-| 1 | Java class | Implement `SmartWorkflowTool` |
-| 2 | Java class | Implement `SmartWorkflowToolsProvider` |
-| 3 | `src/META-INF/services/` | Register provider class name |
-| 4 | Agent element | Add tool `name()` to the Tools list |
+---
 
 ## Common mistakes
 
-- **Forgetting the SPI registration file** — Without the file in `META-INF/services/`, the framework will never load your provider and the tool will be invisible to all agents.
-- **Using arrays instead of Lists** — The deserializer does not support Java arrays. Always declare list parameters as `java.util.List<T>`.
-- **Not adding the tool to the agent's Tools list** — Registering a tool makes it globally *available*, but agents only use tools listed in their configuration.
+- **Forgetting the SPI registration file** — Without `META-INF/services/com.axonivy.utils.smart.workflow.tools.provider.SmartWorkflowToolsProvider`, the framework never loads your provider. The tool will not appear in any agent, even if the class compiles and is on the classpath.
+- **Tool name mismatch** — The string in the agent's `Tools` list must exactly match the return value of `name()`. A single character difference and the agent cannot find the tool.
+- **Using arrays instead of Lists** — The deserialiser does not support Java arrays. Always declare list parameters as `java.util.List<T>`.
+- **Not adding the tool to the agent's Tools list** — Registering a tool makes it globally *available*. Agents only use tools that are explicitly listed in their own `Tools` field.
+
+---
+
+## Example process
+
+The working implementation is available in the tutorial project:
+
+- `tutorial/processes/tutorial/features/Feature06.p.json` — the agent process
+- `tutorial/src/tutorial/tool/FxRateConverterTool.java` — the Java tool implementation
+- `tutorial/src/tutorial/tool/TutorialToolProvider.java` — the SPI provider
+- `tutorial/src/META-INF/services/com.axonivy.utils.smart.workflow.tools.provider.SmartWorkflowToolsProvider` — the SPI registration file
+
+Open the process in the Designer and inspect the `Invoice Analyst Agent` element — note the `Tools` field containing `["convertToUSD"]`. Open `FxRateConverterTool.java` to see the full implementation.
+
+---
 
 ## See also
 
 - [Callable Process Tools]
-- [Web Search Tool]
-- [Custom Model Provider (SPI)]
+- [Basic Agent Setup]
+- [Structured Output]
+- [Model Provider Selection]
