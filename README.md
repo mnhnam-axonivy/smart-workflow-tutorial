@@ -27,6 +27,28 @@ tutorial-repo/
 └── tutorial/        # Tutorial Axon Ivy project
 ```
 
+### Smart Workflow Feature Guide
+
+The Feature Guide is an interactive documentation viewer built into the tutorial project. To open it, go to the Process list in Axon Ivy Designer and start the **Smart Workflow Feature Guide** process.
+
+![Smart Workflow Feature Guide](images/start_guide.png)
+
+### Tutorial Processes
+
+Each feature in the `tutorial` project has a dedicated demo process that you can run directly in the Designer. Every process follows the same structure:
+
+**Mock data element** — Pre-fills the process input so you can run the process without any manual data entry. Modify the values inside to test the agent with your own data.
+
+![Mock data](images/mock_data.png)
+
+**Agent element** — The `AgenticProcessCall` element containing the AI configuration for that feature: system prompt, query, provider, tools, and result mapping. Double-click it to inspect or change the configuration.
+
+![Agent configuration](images/agent_configuration.png)
+
+**Show result element** — Logs the agent's response to the Axon Ivy Runtime Log after each run. To inspect the output, open the **Output** tab in the Designer and switch to the **Axon Ivy Runtime Log** view.
+
+![Inspect result](images/inspect_result.png)
+
 ---
 
 ## 日本語
@@ -53,3 +75,25 @@ tutorial-repo/
 ├── smart-workflow/  # Axon Ivy Smart Workflow のコアプロジェクト
 └── tutorial/        # Axon Ivy チュートリアルプロジェクト
 ```
+
+### Smart Workflow フィーチャーガイド
+
+フィーチャーガイドは、チュートリアルプロジェクトに組み込まれたインタラクティブなドキュメントビューアーです。開くには、Axon Ivy Designer のプロセス一覧から **Smart Workflow Feature Guide** プロセスを起動してください。
+
+![Smart Workflow Feature Guide](images/start_guide.png)
+
+### チュートリアルプロセス
+
+`tutorial` プロジェクトの各フィーチャーには、Designer から直接実行できる専用のデモプロセスがあります。すべてのプロセスは同じ構成に従っています。
+
+**Mock data 要素** — プロセスの入力をあらかじめ設定するため、手動でのデータ入力なしにプロセスを実行できます。内部の値を変更することで、独自のデータを使ってエージェントをテストできます。
+
+![Mock data](images/mock_data.png)
+
+**エージェント要素** — そのフィーチャーの AI 設定（システムプロンプト・クエリ・プロバイダー・ツール・結果マッピング）を含む `AgenticProcessCall` 要素です。ダブルクリックして設定の確認や変更ができます。
+
+![Agent configuration](images/agent_configuration.png)
+
+**Show result 要素** — 実行のたびにエージェントの応答を Axon Ivy Runtime Log に記録します。出力を確認するには、Designer の **Output** タブを開き、**Axon Ivy Runtime Log** ビューに切り替えてください。
+
+![Inspect result](images/inspect_result.png)
