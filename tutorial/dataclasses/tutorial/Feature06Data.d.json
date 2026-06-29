@@ -1,0 +1,12 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "Feature06Data",
+  "namespace" : "tutorial",
+  "fields" : [ {
+    "name" : "invoiceText",
+    "comment" : "Raw invoice text pasted by the employee"
+  }, {
+    "name" : "summary",
+    "comment" : "AI-generated summary with USD conversion produced by the Invoice Analyst Agent"
+  } ]
+}
