@@ -1,5 +1,6 @@
 package tutorial;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -11,10 +12,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 
 import ch.ivyteam.ivy.cm.ContentObject;
 import ch.ivyteam.ivy.cm.ContentObjectValue;
@@ -55,6 +60,65 @@ public class TutorialPagesBean {
 
   public List<String> getCmsImagePaths() {
     return cmsImagePaths;
+  }
+
+  public void exportZip() {
+    FacesContext ctx = FacesContext.getCurrentInstance();
+    ExternalContext ec = ctx.getExternalContext();
+
+    ec.responseReset();
+    ec.setResponseContentType("application/zip");
+    ec.setResponseHeader("Content-Disposition", "attachment; filename=\"tutorial-docs.zip\"");
+
+    try (ZipOutputStream zos = new ZipOutputStream(ec.getResponseOutputStream())) {
+      // EN markdown
+      for (Map.Entry<String, String> e : features.entrySet()) {
+        if (!e.getValue().isEmpty()) {
+          addZipEntry(zos, "en/feature-" + e.getKey() + ".md",
+              rewriteImageRefs(e.getValue()).getBytes(StandardCharsets.UTF_8));
+        }
+      }
+      // JP markdown
+      for (Map.Entry<String, String> e : jpFeatures.entrySet()) {
+        if (!e.getValue().isEmpty()) {
+          addZipEntry(zos, "jp/feature-" + e.getKey() + ".md",
+              rewriteImageRefs(e.getValue()).getBytes(StandardCharsets.UTF_8));
+        }
+      }
+      // Images
+      for (String imgPath : cmsImagePaths) {
+        String filename = imgPath.substring(imgPath.lastIndexOf('/') + 1) + ".png";
+        Optional<ContentObject> obj = Ivy.cm().findObject(imgPath);
+        if (obj.map(ContentObject::exists).orElse(false)) {
+          try (InputStream is = obj.get().values().getFirst().read().inputStream()) {
+            if (is != null) {
+              addZipEntry(zos, "images/" + filename, is.readAllBytes());
+            }
+          }
+        }
+      }
+    } catch (IOException e) {
+      Ivy.log().error("Export ZIP failed", e);
+    }
+
+    ctx.responseComplete();
+  }
+
+  private static String rewriteImageRefs(String md) {
+    Matcher m = CMS_IMG_PATTERN.matcher(md);
+    StringBuffer sb = new StringBuffer();
+    while (m.find()) {
+      String filename = m.group(1).substring(m.group(1).lastIndexOf('/') + 1);
+      m.appendReplacement(sb, "(../images/" + filename + ".png)");
+    }
+    m.appendTail(sb);
+    return sb.toString();
+  }
+
+  private static void addZipEntry(ZipOutputStream zos, String name, byte[] data) throws IOException {
+    zos.putNextEntry(new ZipEntry(name));
+    zos.write(data);
+    zos.closeEntry();
   }
 
   private void collectImagePaths(String md, Set<String> seen) {

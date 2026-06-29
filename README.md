@@ -49,6 +49,26 @@ Each feature in the `tutorial` project has a dedicated demo process that you can
 
 ![Inspect result](images/inspect_result.png)
 
+### Export Documentation
+
+The Feature Guide includes an **⬇ Export** button in the navigation bar. Clicking it downloads a `tutorial-docs.zip` file containing all feature documentation and images as standalone Markdown files — ready to read in any Markdown viewer or share without an Axon Ivy runtime.
+
+The ZIP has the following structure:
+
+```
+tutorial-docs.zip
+├── en/
+│   ├── feature-01.md
+│   └── … feature-07.md
+├── jp/
+│   ├── feature-01.md
+│   └── … feature-07.md
+└── images/
+    └── *.png
+```
+
+All `cms:/` image references in the markdown files are automatically rewritten to relative paths (`../images/xxx.png`) so images render correctly when opened locally.
+
 ---
 
 ## 日本語
@@ -97,3 +117,23 @@ tutorial-repo/
 **Show result 要素** — 実行のたびにエージェントの応答を Axon Ivy Runtime Log に記録します。出力を確認するには、Designer の **Output** タブを開き、**Axon Ivy Runtime Log** ビューに切り替えてください。
 
 ![Inspect result](images/inspect_result.png)
+
+### ドキュメントのエクスポート
+
+フィーチャーガイドのナビゲーションバーには **⬇ Export** ボタンがあります。クリックすると `tutorial-docs.zip` ファイルがダウンロードされます。このファイルにはすべてのフィーチャードキュメントと画像がスタンドアロンの Markdown ファイルとして含まれており、Axon Ivy ランタイムなしで任意の Markdown ビューアーで閲覧したり共有したりできます。
+
+ZIP の構成は以下の通りです。
+
+```text
+tutorial-docs.zip
+├── en/
+│   ├── feature-01.md
+│   └── … feature-07.md
+├── jp/
+│   ├── feature-01.md
+│   └── … feature-07.md
+└── images/
+    └── *.png
+```
+
+Markdown ファイル内の `cms:/` 画像参照はすべて相対パス（`../images/xxx.png`）に自動変換されるため、ローカルで開いても画像が正しく表示されます。

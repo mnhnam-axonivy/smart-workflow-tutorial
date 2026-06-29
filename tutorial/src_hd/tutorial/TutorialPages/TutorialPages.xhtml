@@ -65,6 +65,12 @@
             <div class="sw-lang-toggle">
               <button class="sw-lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
               <button class="sw-lang-btn" data-lang="jp" onclick="setLang('jp')">JP</button>
+              <h:form style="display:inline">
+                <p:commandButton value="⬇ Export" ajax="false"
+                                 action="#{tutorialPagesBean.exportZip}"
+                                 styleClass="sw-lang-btn"
+                                 title="Download all feature docs and images as a ZIP file" />
+              </h:form>
             </div>
           </div>
 
