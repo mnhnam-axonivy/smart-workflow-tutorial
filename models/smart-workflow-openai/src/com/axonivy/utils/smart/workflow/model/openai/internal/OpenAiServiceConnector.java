@@ -1,0 +1,118 @@
+package com.axonivy.utils.smart.workflow.model.openai.internal;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
+
+import com.axonivy.utils.smart.workflow.client.SmartHttpClientBuilderFactory;
+
+import ch.ivyteam.ivy.environment.Ivy;
+import dev.langchain4j.model.chat.Capability;
+import dev.langchain4j.model.chat.request.ChatRequestParameters;
+import dev.langchain4j.model.openai.OpenAiChatModel;
+import dev.langchain4j.model.openai.OpenAiChatModel.OpenAiChatModelBuilder;
+import dev.langchain4j.model.openai.OpenAiChatModelName;
+
+public class OpenAiServiceConnector {
+
+  private static final int DEFAULT_TEMPERATURE = 0;
+
+  // Temporary model name and temperature for GPT-5. Will remove once LangChain4j fully support GPT-5
+  private static final String GPT_5 = "gpt-5";
+  private static final int DEFAULT_TEMPERATURE_GPT_5 = 1;
+
+  private static final String DEFAULT_MODEL = OpenAiChatModelName.GPT_4_1_MINI.toString();
+
+  public interface OpenAiConf {
+    String PREFIX = "AI.Providers.OpenAI.";
+    String BASE_URL = PREFIX + "BaseUrl";
+    String API_KEY = PREFIX + "APIKey";
+    String DEFAULT_MODEL = PREFIX + "DefaultModel";
+    String DEFAULT_EMBEDDING_MODEL = PREFIX + "DefaultEmbeddingModel";
+  }
+
+  public static OpenAiChatModelBuilder buildOpenAiModel() {
+    return buildOpenAiModel(DEFAULT_MODEL);
+  }
+
+  public static OpenAiChatModelBuilder buildJsonOpenAiModel() {
+    return buildJsonOpenAiModel(DEFAULT_MODEL);
+  }
+
+  public static OpenAiChatModelBuilder buildOpenAiModel(String modelName) {
+    return initBuilder(resolveModelName(modelName));
+  }
+
+  public static OpenAiChatModelBuilder buildJsonOpenAiModel(String modelName) {
+    return initBuilder(resolveModelName(modelName))
+        .supportedCapabilities(Capability.RESPONSE_FORMAT_JSON_SCHEMA)
+        .strictJsonSchema(true);
+  }
+
+  private static OpenAiChatModelBuilder initBuilder(String modelName) {
+    OpenAiChatModelBuilder model = initBuilder();
+    
+    var request = ChatRequestParameters.builder()
+      .modelName(modelName);
+    temperature(modelName)
+      .ifPresent(request::temperature);
+    model.defaultRequestParameters(request.build()); 
+    
+    return model;
+  }
+
+  private static Optional<Double> temperature(String modelName) {
+    if (modelName.startsWith("o")) {
+      // Only set temperature if not using the "o" series
+      return Optional.empty();
+    }
+    if (Strings.CI.startsWith(modelName, GPT_5)) {
+      return Optional.of(Double.valueOf(DEFAULT_TEMPERATURE_GPT_5));
+    }
+    return Optional.of(Double.valueOf(DEFAULT_TEMPERATURE));
+  }
+
+  private static OpenAiChatModelBuilder initBuilder() {
+    OpenAiChatModelBuilder builder = OpenAiChatModel.builder()
+        .httpClientBuilder(new SmartHttpClientBuilderFactory().create())
+        .logRequests(true)
+        .logResponses(true);
+    var baseUrl = Ivy.var().get(OpenAiConf.BASE_URL);
+    if (!baseUrl.isBlank()) {
+      builder.baseUrl(baseUrl);
+    }
+    String key = Ivy.var().get(OpenAiConf.API_KEY);
+    if (!key.isBlank()) {
+      builder.apiKey(key);
+    } else {
+      builder.customHeaders(Map.of("X-Requested-By", "ivy")); // TODO as pure test variable
+    }
+    return builder;
+  }
+
+  private static String resolveModelName(String modelName) {
+    String selected = StringUtils.defaultIfBlank(modelName,
+        StringUtils.defaultIfBlank(Ivy.var().get(OpenAiConf.DEFAULT_MODEL), DEFAULT_MODEL));
+
+    validateModel(selected);
+    return selected;
+  }
+
+  private static void validateModel(String modelName) {
+    boolean isKnown = Arrays.stream(OpenAiChatModelName.values()).map(Enum::toString)
+        .anyMatch(name -> name.equals(modelName));
+
+    if (!isKnown) {
+      String baseUrl = Ivy.var().get(OpenAiConf.BASE_URL);
+      if (StringUtils.isNotBlank(baseUrl)) {
+        Ivy.log().info("Model '" + modelName
+            + "' is not in the OpenAI model list. Continue with custom endpoint '" + baseUrl + "'.");
+      } else {
+        Ivy.log().warn("The compatibility of model '" + modelName + "' is unknown.");
+      }
+    }
+  }
+}
