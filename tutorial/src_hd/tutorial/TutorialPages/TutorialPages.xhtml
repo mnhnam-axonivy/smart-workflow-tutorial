@@ -23,6 +23,8 @@
         <div id="sw-md-05">#{tutorialPagesBean.getFeature('05')}</div>
         <div id="sw-md-06">#{tutorialPagesBean.getFeature('06')}</div>
         <div id="sw-md-07">#{tutorialPagesBean.getFeature('07')}</div>
+        <div id="sw-md-08">#{tutorialPagesBean.getFeature('08')}</div>
+        <div id="sw-md-09">#{tutorialPagesBean.getFeature('09')}</div>
       </div>
 
       <!-- JP markdown content (hidden) -->
@@ -34,6 +36,8 @@
         <div id="sw-md-jp-05">#{tutorialPagesBean.getJpFeature('05')}</div>
         <div id="sw-md-jp-06">#{tutorialPagesBean.getJpFeature('06')}</div>
         <div id="sw-md-jp-07">#{tutorialPagesBean.getJpFeature('07')}</div>
+        <div id="sw-md-jp-08">#{tutorialPagesBean.getJpFeature('08')}</div>
+        <div id="sw-md-jp-09">#{tutorialPagesBean.getJpFeature('09')}</div>
       </div>
 
       <!-- CMS image URL bridge: JSF resolves each path → JS reads the rendered src -->
@@ -116,7 +120,7 @@
                 <h2>#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/IntermediateTitle')}</h2>
                 <p class="sw-level-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/IntermediateDesc')}</p>
               </div>
-              <span class="sw-level-count">3 features</span>
+              <span class="sw-level-count">5 features</span>
             </div>
             <div class="sw-feature-grid">
               <button class="sw-card intermediate" onclick="showFeature('05')">
@@ -133,6 +137,16 @@
                 <div class="sw-card-num">NO. 07</div>
                 <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature07Title')}</div>
                 <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature07Desc')}</div>
+              </button>
+              <button class="sw-card intermediate" onclick="showFeature('08')">
+                <div class="sw-card-num">NO. 08</div>
+                <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature08Title')}</div>
+                <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature08Desc')}</div>
+              </button>
+              <button class="sw-card intermediate" onclick="showFeature('09')">
+                <div class="sw-card-num">NO. 09</div>
+                <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature09Title')}</div>
+                <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature09Desc')}</div>
               </button>
             </div>
           </div>

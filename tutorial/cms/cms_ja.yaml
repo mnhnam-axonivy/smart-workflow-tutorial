@@ -22,10 +22,10 @@ Dialogs:
       Feature06Title: Javaツール
       Feature07Desc: DuckDuckGo経由でエージェントがインターネット検索できる組み込みツール。
       Feature07Title: ウェブ検索ツール
-      Feature08Desc: 組み込みのプロンプトインジェクション検出と機密データブロックを有効化します。
-      Feature08Title: ガードレール（基本）
-      Feature09Desc: すべての会話をIvy履歴に記録し、Arize PhoenixでLLM呼び出しをトレース。
-      Feature09Title: 観測可能性と履歴
+      Feature08Desc: すべてのエージェント会話をIvy履歴に記録し、Arize PhoenixでLLM呼び出しをトレース — コード変更不要。
+      Feature08Title: 観測可能性
+      Feature09Desc: 組み込みのSensitiveDataOutputGuardrailでAIレスポンスの機密データをブロック — エラー境界イベントでキャッチします。
+      Feature09Title: 出力ガードレール
       Feature10Desc: IvyMemoryまたはBusinessDataMemoryを使用して会話コンテキストを保持します。
       Feature10Title: メモリと状態
       Feature11Desc: 重要な判断でエージェントの実行を一時停止し、人間のレビュータスクを割り当て、再開します。

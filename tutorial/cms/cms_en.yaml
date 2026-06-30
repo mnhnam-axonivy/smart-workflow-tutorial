@@ -22,10 +22,10 @@ Dialogs:
       Feature06Title: Java Tools
       Feature07Desc: Built-in tool that lets agents search the internet via DuckDuckGo for up-to-date info.
       Feature07Title: Web Search Tool
-      Feature08Desc: Enable built-in prompt injection detection and sensitive data blocking.
-      Feature08Title: Guardrails (Basic)
-      Feature09Desc: Record every conversation to Ivy history and trace LLM calls in Arize Phoenix.
-      Feature09Title: Observability & History
+      Feature08Desc: Record every agent conversation to Ivy history and trace LLM calls in Arize Phoenix — with zero code changes.
+      Feature08Title: Observability
+      Feature09Desc: Block sensitive data in AI responses using the built-in SensitiveDataOutputGuardrail — caught with an Error Boundary Event.
+      Feature09Title: Output Guardrail
       Feature10Desc: Preserve conversation context across turns using IvyMemory or BusinessDataMemory.
       Feature10Title: Memory & State
       Feature11Desc: Pause agent execution at critical decisions, assign a human review task, then resume.
