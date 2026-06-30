@@ -24,8 +24,8 @@ Dialogs:
       Feature07Title: Web Search Tool
       Feature08Desc: Record every agent conversation to Ivy history and trace LLM calls in Arize Phoenix — with zero code changes.
       Feature08Title: Observability
-      Feature09Desc: Record every conversation to Ivy history and trace LLM calls in Arize Phoenix.
-      Feature09Title: Observability & History
+      Feature09Desc: Block sensitive data in AI responses using the built-in SensitiveDataOutputGuardrail — caught with an Error Boundary Event.
+      Feature09Title: Output Guardrail
       Feature10Desc: Preserve conversation context across turns using IvyMemory or BusinessDataMemory.
       Feature10Title: Memory & State
       Feature11Desc: Pause agent execution at critical decisions, assign a human review task, then resume.

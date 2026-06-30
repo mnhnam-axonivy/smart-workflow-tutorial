@@ -1,0 +1,16 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "Feature09Data",
+  "namespace" : "tutorial",
+  "fields" : [ {
+    "name" : "query",
+    "comment" : "User query sent to the agent (contains a prompt injection attempt)"
+  }, {
+    "name" : "result",
+    "comment" : "Agent response or guardrail violation message"
+  }, {
+    "name" : "error",
+    "type" : "ch.ivyteam.ivy.bpm.error.BpmError",
+    "comment" : "Captured BPM error when a guardrail blocks the request"
+  } ]
+}
