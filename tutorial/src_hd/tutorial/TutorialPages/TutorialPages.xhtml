@@ -26,6 +26,7 @@
         <div id="sw-md-08">#{tutorialPagesBean.getFeature('08')}</div>
         <div id="sw-md-09">#{tutorialPagesBean.getFeature('09')}</div>
         <div id="sw-md-10">#{tutorialPagesBean.getFeature('10')}</div>
+        <div id="sw-md-11">#{tutorialPagesBean.getFeature('11')}</div>
       </div>
 
       <!-- JP markdown content (hidden) -->
@@ -40,6 +41,7 @@
         <div id="sw-md-jp-08">#{tutorialPagesBean.getJpFeature('08')}</div>
         <div id="sw-md-jp-09">#{tutorialPagesBean.getJpFeature('09')}</div>
         <div id="sw-md-jp-10">#{tutorialPagesBean.getJpFeature('10')}</div>
+        <div id="sw-md-jp-11">#{tutorialPagesBean.getJpFeature('11')}</div>
       </div>
 
       <!-- CMS image URL bridge: JSF resolves each path → JS reads the rendered src -->
@@ -154,6 +156,11 @@
                 <div class="sw-card-num">NO. 10</div>
                 <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature10Title')}</div>
                 <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature10Desc')}</div>
+              </button>
+              <button class="sw-card intermediate" onclick="showFeature('11')">
+                <div class="sw-card-num">NO. 11</div>
+                <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature11Title')}</div>
+                <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature11Desc')}</div>
               </button>
             </div>
           </div>

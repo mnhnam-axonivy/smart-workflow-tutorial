@@ -24,12 +24,12 @@ Dialogs:
       Feature07Title: Web Search Tool
       Feature08Desc: Record every agent conversation to Ivy history and trace LLM calls in Arize Phoenix — with zero code changes.
       Feature08Title: Observability
-      Feature09Desc: Block sensitive data in AI responses using the built-in SensitiveDataOutputGuardrail — caught with an Error Boundary Event.
+      Feature09Desc: Validate AI responses before they reach the user — block harmful or sensitive content using a built-in output guardrail.
       Feature09Title: Output Guardrail
-      Feature10Desc: Block prompt injection attacks before they reach the model using the built-in PromptInjectionInputGuardrail — zero token cost.
+      Feature10Desc: Validate user messages before they reach the model — block prompt injection and other malicious inputs with a built-in input guardrail.
       Feature10Title: Input Guardrail
-      Feature11Desc: Pause agent execution at critical decisions, assign a human review task, then resume.
-      Feature11Title: Human-in-the-Loop
+      Feature11Desc: Anonymise personal data in user messages before the LLM sees it and restore original values in the response — GDPR-friendly.
+      Feature11Title: PII Masking Guardrail
       Feature12Desc: Chain multiple specialised agents — each receives the previous agent's output.
       Feature12Title: Agent Pipeline Pattern
       Feature13Desc: Implement GuardrailProvider SPI to add domain-specific validation rules.
