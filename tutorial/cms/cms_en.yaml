@@ -26,8 +26,8 @@ Dialogs:
       Feature08Title: Observability
       Feature09Desc: Block sensitive data in AI responses using the built-in SensitiveDataOutputGuardrail — caught with an Error Boundary Event.
       Feature09Title: Output Guardrail
-      Feature10Desc: Preserve conversation context across turns using IvyMemory or BusinessDataMemory.
-      Feature10Title: Memory & State
+      Feature10Desc: Block prompt injection attacks before they reach the model using the built-in PromptInjectionInputGuardrail — zero token cost.
+      Feature10Title: Input Guardrail
       Feature11Desc: Pause agent execution at critical decisions, assign a human review task, then resume.
       Feature11Title: Human-in-the-Loop
       Feature12Desc: Chain multiple specialised agents — each receives the previous agent's output.

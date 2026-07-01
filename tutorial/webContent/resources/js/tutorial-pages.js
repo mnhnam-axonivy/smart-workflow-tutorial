@@ -14,6 +14,9 @@
     'Java Tools': '06',
     'Java Tools (SPI pattern)': '06',
     'Web Search Tool': '07',
+    'Observability': '08',
+    'Output Guardrail': '09',
+    'Input Guardrail': '10',
   };
 
   var FEATURE_LINK_MAP_JP = {
@@ -24,6 +27,9 @@
     '呼び出し可能プロセスツール': '05',
     'Javaツール': '06',
     'ウェブ検索ツール': '07',
+    '観測可能性': '08',
+    '出力ガードレール': '09',
+    '入力ガードレール': '10',
   };
 
   // ── UI strings ──────────────────────────────────────────────────────────────
@@ -58,6 +64,9 @@
       '05': { title: '呼び出し可能プロセスツール',      desc: 'タグ1つでIvyの呼び出し可能サブプロセスをAIが発見できるツールに変えます。' },
       '06': { title: 'Javaツール',                     desc: 'JavaでSmartWorkflowToolを実装し、SPIで登録されるコードのみのツールロジック。' },
       '07': { title: 'ウェブ検索ツール',                desc: 'DuckDuckGo経由でエージェントがインターネット検索できる組み込みツール。' },
+      '08': { title: '観測可能性',                      desc: 'Arize PhoenixでLLM呼び出しをトレース — コード変更不要。' },
+      '09': { title: '出力ガードレール',                desc: '組み込みのSensitiveDataOutputGuardrailでAIレスポンスの機密データをブロック。' },
+      '10': { title: '入力ガードレール',                desc: '組み込みのPromptInjectionInputGuardrailでプロンプトインジェクション攻撃をブロック。' },
     }
   };
 

@@ -26,8 +26,8 @@ Dialogs:
       Feature08Title: 観測可能性
       Feature09Desc: 組み込みのSensitiveDataOutputGuardrailでAIレスポンスの機密データをブロック — エラー境界イベントでキャッチします。
       Feature09Title: 出力ガードレール
-      Feature10Desc: IvyMemoryまたはBusinessDataMemoryを使用して会話コンテキストを保持します。
-      Feature10Title: メモリと状態
+      Feature10Desc: 組み込みのPromptInjectionInputGuardrailでプロンプトインジェクション攻撃がモデルに届く前にブロック — トークンコストゼロ。
+      Feature10Title: 入力ガードレール
       Feature11Desc: 重要な判断でエージェントの実行を一時停止し、人間のレビュータスクを割り当て、再開します。
       Feature11Title: ヒューマン・イン・ザ・ループ
       Feature12Desc: 複数の専門エージェントを連鎖 — 各エージェントが前のエージェントの出力を受け取ります。
