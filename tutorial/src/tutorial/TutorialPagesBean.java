@@ -38,7 +38,7 @@ public class TutorialPagesBean {
   @PostConstruct
   public void init() {
     Set<String> seen = new LinkedHashSet<>();
-    for (int i = 1; i <= 9; i++) {
+    for (int i = 1; i <= 10; i++) {
       String id = String.format("%02d", i);
       String en = readCmsMarkdown("/Files/Features/feature-" + id);
       String jp = readCmsMarkdownLocale("/Files/Features/feature-" + id, "ja");
