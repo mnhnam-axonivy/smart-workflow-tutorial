@@ -1,0 +1,14 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "Feature11Data",
+  "namespace" : "tutorial",
+  "fields" : [ {
+    "name" : "query",
+    "type" : "String",
+    "modifiers" : [ ]
+  }, {
+    "name" : "result",
+    "type" : "String",
+    "modifiers" : [ ]
+  } ]
+}
