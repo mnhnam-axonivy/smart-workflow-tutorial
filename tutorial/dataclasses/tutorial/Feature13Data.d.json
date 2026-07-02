@@ -1,0 +1,18 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "Feature13Data",
+  "namespace" : "tutorial",
+  "fields" : [ {
+    "name" : "invoiceId"
+  }, {
+    "name" : "query"
+  }, {
+    "name" : "result"
+  }, {
+    "name" : "aiMemoryId",
+    "comment" : "name convention: field holding the memory id of an ongoing AI conversation"
+  }, {
+    "name" : "decision",
+    "type" : "tutorial.HumanFeedback"
+  } ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "HumanDecisionData",
+  "namespace" : "tutorial.HumanDecision",
+  "fields" : [ {
+    "name" : "decision",
+    "type" : "tutorial.HumanFeedback"
+  }, {
+    "name" : "answer"
+  } ]
+}

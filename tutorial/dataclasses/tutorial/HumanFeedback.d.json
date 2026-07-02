@@ -1,0 +1,12 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "HumanFeedback",
+  "namespace" : "tutorial",
+  "fields" : [ {
+    "name" : "question",
+    "comment" : "The question the agent wants a human to answer"
+  }, {
+    "name" : "answer",
+    "comment" : "The human's free-text response"
+  } ]
+}

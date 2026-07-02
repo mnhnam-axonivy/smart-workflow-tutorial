@@ -27,6 +27,8 @@
         <div id="sw-md-09">#{tutorialPagesBean.getFeature('09')}</div>
         <div id="sw-md-10">#{tutorialPagesBean.getFeature('10')}</div>
         <div id="sw-md-11">#{tutorialPagesBean.getFeature('11')}</div>
+        <div id="sw-md-12">#{tutorialPagesBean.getFeature('12')}</div>
+        <div id="sw-md-13">#{tutorialPagesBean.getFeature('13')}</div>
       </div>
 
       <!-- JP markdown content (hidden) -->
@@ -42,6 +44,8 @@
         <div id="sw-md-jp-09">#{tutorialPagesBean.getJpFeature('09')}</div>
         <div id="sw-md-jp-10">#{tutorialPagesBean.getJpFeature('10')}</div>
         <div id="sw-md-jp-11">#{tutorialPagesBean.getJpFeature('11')}</div>
+        <div id="sw-md-jp-12">#{tutorialPagesBean.getJpFeature('12')}</div>
+        <div id="sw-md-jp-13">#{tutorialPagesBean.getJpFeature('13')}</div>
       </div>
 
       <!-- CMS image URL bridge: JSF resolves each path → JS reads the rendered src -->
@@ -67,8 +71,9 @@
 
           <div class="sw-level-nav-bar">
             <div class="sw-level-nav">
-              <a class="sw-level-pill" data-lv="begin" href="#sw-begin">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/NavBeginner')}</a>
-              <a class="sw-level-pill" data-lv="mid"   href="#sw-mid">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/NavIntermediate')}</a>
+              <a class="sw-level-pill" data-lv="begin"  href="#sw-begin">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/NavBeginner')}</a>
+              <a class="sw-level-pill" data-lv="mid"    href="#sw-mid">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/NavIntermediate')}</a>
+              <a class="sw-level-pill" data-lv="exp" href="#sw-expert">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/NavExpert')}</a>
             </div>
             <div class="sw-lang-toggle">
               <button class="sw-lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
@@ -124,7 +129,7 @@
                 <h2>#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/IntermediateTitle')}</h2>
                 <p class="sw-level-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/IntermediateDesc')}</p>
               </div>
-              <span class="sw-level-count">6 features</span>
+              <span class="sw-level-count">8 features</span>
             </div>
             <div class="sw-feature-grid">
               <button class="sw-card intermediate" onclick="showFeature('05')">
@@ -161,6 +166,30 @@
                 <div class="sw-card-num">NO. 11</div>
                 <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature11Title')}</div>
                 <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature11Desc')}</div>
+              </button>
+              <button class="sw-card intermediate" onclick="showFeature('12')">
+                <div class="sw-card-num">NO. 12</div>
+                <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature12Title')}</div>
+                <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature12Desc')}</div>
+              </button>
+            </div>
+          </div>
+
+          <!-- EXPERT -->
+          <div class="sw-level-section" id="sw-expert" data-lv="exp">
+            <div class="sw-level-header">
+              <div class="sw-level-kanji">達</div>
+              <div class="sw-level-header-text">
+                <h2>#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/ExpertTitle')}</h2>
+                <p class="sw-level-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/ExpertDesc')}</p>
+              </div>
+              <span class="sw-level-count">1 feature</span>
+            </div>
+            <div class="sw-feature-grid">
+              <button class="sw-card expert" onclick="showFeature('13')">
+                <div class="sw-card-num">NO. 13</div>
+                <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature13Title')}</div>
+                <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature13Desc')}</div>
               </button>
             </div>
           </div>

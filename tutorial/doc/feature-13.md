@@ -178,10 +178,8 @@ The demo provides two start points to contrast both paths:
 ## Common mistakes
 
 - **Missing `aiMemoryId`** — `DecisionMaker.resolve()` cannot locate the agent's memory; the agent resumes with no tool result and may hallucinate or loop.
-- **UserTask not connected back to the same ProgramInterface** — the agent never re-enters and the process ends prematurely.
+- **UserTask not connected back to the same AgenticProcessCall** — the agent never re-enters and the process ends prematurely.
 - **Forgetting the `tool` tag** — without the `tool` tag on the `CallSubStart`, the agent cannot discover or call `askUserFeedback`.
-- **Agent not instructed to use the tool** — if the system prompt does not mention `askUserFeedback`, the agent may decide autonomously instead of delegating to the human.
-- **Listing options in the system prompt** — if the prompt suggests choices, the agent may embed them in its question. Keep the prompt directive: ask one question, expect free-text.
 
 ---
 

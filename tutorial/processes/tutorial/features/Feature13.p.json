@@ -1,0 +1,212 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/process.json",
+  "id" : "19F13AAAAAAAAA13",
+  "config" : {
+    "data" : "tutorial.Feature13Data"
+  },
+  "elements" : [ {
+      "id" : "f0",
+      "type" : "RequestStart",
+      "name" : "Tutorial Feature 13: Human in the Loop",
+      "config" : {
+        "signature" : "start",
+        "request" : {
+          "name" : "Tutorial Feature 13: Human in the Loop"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 256 }
+      },
+      "connect" : [
+        { "id" : "f1", "to" : "fA" }
+      ]
+    }, {
+      "id" : "f99",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 936, "y" : 256 }
+      }
+    }, {
+      "id" : "f0B",
+      "type" : "RequestStart",
+      "name" : "Tutorial Feature 13: Auto-approve (below $1000)",
+      "config" : {
+        "signature" : "startLowValue",
+        "request" : {
+          "name" : "Tutorial Feature 13: Auto-approve (below $1000)"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 416 }
+      },
+      "connect" : [
+        { "id" : "f0Bc", "to" : "fAB" }
+      ]
+    }, {
+      "id" : "fAB",
+      "type" : "Script",
+      "name" : "Mock query (low value)",
+      "config" : {
+        "output" : {
+          "code" : [
+            "in.invoiceId = \"INV-2025-0891\";",
+            "in.query = \"Invoice #INV-2025-0891 from Office Depot. Total: $85 USD. Office stationery supplies. Due: 2025-08-01. Please process this invoice for approval.\";"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 432, "y" : 416 },
+        "color" : "yellow"
+      },
+      "connect" : [
+        { "id" : "fABc", "to" : "f5", "color" : "default" }
+      ]
+    }, {
+      "id" : "fA",
+      "type" : "Script",
+      "name" : "Mock query",
+      "config" : {
+        "output" : {
+          "code" : [
+            "in.invoiceId = \"INV-2025-0892\";",
+            "in.query = \"Invoice #INV-2025-0892 from Apex Solutions Ltd. Total: $12,500 USD. Cloud infrastructure services. Due: 2025-08-01. Please process this invoice for approval.\";"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 264, "y" : 256 },
+        "color" : "yellow"
+      },
+      "connect" : [
+        { "id" : "f2", "to" : "f5", "color" : "default" }
+      ]
+    }, {
+      "id" : "f5",
+      "type" : "ProgramInterface",
+      "name" : "Invoice Approval Agent",
+      "config" : {
+        "javaClass" : "com.axonivy.utils.smart.workflow.AgenticProcessCall",
+        "userConfig" : {
+          "system" : "You are an invoice approval assistant for Acme Corp. When an invoice total exceeds $2,000, you MUST pause and use the askUserFeedback tool to ask the human a single direct question requesting their justification reason. Do not suggest or list any options — the human will type their own free-text reason. After receiving the reason, confirm the invoice is approved and describe the approval task that will be created with that reason in its description.",
+          "tools" : "[\"askUserFeedback\"]",
+          "resultMapping" : "in.result",
+          "query" : "<%=in.query%>"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 432, "y" : 256 },
+        "size" : { "width" : 160, "height" : 62 }
+      },
+      "boundaries" : [ {
+          "id" : "f32",
+          "type" : "ErrorBoundaryEvent",
+          "name" : "human:decision",
+          "config" : {
+            "errorCode" : "human:decision",
+            "output" : {
+              "map" : {
+                "out" : "in",
+                "out.decision" : "error.getAttribute(\"decision\") as tutorial.HumanFeedback"
+              }
+            }
+          },
+          "visual" : {
+            "at" : { "x" : 480, "y" : 217 },
+            "labelOffset" : { "x" : 17, "y" : -23 },
+            "icon" : "std:Escalation"
+          },
+          "connect" : [
+            { "id" : "f33", "to" : "f26" }
+          ]
+        } ],
+      "connect" : [
+        { "id" : "f6", "to" : "fL", "color" : "default" }
+      ]
+    }, {
+      "id" : "f26",
+      "type" : "UserTask",
+      "name" : "Provide justification",
+      "config" : {
+        "dialog" : "tutorial.HumanDecision:start(tutorial.HumanFeedback)",
+        "call" : {
+          "map" : {
+            "param.decision" : "in.decision"
+          }
+        },
+        "task" : {
+          "name" : "Provide feedback for Invoice Approval Agent"
+        },
+        "output" : {
+          "map" : {
+            "out" : "in",
+            "out.result" : "result.answer"
+          },
+          "code" : [
+            "import com.axonivy.utils.smart.workflow.tools.human.DecisionMaker;",
+            "",
+            "new DecisionMaker(in.aiMemoryId).resolve(result.answer);"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 432, "y" : 128 }
+      },
+      "connect" : [
+        { "id" : "f27", "to" : "f5" }
+      ]
+    }, {
+      "id" : "fL",
+      "type" : "Script",
+      "name" : "Log result",
+      "config" : {
+        "output" : {
+          "code" : "ivy.log.info(\"[HumanInTheLoop] Agent result: {0}\", in.result);"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 640, "y" : 256 },
+        "color" : "yellow"
+      },
+      "connect" : [
+        { "id" : "fLc", "to" : "fTS" }
+      ]
+    }, {
+      "id" : "fTS",
+      "type" : "TaskSwitchEvent",
+      "name" : "Invoice Approval",
+      "config" : {
+        "task" : {
+          "name" : "Invoice <%=in1.invoiceId%> Approval ",
+          "description" : "Justification reason: <%=in1.result%>"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 816, "y" : 256 }
+      },
+      "connect" : [
+        { "id" : "fTSc", "to" : "f99", "color" : "default" }
+      ]
+    }, {
+      "id" : "fN1",
+      "type" : "ProcessAnnotation",
+      "name" : [
+        "   Human-in-the-Loop pattern:",
+        "        (1) Agent calls askUserDecision tool ",
+        "   →  (2) human:decision error routes to UserTask ",
+        "   →  (3) User selects ",
+        "   →  DecisionMaker.resolve() resumes the agent"
+      ],
+      "visual" : {
+        "at" : { "x" : 750, "y" : 150 },
+        "size" : { "width" : 388, "height" : 116 }
+      }
+    } ],
+  "layout" : {
+    "colors" : {
+      "red" : "#ff0000",
+      "green" : "#1eff00",
+      "yellow" : "#fbff00",
+      "pink" : "#fb00ff"
+    }
+  }
+}
