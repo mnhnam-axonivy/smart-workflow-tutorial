@@ -30,10 +30,10 @@ Dialogs:
       Feature10Title: 入力ガードレール
       Feature11Desc: ユーザーメッセージの個人情報をLLMに届く前に匿名化し、レスポンスで元の値を復元します。GDPRに対応。
       Feature11Title: PIIマスキングガードレール
-      Feature12Desc: 複数の専門エージェントを連鎖 — 各エージェントが前のエージェントの出力を受け取ります。
-      Feature12Title: エージェントパイプラインパターン
-      Feature13Desc: GuardrailProvider SPIを実装してドメイン固有の検証ルールを追加します。
-      Feature13Title: カスタムガードレール
+      Feature12Desc: データクラスのフィールド1つで、エージェントが過去のターンを記憶し一貫したマルチターン対話を構築できるようにします。
+      Feature12Title: 会話メモリ
+      Feature13Desc: エージェントの実行を一時停止し、決定を人間タスクにルーティング — ユーザーの選択後、エージェントが自動的に再開します。
+      Feature13Title: ヒューマンインザループ
       Feature14Desc: LLMに送信する前に個人データを仮名化し、出力で復元します。
       Feature14Title: PIIマスキングガードレール
       Feature15Desc: OpenSearchベクターストアを接続し、エージェントがビジネス文書をセマンティック検索できるようにします。

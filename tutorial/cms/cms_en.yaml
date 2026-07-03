@@ -30,10 +30,10 @@ Dialogs:
       Feature10Title: Input Guardrail
       Feature11Desc: Anonymise personal data in user messages before the LLM sees it and restore original values in the response — GDPR-friendly.
       Feature11Title: PII Masking Guardrail
-      Feature12Desc: Chain multiple specialised agents — each receives the previous agent's output.
-      Feature12Title: Agent Pipeline Pattern
-      Feature13Desc: Implement GuardrailProvider SPI to add domain-specific validation rules.
-      Feature13Title: Custom Guardrails
+      Feature12Desc: Enable agents to remember previous turns and build coherent multi-turn dialogues using a single data class field.
+      Feature12Title: Conversation Memory
+      Feature13Desc: Pause agent execution and route decisions to human tasks — the agent resumes automatically with the user's choice.
+      Feature13Title: Human in the Loop
       Feature14Desc: Pseudonymise personal data before sending to the LLM, restore in the output.
       Feature14Title: PII Masking Guardrail
       Feature15Desc: Connect an OpenSearch vector store to let agents semantically search business documents.

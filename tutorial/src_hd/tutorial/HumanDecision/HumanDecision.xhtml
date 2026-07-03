@@ -1,0 +1,27 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:ic="http://ivyteam.ch/jsf/component" xmlns:p="http://primefaces.org/ui"
+  xmlns:pe="http://primefaces.org/ui/extensions">
+<h:body>
+  <ui:composition template="/ivy-form/layouts/form.xhtml">
+    <ui:define name="title"></ui:define>
+    <ui:define name="content">
+      <h:form id="form">
+        <h:panelGroup layout="block" styleClass="i-flex i-gap i-flex-col">
+          <h:outputText value="#{data.decision.question}" styleClass="" />
+          <h:panelGroup layout="block" styleClass="i-flex i-gap i-flex-col ui-fluid">
+            <p:outputLabel id="answer-label" for="answer" value="Your answer" />
+            <p:inputTextarea value="#{data.answer}" id="answer" required="true" rows="3" style="width:100%" autoResize="false" />
+            <p:message id="answer-msg" for="answer" styleClass="i-message" />
+          </h:panelGroup>
+          <h:panelGroup layout="block" id="layout4" styleClass="i-flex i-gap i-justify-end ">
+            <p:commandButton id="button5" actionListener="#{ivyWorkflowView.cancel()}" value="Cancel" styleClass="ui-button-secondary ui-button-flat" update="@form" process="@this"/>
+            <p:commandButton id="button6" actionListener="#{logic.close}" value="Submit" icon="ti ti-check" styleClass="ui-button-primary" update="@form" />
+            <p:defaultCommand target="button6"/>
+          </h:panelGroup>
+        </h:panelGroup>
+      </h:form>
+    </ui:define>
+  </ui:composition>
+</h:body>
+</html>
