@@ -10,13 +10,9 @@ By default, AI agents make decisions autonomously. **Human in the Loop** pauses 
 >
 > The finished process is at `tutorial/processes/tutorial/features/Feature13.p.json`.
 
----
-
 ## Before you start
 
 Some agent decisions require human judgement — a compliance check, an approval step, or a reason that must be recorded for audit. Without Human in the Loop, the agent would either make that choice autonomously or block waiting for input it cannot receive. This pattern lets the agent delegate any specific question to a real user and then continue processing with the free-text result.
-
----
 
 ## How does it work?
 
@@ -41,15 +37,25 @@ The agent uses `aiMemoryId` to persist its state across the suspension. Without 
 
 ---
 
-## Step 1 — Create the askUserFeedback tool
+## Step 1 — Add aiMemoryId to the data class
 
-Create a callable subprocess tagged `tool`. The tool receives a `HumanFeedback` and throws it as a `human:decision` error:
+Add `aiMemoryId: String` to your data class before anything else. This is the foundation the whole pattern depends on:
 
-```text
-CallSubStart (tagged "tool") → ErrorEnd "human:decision"
+```json
+{ "name": "aiMemoryId", "comment": "name convention: field holding the memory id of an ongoing AI conversation" }
 ```
 
-In the `ErrorEnd` output code:
+The framework writes a conversation ID here on the first agent call. `DecisionMaker` uses this ID to locate and update the suspended conversation when the human task completes.
+
+> Without `aiMemoryId` the agent has no memory store, `DecisionMaker.resolve()` fails silently, and the agent cannot resume correctly.
+
+---
+
+## Step 2 — Create the askUserFeedback tool
+
+![askUserFeedback tool process](cms:/Files/Images/feature13-02)
+
+Create a callable subprocess tagged `tool`. The tool receives a `HumanFeedback` and throws it as a `human:decision` error. In the `ErrorEnd` output code:
 
 ```java
 error.setAttribute("decision", in.feedback);
@@ -61,7 +67,7 @@ This attaches the `HumanFeedback` object (question + placeholder for the answer)
 
 ---
 
-## Step 2 — Configure the ProgramInterface
+## Step 3 — Configure the AgenticProcessCall
 
 Add the tool and attach an `ErrorBoundaryEvent`:
 
@@ -81,21 +87,19 @@ The error boundary routes the flow to the `UserTask` while keeping the process i
 
 ---
 
-## Step 3 — Create the UserTask and dialog
+## Step 4 — Create the UserTask and dialog
 
-Connect the error boundary to a `UserTask` with the `HumanDecision` dialog:
+![HumanDecision dialog](cms:/Files/Images/feature13-01)
 
-```json
-"dialog": "tutorial.HumanDecision:start(tutorial.HumanFeedback)"
-```
-
-The dialog (`HumanDecision.xhtml`) shows the agent's question as plain text and provides a free-text area for the user's answer. After the user submits, connect the `UserTask` output back to the **same `ProgramInterface` element** — this re-enters the agent with its suspended context restored from memory.
+Connect the error boundary to a `UserTask` with the `HumanDecision` dialog. The dialog (`HumanDecision.xhtml`) shows the agent's question as plain text and provides a free-text area for the user's answer. After the user submits, connect the `UserTask` output back to the **same `AgenticProcessCall` element** — this re-enters the agent with its suspended context restored from memory.
 
 ---
 
-## Step 4 — Resolve the decision
+## Step 5 — Resolve the decision
 
-In the `UserTask` output code, call `DecisionMaker.resolve()` before the flow returns to the agent:
+In the `UserTask` output code, call `DecisionMaker.resolve()` before the flow returns to the agent.
+
+`result` is the dialog's output object — the data class returned by `HumanDecision:start(tutorial.HumanFeedback)`. Its `answer` field holds the free-text string the user typed.
 
 ```java
 import com.axonivy.utils.smart.workflow.tools.human.DecisionMaker;
@@ -104,20 +108,6 @@ new DecisionMaker(in.aiMemoryId).resolve(result.answer);
 ```
 
 This writes the user's free-text answer into the agent's memory so the suspended `askUserFeedback` tool call returns the correct value when the agent resumes.
-
----
-
-## Step 5 — Add aiMemoryId to the data class
-
-Add `aiMemoryId: String` to your data class — the same convention as [Conversation Memory]:
-
-```json
-{ "name": "aiMemoryId", "comment": "name convention: field holding the memory id of an ongoing AI conversation" }
-```
-
-The framework writes a conversation ID here on the first agent call. `DecisionMaker` uses this ID to locate and update the suspended conversation.
-
-> Without `aiMemoryId` the agent has no memory store, `DecisionMaker.resolve()` fails silently, and the agent cannot resume correctly.
 
 ---
 
@@ -151,14 +141,24 @@ The demo provides two start points to contrast both paths:
 2. Agent detects the amount is below $2,000 — approves automatically without calling `askUserFeedback`
 3. Flow proceeds directly to the approval `TaskSwitchEvent`
 
+No process configuration change is needed for this path — the agent applies the threshold check itself based on the system prompt. The `askUserFeedback` tool is simply never called.
+
 ### Agent configuration
 
 | Field | Value |
 | --- | --- |
-| System prompt | `You are an invoice approval assistant for Acme Corp. When an invoice total exceeds $2,000, you MUST pause and use the askUserFeedback tool to ask the human a single direct question requesting their justification reason. Do not suggest or list any options — the human will type their own free-text reason. After receiving the reason, confirm the invoice is approved and describe the approval task that will be created with that reason in its description.` |
+| System prompt | *see prompt below* |
 | Tools | `["askUserFeedback"]` |
 | Result mapping | `in.result` |
 | Query | `<%=in.query%>` |
+
+```text
+You are an invoice approval assistant for Acme Corp. When an invoice total exceeds $2,000,
+you MUST pause and use the askUserFeedback tool to ask the human a single direct question
+requesting their justification reason. Do not suggest or list any options — the human will
+type their own free-text reason. After receiving the reason, confirm the invoice is approved
+and describe the approval task that will be created with that reason in its description.
+```
 
 ---
 
@@ -167,8 +167,8 @@ The demo provides two start points to contrast both paths:
 | Component | Key setting |
 | --- | --- |
 | `askUserFeedback` callable | Tagged `tool`; `ErrorEnd` throws `human:decision` with `HumanFeedback` attached via `error.setAttribute("decision", in.feedback)` |
-| ProgramInterface error boundary | Error code `human:decision`; maps error attribute to `in.decision` as `tutorial.HumanFeedback` |
-| `UserTask` | Dialog `tutorial.HumanDecision:start(tutorial.HumanFeedback)`; connects back to ProgramInterface |
+| AgenticProcessCall error boundary | Error code `human:decision`; maps error attribute to `in.decision` as `tutorial.HumanFeedback` |
+| `UserTask` | Dialog `tutorial.HumanDecision:start(tutorial.HumanFeedback)`; connects back to AgenticProcessCall |
 | `UserTask` output code | `new DecisionMaker(in.aiMemoryId).resolve(result.answer)` |
 | Data class | `aiMemoryId: String`, `decision: tutorial.HumanFeedback`, and `result: String` fields required |
 | `TaskSwitchEvent` | Task name `Invoice <%=in1.invoiceId%> Approval`; description `Justification reason: <%=in1.result%>` |

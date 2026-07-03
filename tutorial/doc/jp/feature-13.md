@@ -10,13 +10,9 @@
 >
 > 完成したプロセスは `tutorial/processes/tutorial/features/Feature13.p.json` にあります。
 
----
-
 ## 始める前に
 
 エージェントの決定の中には、人間の判断が必要なものがあります — コンプライアンスチェック、承認ステップ、または監査のために記録が必要な理由など。ヒューマンインザループがなければ、エージェントはその選択を自律的に行うか、受け取れない入力を待ち続けるかのどちらかです。このパターンにより、エージェントは特定の質問を実際のユーザーに委任し、フリーテキストの回答を使って処理を継続できます。
-
----
 
 ## 仕組み
 
@@ -41,15 +37,25 @@
 
 ---
 
-## ステップ1 — askUserFeedbackツールを作成する
+## ステップ1 — データクラスにaiMemoryIdを追加する
 
-`tool`タグが付いた呼び出し可能サブプロセスを作成します。ツールは`HumanFeedback`を受け取り、`human:decision`エラーとしてスローします：
+パターン全体が依存する基盤として、最初にデータクラスに`aiMemoryId: String`を追加します：
 
-```text
-CallSubStart（「tool」タグ付き）→ ErrorEnd「human:decision」
+```json
+{ "name": "aiMemoryId", "comment": "name convention: field holding the memory id of an ongoing AI conversation" }
 ```
 
-`ErrorEnd`の出力コード：
+フレームワークは最初のエージェント呼び出し時にここに会話IDを書き込みます。`DecisionMaker`はこのIDを使用して、人間タスク完了時にサスペンドされた会話を見つけて更新します。
+
+> `aiMemoryId`がないと、エージェントはメモリストアを持てず、`DecisionMaker.resolve()`はサイレントに失敗し、エージェントは正しく再開できません。
+
+---
+
+## ステップ2 — askUserFeedbackツールを作成する
+
+![askUserFeedbackツールプロセス](cms:/Files/Images/feature13-02)
+
+`tool`タグが付いた呼び出し可能サブプロセスを作成します。ツールは`HumanFeedback`を受け取り、`human:decision`エラーとしてスローします。`ErrorEnd`の出力コード：
 
 ```java
 error.setAttribute("decision", in.feedback);
@@ -61,7 +67,7 @@ error.setAttribute("decision", in.feedback);
 
 ---
 
-## ステップ2 — ProgramInterfaceを設定する
+## ステップ3 — AgenticProcessCallを設定する
 
 ツールを追加し、`ErrorBoundaryEvent`をアタッチします：
 
@@ -81,21 +87,19 @@ out.decision = error.getAttribute("decision") as tutorial.HumanFeedback
 
 ---
 
-## ステップ3 — UserTaskとダイアログを作成する
+## ステップ4 — UserTaskとダイアログを作成する
 
-エラー境界を`HumanDecision`ダイアログを持つ`UserTask`に接続します：
+![HumanDecisionダイアログ](cms:/Files/Images/feature13-01)
 
-```json
-"dialog": "tutorial.HumanDecision:start(tutorial.HumanFeedback)"
-```
-
-ダイアログ（`HumanDecision.xhtml`）はエージェントの質問をプレーンテキストで表示し、ユーザーの回答用のフリーテキストエリアを提供します。ユーザーが送信した後、`UserTask`の出力を**同じ`ProgramInterface`要素**に戻るように接続します — これにより、メモリから復元されたサスペンドされたコンテキストでエージェントが再エントリーします。
+エラー境界を`HumanDecision`ダイアログを持つ`UserTask`に接続します。ダイアログ（`HumanDecision.xhtml`）はエージェントの質問をプレーンテキストで表示し、ユーザーの回答用のフリーテキストエリアを提供します。ユーザーが送信した後、`UserTask`の出力を**同じ`AgenticProcessCall`要素**に戻るように接続します — これにより、メモリから復元されたサスペンドされたコンテキストでエージェントが再エントリーします。
 
 ---
 
-## ステップ4 — 決定を解決する
+## ステップ5 — 決定を解決する
 
-`UserTask`の出力コードで、フローがエージェントに戻る前に`DecisionMaker.resolve()`を呼び出します：
+`UserTask`の出力コードで、フローがエージェントに戻る前に`DecisionMaker.resolve()`を呼び出します。
+
+`result`はダイアログの出力オブジェクトです — `HumanDecision:start(tutorial.HumanFeedback)`が返すデータクラスです。その`answer`フィールドにユーザーが入力したフリーテキスト文字列が格納されます。
 
 ```java
 import com.axonivy.utils.smart.workflow.tools.human.DecisionMaker;
@@ -104,20 +108,6 @@ new DecisionMaker(in.aiMemoryId).resolve(result.answer);
 ```
 
 これにより、ユーザーのフリーテキスト回答がエージェントのメモリに書き込まれ、エージェントが再開したときにサスペンドされた`askUserFeedback`ツール呼び出しが正しい値を返します。
-
----
-
-## ステップ5 — データクラスにaiMemoryIdを追加する
-
-[会話メモリ]と同じ規約で、データクラスに`aiMemoryId: String`を追加します：
-
-```json
-{ "name": "aiMemoryId", "comment": "name convention: field holding the memory id of an ongoing AI conversation" }
-```
-
-フレームワークは最初のエージェント呼び出し時にここに会話IDを書き込みます。`DecisionMaker`はこのIDを使用して、サスペンドされた会話を見つけて更新します。
-
-> `aiMemoryId`がないと、エージェントはメモリストアを持てず、`DecisionMaker.resolve()`はサイレントに失敗し、エージェントは正しく再開できません。
 
 ---
 
@@ -151,14 +141,24 @@ new DecisionMaker(in.aiMemoryId).resolve(result.answer);
 2. エージェントが金額が$2,000未満であることを検出 — `askUserFeedback`を呼び出さずに自動承認する
 3. フローが直接承認の`TaskSwitchEvent`に進む
 
+このパスにプロセス設定の変更は不要です — エージェントはシステムプロンプトに基づいて自分自身で閾値チェックを適用します。`askUserFeedback`ツールは単純に呼び出されません。
+
 ### エージェントの設定
 
 | フィールド | 値 |
 | --- | --- |
-| システムプロンプト | `You are an invoice approval assistant for Acme Corp. When an invoice total exceeds $2,000, you MUST pause and use the askUserFeedback tool to ask the human a single direct question requesting their justification reason. Do not suggest or list any options — the human will type their own free-text reason. After receiving the reason, confirm the invoice is approved and describe the approval task that will be created with that reason in its description.` |
+| システムプロンプト | *下記のプロンプトを参照* |
 | ツール | `["askUserFeedback"]` |
 | 結果マッピング | `in.result` |
 | クエリ | `<%=in.query%>` |
+
+```text
+You are an invoice approval assistant for Acme Corp. When an invoice total exceeds $2,000,
+you MUST pause and use the askUserFeedback tool to ask the human a single direct question
+requesting their justification reason. Do not suggest or list any options — the human will
+type their own free-text reason. After receiving the reason, confirm the invoice is approved
+and describe the approval task that will be created with that reason in its description.
+```
 
 ---
 
@@ -167,8 +167,8 @@ new DecisionMaker(in.aiMemoryId).resolve(result.answer);
 | コンポーネント | 主要設定 |
 | --- | --- |
 | `askUserFeedback`呼び出し可能 | `tool`タグ付き；`ErrorEnd`が`error.setAttribute("decision", in.feedback)`で`HumanFeedback`をアタッチして`human:decision`をスロー |
-| ProgramInterfaceエラー境界 | エラーコード`human:decision`；エラー属性を`tutorial.HumanFeedback`として`in.decision`にマップ |
-| `UserTask` | ダイアログ`tutorial.HumanDecision:start(tutorial.HumanFeedback)`；ProgramInterfaceに戻る接続 |
+| AgenticProcessCallエラー境界 | エラーコード`human:decision`；エラー属性を`tutorial.HumanFeedback`として`in.decision`にマップ |
+| `UserTask` | ダイアログ`tutorial.HumanDecision:start(tutorial.HumanFeedback)`；AgenticProcessCallに戻る接続 |
 | `UserTask`出力コード | `new DecisionMaker(in.aiMemoryId).resolve(result.answer)` |
 | データクラス | `aiMemoryId: String`、`decision: tutorial.HumanFeedback`、`result: String`フィールドが必須 |
 | `TaskSwitchEvent` | タスク名 `Invoice <%=in1.invoiceId%> Approval`；説明 `Justification reason: <%=in1.result%>` |

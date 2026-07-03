@@ -190,11 +190,12 @@
       "id" : "fN1",
       "type" : "ProcessAnnotation",
       "name" : [
-        "   Human-in-the-Loop pattern:",
-        "        (1) Agent calls askUserDecision tool ",
-        "   →  (2) human:decision error routes to UserTask ",
-        "   →  (3) User selects ",
-        "   →  DecisionMaker.resolve() resumes the agent"
+        "   Human-in-the-Loop — Invoice Approval:",
+        "   (1) Invoice > $2,000 → agent calls askUserFeedback tool",
+        "   →  (2) human:decision error suspends agent → UserTask appears",
+        "   →  (3) Human types free-text justification reason",
+        "   →  (4) DecisionMaker.resolve() feeds answer back → agent resumes",
+        "   →  (5) TaskSwitchEvent creates 'Invoice <ID> Approval' task"
       ],
       "visual" : {
         "at" : { "x" : 750, "y" : 150 },
