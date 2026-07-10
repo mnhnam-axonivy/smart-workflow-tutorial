@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -33,7 +34,11 @@ public class TutorialPagesBean {
 
   private final Map<String, String> features = new LinkedHashMap<>();
   private final Map<String, String> jpFeatures = new LinkedHashMap<>();
+  private final Map<String, String> practices = new LinkedHashMap<>();
+  private final Map<String, String> jpPractices = new LinkedHashMap<>();
   private List<String> cmsImagePaths = new ArrayList<>();
+  private List<String> jpCmsImagePaths = new ArrayList<>();
+  private final Map<String, String> jpImageDataUrls = new LinkedHashMap<>();
 
   @PostConstruct
   public void init() {
@@ -47,7 +52,27 @@ public class TutorialPagesBean {
       collectImagePaths(en, seen);
       collectImagePaths(jp, seen);
     }
+    for (int i = 1; i <= 5; i++) {
+      String id = String.format("%02d", i);
+      String en = readCmsMarkdown("/Files/Practices/practice-" + id);
+      String jp = readCmsMarkdownLocale("/Files/Practices/practice-" + id, "ja");
+      practices.put(id, en);
+      jpPractices.put(id, jp);
+      collectImagePaths(en, seen);
+      collectImagePaths(jp, seen);
+    }
     cmsImagePaths = new ArrayList<>(seen);
+
+    // Build JP image data URLs for paths that have a "ja" locale variant
+    List<String> jpPaths = new ArrayList<>();
+    for (String path : seen) {
+      String dataUrl = readJpImageDataUrl(path);
+      if (!dataUrl.isEmpty()) {
+        jpPaths.add(path);
+        jpImageDataUrls.put(path, dataUrl);
+      }
+    }
+    jpCmsImagePaths = jpPaths;
   }
 
   public String getFeature(String id) {
@@ -58,8 +83,24 @@ public class TutorialPagesBean {
     return jpFeatures.getOrDefault(id, "");
   }
 
+  public String getPractice(String id) {
+    return practices.getOrDefault(id, "");
+  }
+
+  public String getJpPractice(String id) {
+    return jpPractices.getOrDefault(id, "");
+  }
+
   public List<String> getCmsImagePaths() {
     return cmsImagePaths;
+  }
+
+  public List<String> getJpCmsImagePaths() {
+    return jpCmsImagePaths;
+  }
+
+  public Map<String, String> getJpImageDataUrls() {
+    return jpImageDataUrls;
   }
 
   public void exportZip() {
@@ -125,6 +166,27 @@ public class TutorialPagesBean {
     Matcher m = CMS_IMG_PATTERN.matcher(md);
     while (m.find()) {
       seen.add(m.group(1));
+    }
+  }
+
+  private String readJpImageDataUrl(String cmsPath) {
+    Optional<ContentObject> obj = Ivy.cm().findObject(cmsPath);
+    if (!obj.map(ContentObject::exists).orElse(false)) return "";
+    ContentObjectValue target = null;
+    for (ContentObjectValue v : obj.get().values()) {
+      if ("ja".equals(v.locale().getLanguage())) {
+        target = v;
+        break;
+      }
+    }
+    if (target == null) return "";
+    try (InputStream is = target.read().inputStream()) {
+      if (is == null) return "";
+      byte[] bytes = is.readAllBytes();
+      return "data:image/png;base64," + Base64.getEncoder().encodeToString(bytes);
+    } catch (Exception e) {
+      Ivy.log().warn("Could not read JP image: " + cmsPath, e);
+      return "";
     }
   }
 
