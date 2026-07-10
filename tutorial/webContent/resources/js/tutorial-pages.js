@@ -20,6 +20,14 @@
     'PII Masking Guardrail': '11',
     'Conversation Memory': '12',
     'Human in the Loop': '13',
+    'Practice 01 — Agent Pattern: AI Task': 'p01',
+    'Practice 02 — Agent Pattern: Subprocess Design and Tool Co-location': 'p02',
+    'Practice 03 — Agent Organisation: Folder Structure and Naming Conventions': 'p03',
+    'Practice 05 — Agent Prompts: Clarity and Dynamic Context': 'p05',
+    'Agent Pattern: AI Task': 'p01',
+    'Agent Pattern: Subprocess Design and Tool Co-location': 'p02',
+    'Agent Organisation: Folder Structure and Naming Conventions': 'p03',
+    'Agent Prompts: Clarity and Dynamic Context': 'p05',
   };
 
   var FEATURE_LINK_MAP_JP = {
@@ -36,6 +44,10 @@
     'PIIマスキングガードレール': '11',
     '会話メモリ': '12',
     'ヒューマンインザループ': '13',
+    'プラクティス 01 — エージェントパターン: AIタスク': 'p01',
+    'プラクティス 02 — エージェントパターン: サブプロセス設計とツールの同一配置': 'p02',
+    'プラクティス 03 — エージェント構成: フォルダ構造と命名規則': 'p03',
+    'プラクティス 05 — エージェントプロンプト: 明確さと動的コンテキスト': 'p05',
   };
 
   // ── UI strings ──────────────────────────────────────────────────────────────
@@ -55,13 +67,15 @@
       begin:  '初級',
       mid:    '中級',
       exp:    'エキスパート',
-      adv:    '上級'
+      adv:    '上級',
+      bp:     'ベストプラクティス'
     },
     levels: {
-      begin:  { title: '初級',         desc: 'コアコンセプト — ここから始めましょう' },
-      mid:    { title: '中級',         desc: 'ツールと安全性 — エージェントを実用的で安全に' },
-      exp:    { title: 'エキスパート', desc: '高度な統合 — 限界に挑戦' },
-      adv:    { title: '上級',         desc: 'パターンとオーケストレーション — 高度なワークフローを設計' }
+      begin:  { title: '初級',                   desc: 'コアコンセプト — ここから始めましょう' },
+      mid:    { title: '中級',                   desc: 'ツールと安全性 — エージェントを実用的で安全に' },
+      exp:    { title: 'エキスパート',            desc: '高度な統合 — 限界に挑戦' },
+      adv:    { title: '上級',                   desc: 'パターンとオーケストレーション — 高度なワークフローを設計' },
+      bp:     { title: 'ベストプラクティス',      desc: '本番対応AIワークフローのパターンとアンチパターン' }
     },
     // Keyed by the ID passed to showFeature()
     features: {
@@ -78,6 +92,10 @@
       '11': { title: 'PIIマスキングガードレール',       desc: 'ユーザーメッセージの個人情報をLLMに届く前に匿名化し、レスポンスで元の値を復元。' },
       '12': { title: '会話メモリ',                      desc: 'データクラスのフィールド1つでエージェントが過去のターンを記憶し、一貫したマルチターン対話を構築。' },
       '13': { title: 'ヒューマンインザループ',           desc: 'エージェントの実行を一時停止し、決定を人間タスクにルーティング — ユーザーの選択後、エージェントが自動的に再開。' },
+      'p01': { title: 'エージェントパターン：AIタスク', desc: 'ルーティンの人間承認をAI決定で置き換え、型付き結果をプロセスデータに直接書き込みます。' },
+      'p02': { title: 'エージェントパターン：サブプロセス設計とツールの同一配置', desc: '呼び出し可能なサブプロセスに抽出するタイミングと、ツールをオーケストレータと同一ファイルに配置するタイミングを判断します。' },
+      'p03': { title: 'エージェント整理：フォルダ構造と命名規則', desc: 'エージェントファイルを専用のagents/フォルダに整理し、プロセスファイル・呼び出し可能プロセス・データクラスに一貫した命名規則を適用します。' },
+      'p05': { title: 'エージェントプロンプト：明瞭さと動的コンテキスト', desc: 'ツールメソッド名を含まないシステムプロンプトを書き、EL式で今日の日付・ユーザーロケール・プロセスデータをリアルタイムにプロンプトへ注入します。' },
     }
   };
 
@@ -112,7 +130,7 @@
     });
 
     document.querySelectorAll('.sw-card[onclick]').forEach(function(card) {
-      var m = card.getAttribute('onclick').match(/showFeature\('(\d+)'\)/);
+      var m = card.getAttribute('onclick').match(/showFeature\('([\w]+)'\)/);
       if (!m) return;
       var id    = m[1];
       var title = card.querySelector('.sw-card-title');
@@ -162,7 +180,7 @@
 
     // Feature cards
     document.querySelectorAll('.sw-card[onclick]').forEach(function(card) {
-      var m = card.getAttribute('onclick').match(/showFeature\('(\d+)'\)/);
+      var m = card.getAttribute('onclick').match(/showFeature\('([\w]+)'\)/);
       if (!m) return;
       var id    = m[1];
       var titleEl = card.querySelector('.sw-card-title');
@@ -242,18 +260,26 @@
     }
 
     _buildCmsImageMap() {
-      var map = {};
+      var enMap = {};
       document.querySelectorAll('#sw-cms-img-data span[data-cms-path]').forEach(function(span) {
         var img = span.querySelector('img');
-        if (img) map[span.getAttribute('data-cms-path')] = img.src;
+        if (img) enMap[span.getAttribute('data-cms-path')] = img.src;
       });
-      return map;
+      var jpMap = {};
+      document.querySelectorAll('#sw-cms-img-data-jp span[data-cms-path-ja]').forEach(function(span) {
+        var img = span.querySelector('img');
+        if (img && img.src && img.src.startsWith('data:')) {
+          jpMap[span.getAttribute('data-cms-path-ja')] = img.src;
+        }
+      });
+      return { en: enMap, jp: jpMap };
     }
 
     _preprocessMarkdown(md) {
-      var map = this._buildCmsImageMap();
+      var maps = this._buildCmsImageMap();
       md = md.replace(/\(cms:(\/[^)]+)\)/g, function(_, path) {
-        return '(' + (map[path] || '#') + ')';
+        var url = (currentLang === 'jp' && maps.jp[path]) ? maps.jp[path] : maps.en[path];
+        return '(' + (url || '#') + ')';
       });
       var linkMap = currentLang === 'jp' ? FEATURE_LINK_MAP_JP : FEATURE_LINK_MAP;
       md = md.replace(/\[([^\]]+)\](?!\s*[\(\[])/g, function(match, text) {

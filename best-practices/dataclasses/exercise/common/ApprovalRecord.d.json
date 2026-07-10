@@ -1,0 +1,13 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "ApprovalRecord",
+  "namespace" : "exercise.common",
+  "fields" : [ {
+    "name" : "approverName"
+  }, {
+    "name" : "approvalNote"
+  }, {
+    "name" : "isApproved",
+    "type" : "Boolean"
+  } ]
+}

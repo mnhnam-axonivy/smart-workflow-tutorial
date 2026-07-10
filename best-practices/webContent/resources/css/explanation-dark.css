@@ -1,0 +1,27 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Explanation Panel — dark-mode variables.
+   Loaded dynamically via explanation-#{ivyFreyaTheme.mode}.css.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Surfaces & text ───────────────────────────────────────────── */
+  --ep-title:          #e2e8f0;   /* slate-200 */
+  --ep-body:           #94a3b8;   /* slate-400 */
+  --ep-surface-panel:  #0f172a;   /* slate-900 */
+  --ep-step-bg:        #1e293b;   /* slate-800 */
+  --ep-border:         #334155;   /* slate-700 */
+  --ep-shadow:         0 2px 16px rgba(0,0,0,.35);
+
+  /* ── Step accent colors (brightened for dark backgrounds) ──────── */
+  --ep-step1-color:    #60a5fa;   /* blue-400   — Choose Region  */
+  --ep-step2-color:    #a78bfa;   /* violet-400 — Upload         */
+  --ep-step3-color:    #34d399;   /* emerald-400 — Proceed       */
+
+  /* ── Behind-the-scenes number bubble ──────────────────────────── */
+  --ep-num-bg:         #4f46e5;   /* indigo-600 */
+  --ep-num-color:      #ffffff;
+
+  /* ── Expected result box ───────────────────────────────────────── */
+  --ep-result-bg:      #0e2820;
+  --ep-result-border:  #1a4d38;
+}

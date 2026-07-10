@@ -1,0 +1,72 @@
+Dialogs:
+  exercise:
+    purchasing:
+      PurchasingForm:
+        BrowseLabel: Upload document
+        ButtonHideExplanation: Hide Explanation
+        ButtonShowExplanation: Show Explanation
+        ColumnDescription: Description
+        ColumnItemName: Item Name
+        ColumnItemType: Item Type
+        ColumnQuantity: Quantity
+        ColumnTotal: Total
+        ColumnUnitPrice: Unit Price
+        DragDropLabel: Drag and drop file here
+        ExplanationBehindStep1: Document Extraction — The uploaded file is converted to plain text.
+        ExplanationBehindStep2: Translation — The extracted text is translated into the target language.
+        ExplanationBehindStep3: Data Mapping — Line items, requester, and purchase details are extracted and structured.
+        ExplanationBehindStep4: Tax Calculation — Subtotal, tax amounts by item type, and grand total are computed.
+        ExplanationBehindStep5: Statistics & AI Summary — Item statistics are calculated and an executive summary is generated in the target language.
+        ExplanationBehindTitle: Behind the Scenes
+        ExplanationHowToUseTitle: How to Use
+        ExplanationResultDesc: 'The form is pre-filled with complete purchasing data: line items, tax breakdown, statistics (item count, average price, tax rate), and an AI-generated executive summary in your chosen language.'
+        ExplanationResultTitle: Expected Result
+        ExplanationStep1Desc: Select the target region to set the language and tax rules for document processing.
+        ExplanationStep1Title: 1. Choose Region
+        ExplanationStep2Desc: 'Upload a purchasing document (PDF or image). The AI will read and extract all relevant data. Sample invoices are available in the doc/ folder of this repository: purchasing-invoice-sample.pdf, purchasing-invoice-below5000.pdf, purchasing-invoice-japan.pdf.'
+        ExplanationStep2Title: 2. Upload Document
+        ExplanationStep3Desc: The AI agent will automatically analyze the document and pre-fill the form with structured purchasing data.
+        ExplanationStep3Title: 3. Click Proceed
+        ExplanationTitle: How It Works
+        FooterTotal: 'Total:'
+        InvalidFileMessage: Invalid file type. Only PDF, JPG, JPEG are accepted.
+        InvalidSizeMessage: File is too large.
+        ItemNameRequired: Item name is required
+        LabelAverageUnitPrice: Avg. Unit Price
+        LabelDepartment: Department
+        LabelEmail: Email
+        LabelItemCount: Total Items
+        LabelNotes: Notes
+        LabelRegion: Region
+        LabelRequesterName: Requester Name
+        LabelSubtotal: Subtotal
+        LabelTax: Tax
+        LabelTaxPercentage: Effective Tax Rate
+        LabelTitle: Title
+        LabelTotalWithTax: Total
+        LabelUniqueProductCount: Unique Products
+        PageTitle: Purchasing Request
+        ProceedButton: Proceed
+        QuantityRequired: Quantity is required
+        RequesterNameRequired: Requester Name is required
+        SectionAiSummary: AI Summary
+        SectionLineItems: Line Items
+        SectionStatistics: Statistics
+        SelectPlaceholder: -- Select --
+        TitleRequired: Title is required
+        UnitPriceRequired: Unit price is required
+itemType:
+  ELECTRONICS: Electronics
+  FURNITURE: Furniture
+  OFFICE_SUPPLIES: Office Supplies
+  OTHER: Other
+  SERVICES: Services
+  SOFTWARE: Software
+Labels:
+  Cancel: Cancel
+  Remove: Remove
+  Submit: Submit
+region:
+  EU: Europe
+  JP: Japan
+  US: United States

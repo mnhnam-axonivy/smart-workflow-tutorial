@@ -1,0 +1,18 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "PurchasingFormData",
+  "namespace" : "exercise.purchasing.PurchasingForm",
+  "fields" : [ {
+    "name" : "purchasing",
+    "type" : "exercise.purchasing.PurchasingData",
+    "modifiers" : [ ]
+  }, {
+    "name" : "inputFile",
+    "type" : "java.io.File",
+    "modifiers" : [ ]
+  }, {
+    "name" : "uploadedFile",
+    "type" : "Object",
+    "modifiers" : [ ]
+  } ]
+}

@@ -54,6 +54,17 @@ Dialogs:
       IntermediateTitle: 中級
       NavAdvanced: 上級
       NavBeginner: 初級
+      NavBestPractices: ベストプラクティス
       NavExpert: エキスパート
       NavIntermediate: 中級
+      BestPracticesTitle: ベストプラクティス
+      BestPracticesDesc: 本番対応AIワークフローのパターンとアンチパターン
+      Practice01Title: "エージェントパターン：AIタスク"
+      Practice01Desc: ルーティンの人間承認をAI決定で置き換え、型付き結果をプロセスデータに直接書き込みます。
+      Practice02Title: "エージェントパターン：サブプロセス設計とツールの同一配置"
+      Practice02Desc: 呼び出し可能なサブプロセスに抽出するタイミングと、ツールをオーケストレータと同一ファイルに配置するタイミングを判断します。
+      Practice03Title: "エージェント整理：フォルダ構造と命名規則"
+      Practice03Desc: エージェントファイルを専用のagents/フォルダに整理し、プロセスファイル・呼び出し可能プロセス・データクラスに一貫した命名規則を適用します。
+      Practice05Title: "エージェントプロンプト：明瞭さと動的コンテキスト"
+      Practice05Desc: ツールメソッド名を含まないシステムプロンプトを書き、EL式で今日の日付・ユーザーロケール・プロセスデータをリアルタイムにプロンプトへ注入します。
       PageTitle: Smart Workflow 機能ガイド

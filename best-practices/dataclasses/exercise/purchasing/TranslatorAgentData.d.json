@@ -1,0 +1,12 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "TranslatorAgentData",
+  "namespace" : "exercise.purchasing",
+  "fields" : [ {
+    "name" : "extractedText",
+    "modifiers" : [ ]
+  }, {
+    "name" : "regionLanguage",
+    "modifiers" : [ ]
+  } ]
+}

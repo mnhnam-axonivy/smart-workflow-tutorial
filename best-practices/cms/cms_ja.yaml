@@ -1,0 +1,72 @@
+Dialogs:
+  exercise:
+    purchasing:
+      PurchasingForm:
+        BrowseLabel: ドキュメントをアップロード
+        ButtonHideExplanation: 説明を非表示
+        ButtonShowExplanation: 説明を表示
+        ColumnDescription: 説明
+        ColumnItemName: 品目名
+        ColumnItemType: 品目タイプ
+        ColumnQuantity: 数量
+        ColumnTotal: 合計
+        ColumnUnitPrice: 単価
+        DragDropLabel: ここにファイルをドラッグ＆ドロップ
+        ExplanationBehindStep1: ドキュメント抽出 — アップロードされたファイルをテキストに変換します。
+        ExplanationBehindStep2: 翻訳 — 抽出されたテキストをターゲット言語に翻訳します。
+        ExplanationBehindStep3: データマッピング — 明細・申請者・購買詳細を抽出し、構造化します。
+        ExplanationBehindStep4: 税計算 — 品目タイプ別に小計・税額・合計を計算します。
+        ExplanationBehindStep5: 統計・AIサマリー — 品目統計を算出し、ターゲット言語でエグゼクティブサマリーを生成します。
+        ExplanationBehindTitle: 処理の流れ
+        ExplanationHowToUseTitle: 操作手順
+        ExplanationResultDesc: フォームには購買データが自動入力されます：明細、税内訳、統計情報（品目数・平均単価・税率）、選択した言語でのAIサマリー。
+        ExplanationResultTitle: 期待される結果
+        ExplanationStep1Desc: ドキュメント処理の言語と税ルールを設定するため、対象地域を選択してください。
+        ExplanationStep1Title: 1. 地域を選択
+        ExplanationStep2Desc: 購買ドキュメント（PDFまたは画像）をアップロードしてください。AIが自動的にデータを読み取ります。サンプル請求書はリポジトリのdoc/フォルダにあります：purchasing-invoice-sample.pdf、purchasing-invoice-below5000.pdf、purchasing-invoice-japan.pdf。
+        ExplanationStep2Title: 2. ドキュメントをアップロード
+        ExplanationStep3Desc: AIエージェントがドキュメントを解析し、フォームに購買データを自動入力します。
+        ExplanationStep3Title: 3. 処理するをクリック
+        ExplanationTitle: 使い方ガイド
+        FooterTotal: '合計:'
+        InvalidFileMessage: ファイル形式が不正です。PDF、JPG、JPEGのみ受け付けます。
+        InvalidSizeMessage: ファイルサイズが大きすぎます。
+        ItemNameRequired: 品目名は必須です
+        LabelAverageUnitPrice: 平均単価
+        LabelDepartment: 部門
+        LabelEmail: メールアドレス
+        LabelItemCount: 合計数量
+        LabelNotes: 備考
+        LabelRegion: 地域
+        LabelRequesterName: 申請者名
+        LabelSubtotal: 小計
+        LabelTax: 税額
+        LabelTaxPercentage: 実効税率
+        LabelTitle: タイトル
+        LabelTotalWithTax: 合計金額
+        LabelUniqueProductCount: ユニーク商品数
+        PageTitle: 購買申請
+        ProceedButton: 処理する
+        QuantityRequired: 数量は必須です
+        RequesterNameRequired: 申請者名は必須です
+        SectionAiSummary: AIサマリー
+        SectionLineItems: 明細
+        SectionStatistics: 統計情報
+        SelectPlaceholder: -- 選択 --
+        TitleRequired: タイトルは必須です
+        UnitPriceRequired: 単価は必須です
+itemType:
+  ELECTRONICS: 電子機器
+  FURNITURE: 家具
+  OFFICE_SUPPLIES: 事務用品
+  OTHER: その他
+  SERVICES: サービス
+  SOFTWARE: ソフトウェア
+Labels:
+  Cancel: キャンセル
+  Remove: 削除
+  Submit: 申請
+region:
+  EU: ヨーロッパ
+  JP: 日本
+  US: アメリカ合衆国
