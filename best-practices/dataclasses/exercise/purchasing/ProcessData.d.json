@@ -1,0 +1,13 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "ProcessData",
+  "namespace" : "exercise.purchasing",
+  "fields" : [ {
+    "name" : "purchasingData",
+    "type" : "exercise.purchasing.PurchasingData"
+  }, {
+    "name" : "approvalRecord",
+    "type" : "exercise.common.ApprovalRecord",
+    "modifiers" : [ ]
+  } ]
+}

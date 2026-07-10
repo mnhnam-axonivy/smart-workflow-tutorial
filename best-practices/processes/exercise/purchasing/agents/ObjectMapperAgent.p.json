@@ -1,0 +1,70 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/process.json",
+  "id" : "19F459D4DB5620DD",
+  "kind" : "CALLABLE_SUB",
+  "config" : {
+    "data" : "exercise.purchasing.ObjectMapperAgentData"
+  },
+  "elements" : [ {
+      "id" : "f0",
+      "type" : "CallSubStart",
+      "name" : "mapObject(String,String,Class)",
+      "config" : {
+        "signature" : "mapObject",
+        "input" : {
+          "params" : [
+            { "name" : "extractedText", "type" : "String", "desc" : "The text to extract structured data from" },
+            { "name" : "instruction", "type" : "String", "desc" : "Instruction to guide the agent on how to map the data" },
+            { "name" : "objectClass", "type" : "Class", "desc" : "Expected result type class for structured output" }
+          ],
+          "map" : {
+            "out.extractedText" : "param.extractedText",
+            "out.instruction" : "param.instruction",
+            "out.objectClass" : "param.objectClass"
+          }
+        },
+        "result" : {
+          "params" : [
+            { "name" : "resultObject", "type" : "Object", "desc" : "The mapped structured object" },
+            { "name" : "resultClass", "type" : "Class", "desc" : "The class type of the result object" }
+          ],
+          "map" : {
+            "result.resultObject" : "in.resultObject",
+            "result.resultClass" : "in.objectClass"
+          }
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f2", "to" : "f1" }
+      ]
+    }, {
+      "id" : "f1",
+      "type" : "ProgramInterface",
+      "name" : "Map to Object",
+      "config" : {
+        "javaClass" : "com.axonivy.utils.smart.workflow.AgenticProcessCall",
+        "userConfig" : {
+          "system" : "<%=in.instruction%>",
+          "tools" : "[]",
+          "resultType" : "in.objectClass",
+          "resultMapping" : "in.resultObject",
+          "query" : "<%=in.extractedText%>"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 256, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f3", "to" : "f4" }
+      ]
+    }, {
+      "id" : "f4",
+      "type" : "CallSubEnd",
+      "visual" : {
+        "at" : { "x" : 416, "y" : 64 }
+      }
+    } ]
+}

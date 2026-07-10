@@ -1,0 +1,27 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Explanation Panel — light-mode variables.
+   Loaded dynamically via explanation-#{ivyFreyaTheme.mode}.css.
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Surfaces & text ───────────────────────────────────────────── */
+  --ep-title:          #1e293b;
+  --ep-body:           #475569;
+  --ep-surface-panel:  #f8fafc;
+  --ep-step-bg:        #ffffff;
+  --ep-border:         #e2e8f0;
+  --ep-shadow:         0 2px 16px rgba(0,0,0,.06);
+
+  /* ── Step accent colors ────────────────────────────────────────── */
+  --ep-step1-color:    #3b82f6;   /* blue-500   — Choose Region  */
+  --ep-step2-color:    #8b5cf6;   /* violet-500 — Upload         */
+  --ep-step3-color:    #10b981;   /* emerald-500 — Proceed       */
+
+  /* ── Behind-the-scenes number bubble ──────────────────────────── */
+  --ep-num-bg:         #6366f1;
+  --ep-num-color:      #ffffff;
+
+  /* ── Expected result box ───────────────────────────────────────── */
+  --ep-result-bg:      #f0fdf4;
+  --ep-result-border:  #bbf7d0;
+}

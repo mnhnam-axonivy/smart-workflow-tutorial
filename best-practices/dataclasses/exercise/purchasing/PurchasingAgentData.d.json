@@ -1,0 +1,36 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "PurchasingAgentData",
+  "namespace" : "exercise.purchasing",
+  "fields" : [ {
+    "name" : "documentStream",
+    "type" : "java.io.InputStream",
+    "modifiers" : [ ]
+  }, {
+    "name" : "extractedText",
+    "modifiers" : [ ]
+  }, {
+    "name" : "purchasing",
+    "type" : "exercise.purchasing.PurchasingData",
+    "modifiers" : [ ]
+  }, {
+    "name" : "region",
+    "type" : "java.util.Locale",
+    "modifiers" : [ ]
+  }, {
+    "name" : "regionLanguage",
+    "modifiers" : [ ]
+  }, {
+    "name" : "instruction",
+    "modifiers" : [ ]
+  }, {
+    "name" : "resultObject",
+    "type" : "java.lang.Object"
+  }, {
+    "name" : "aiSummary",
+    "modifiers" : [ ]
+  }, {
+    "name" : "language",
+    "modifiers" : [ ]
+  } ]
+}

@@ -1,0 +1,133 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Explanation Panel — base styles.
+   Theme colors are defined in explanation-light.css / explanation-dark.css
+   and loaded dynamically via explanation-#{ivyFreyaTheme.mode}.css.
+   Classes prefixed ep- to avoid conflicts.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Panel container ────────────────────────────────────────────── */
+.ep-panel {
+  background: var(--ep-surface-panel);
+  border: 1px solid var(--ep-border);
+  border-radius: 16px;
+  padding: 28px 32px;
+  box-shadow: var(--ep-shadow);
+}
+
+/* ── Title ──────────────────────────────────────────────────────── */
+.ep-title {
+  color: var(--ep-title);
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+  line-height: 1.2;
+}
+
+/* ── Section title with left accent bar ─────────────────────────── */
+.ep-section-title {
+  color: var(--ep-title);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin: 0 0 12px 0;
+  padding-left: 10px;
+  border-left: 3px solid var(--primary-color);
+}
+
+/* ── Step cards ─────────────────────────────────────────────────── */
+.ep-step-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.ep-step-card {
+  background: var(--ep-step-bg);
+  border: 1px solid var(--ep-border);
+  border-top-width: 3px;
+  border-radius: 12px;
+  padding: 20px 16px;
+  text-align: center;
+}
+
+/* Per-step accent color on top border and icon */
+.ep-step-card:nth-child(1) { border-top-color: var(--ep-step1-color); }
+.ep-step-card:nth-child(1) .ep-step-icon { color: var(--ep-step1-color); }
+
+.ep-step-card:nth-child(2) { border-top-color: var(--ep-step2-color); }
+.ep-step-card:nth-child(2) .ep-step-icon { color: var(--ep-step2-color); }
+
+.ep-step-card:nth-child(3) { border-top-color: var(--ep-step3-color); }
+.ep-step-card:nth-child(3) .ep-step-icon { color: var(--ep-step3-color); }
+
+.ep-step-icon {
+  font-size: 26px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.ep-step-label {
+  color: var(--ep-title);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.ep-step-desc {
+  color: var(--ep-body);
+  line-height: 1.6;
+}
+
+/* ── Behind the scenes — styled counter list ────────────────────── */
+.ep-behind-list {
+  list-style: none;
+  margin: 0 0 24px 0;
+  padding-left: 0;
+  color: var(--ep-body);
+  counter-reset: ep-step;
+}
+
+.ep-behind-list li {
+  counter-increment: ep-step;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  line-height: 1.7;
+  padding: 4px 0;
+}
+
+.ep-behind-list li::before {
+  content: counter(ep-step);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--ep-num-bg);
+  color: var(--ep-num-color);
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+/* ── Expected result box ────────────────────────────────────────── */
+.ep-result-box {
+  background: var(--ep-result-bg);
+  border: 1px solid var(--ep-result-border);
+  border-radius: 10px;
+  padding: 14px 18px;
+}
+
+.ep-result-text {
+  color: var(--ep-body);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .ep-panel { padding: 20px; }
+  .ep-step-grid { grid-template-columns: 1fr; }
+}

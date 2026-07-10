@@ -1,0 +1,344 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://xmlns.jcp.org/jsf/core"
+  xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+  xmlns:ic="http://ivyteam.ch/jsf/component" xmlns:p="http://primefaces.org/ui"
+  xmlns:pe="http://primefaces.org/ui/extensions">
+<h:body>
+  <ui:composition template="/layouts/frame-10-full-width.xhtml">
+    <ui:define name="title">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/PageTitle')}</ui:define>
+    <ui:define name="content">
+
+      <h:outputStylesheet library="css" name="explanation.css" />
+      <h:outputStylesheet library="css" name="explanation-#{ivyFreyaTheme.mode}.css" />
+
+      <!-- Explanation toggle script -->
+      <script type="text/javascript">
+        var _expShowLabel = '#{ivy.cms.co("/Dialogs/exercise/purchasing/PurchasingForm/ButtonShowExplanation")}';
+        var _expHideLabel = '#{ivy.cms.co("/Dialogs/exercise/purchasing/PurchasingForm/ButtonHideExplanation")}';
+        function toggleExplanation(btn) {
+          var panel = document.getElementById('explanation-panel');
+          var visible = panel.style.display !== 'none';
+          panel.style.display = visible ? 'none' : '';
+          btn.querySelector('.ui-button-text').textContent = visible ? _expShowLabel : _expHideLabel;
+        }
+      </script>
+
+      <!-- Explanation toggle -->
+      <div class="flex align-items-center gap-2 mb-2">
+        <p:commandButton type="button"
+          icon="si si-information-circle"
+          value="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ButtonShowExplanation')}"
+          styleClass="ui-button-text"
+          onclick="toggleExplanation(this)" />
+      </div>
+
+      <!-- Explanation panel (hidden by default) -->
+      <div id="explanation-panel" style="display:none">
+          <div class="ep-panel">
+            <p class="ep-title">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ExplanationTitle')}</p>
+
+            <!-- How to Use: 3 step cards -->
+            <p class="ep-section-title">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ExplanationHowToUseTitle')}</p>
+            <div class="ep-step-grid">
+              <div class="ep-step-card">
+                <i class="si si-earth-1 ep-step-icon" />
+                <p class="ep-step-label">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ExplanationStep1Title')}</p>
+                <p class="ep-step-desc">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ExplanationStep1Desc')}</p>
+              </div>
+              <div class="ep-step-card">
+                <i class="si si-cloud-upload ep-step-icon" />
+                <p class="ep-step-label">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ExplanationStep2Title')}</p>
+                <p class="ep-step-desc">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ExplanationStep2Desc')}</p>
+              </div>
+              <div class="ep-step-card">
+                <i class="si si-cursor-click-1 ep-step-icon" />
+                <p class="ep-step-label">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ExplanationStep3Title')}</p>
+                <p class="ep-step-desc">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ExplanationStep3Desc')}</p>
+              </div>
+            </div>
+
+            <!-- Behind the Scenes -->
+            <p class="ep-section-title">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ExplanationBehindTitle')}</p>
+            <ol class="ep-behind-list">
+              <li>#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ExplanationBehindStep1')}</li>
+              <li>#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ExplanationBehindStep2')}</li>
+              <li>#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ExplanationBehindStep3')}</li>
+              <li>#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ExplanationBehindStep4')}</li>
+              <li>#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ExplanationBehindStep5')}</li>
+            </ol>
+
+            <!-- Expected Result -->
+            <p class="ep-section-title">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ExplanationResultTitle')}</p>
+            <div class="ep-result-box">
+              <p class="ep-result-text">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ExplanationResultDesc')}</p>
+            </div>
+          </div>
+        </div>
+
+      <h:form id="form" styleClass="grid w-full">
+        <f:event listener="#{purchasingFormBean.preRender(data.purchasing)}" type="preRenderComponent" />
+
+        <!-- Global messages -->
+        <div class="col-12">
+          <p:messages id="form-messages" showDetail="true" />
+        </div>
+
+        <!-- ===== SECTION: Request Header ===== -->
+        <div class="col-12">
+          <h3 class="mt-0 mb-3">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/PageTitle')}</h3>
+        </div>
+
+        <!-- Region + Upload row -->
+        <div class="col-12 flex align-items-center pr-5">
+          <div class="p-fluid flex-1">
+            <div class="grid field align-items-center mb-0">
+              <div class="col-2 pr-2">
+                <p:outputLabel for="region" value="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/LabelRegion')}" styleClass="font-bold" />
+              </div>
+              <div class="col-3">
+                <p:selectOneMenu id="region" value="#{purchasingFormBean.purchasing.region}" styleClass="w-full">
+                  <p:ajax listener="#{purchasingFormBean.onRegionChange()}" update="form" />
+                  <f:selectItems value="#{purchasingFormBean.regionValues}" var="r"
+                    itemLabel="#{ivy.cms.co(r.titleCms)}" itemValue="#{r}" />
+                </p:selectOneMenu>
+              </div>
+            </div>
+          </div>
+          <p:fileUpload id="file-upload" widgetVar="fileUpload"
+            mode="advanced" auto="true"
+            accept=".pdf,.jpg,.jpeg"
+            allowTypes="/(\.|\/)(pdf|jpg|jpeg)$/i"
+            invalidFileMessage="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/InvalidFileMessage')}"
+            invalidSizeMessage="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/InvalidSizeMessage')}"
+            listener="#{logic.upload}"
+            update="file-upload-zone"
+            style="display:none" />
+          <p:outputPanel id="file-upload-zone">
+            <!-- Upload button: shown when no file uploaded -->
+            <h:panelGroup rendered="#{data.inputFile == null}">
+              <p:commandButton type="button" value="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/BrowseLabel')}"
+                icon="si si-cloud-upload" onclick="PF('fileUpload').show();" />
+            </h:panelGroup>
+            <!-- File info + actions: shown after upload -->
+            <h:panelGroup rendered="#{data.inputFile != null}">
+              <div class="flex align-items-center gap-2">
+                <i class="si si-file-1" />
+                <span>#{data.inputFile.name}</span>
+                <p:commandButton value="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ProceedButton')}"
+                  icon="si si-arrow-right-1"
+                  actionListener="#{logic.proceed}"
+                  process="@this" update="@form"
+                  styleClass="ml-2 ui-button-primary" />
+                <p:commandButton value="#{ivy.cms.co('/Labels/Remove')}"
+                  icon="si si-delete-1"
+                  actionListener="#{logic.removeFile}"
+                  process="@this" update="file-upload-zone"
+                  styleClass="ml-2 ui-button-danger ui-button-text" immediate="true" />
+              </div>
+            </h:panelGroup>
+          </p:outputPanel>
+        </div>
+
+        <!-- Title | Department row -->
+        <div class="col-12 md:col-6 p-fluid">
+          <div class="grid field col-12 align-items-center mb-0">
+            <div class="col-4 pr-2">
+              <p:outputLabel for="title" value="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/LabelTitle')}" />
+            </div>
+            <div class="col-8">
+              <p:inputText id="title" value="#{purchasingFormBean.purchasing.title}"
+                required="true" requiredMessage="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/TitleRequired')}" styleClass="w-full" />
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6 p-fluid">
+          <div class="grid field col-12 align-items-center mb-0">
+            <div class="col-4 pr-2">
+              <p:outputLabel for="department" value="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/LabelDepartment')}" />
+            </div>
+            <div class="col-8">
+              <p:inputText id="department" value="#{purchasingFormBean.purchasing.department}"
+                styleClass="w-full" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Requester Name | Email row -->
+        <div class="col-12 md:col-6 p-fluid">
+          <div class="grid field col-12 align-items-center mb-0">
+            <div class="col-4 pr-2">
+              <p:outputLabel for="requester-name" value="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/LabelRequesterName')}" />
+            </div>
+            <div class="col-8">
+              <p:inputText id="requester-name" value="#{purchasingFormBean.purchasing.requesterName}"
+                required="true" requiredMessage="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/RequesterNameRequired')}" styleClass="w-full" />
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6 p-fluid">
+          <div class="grid field col-12 align-items-center mb-0">
+            <div class="col-4 pr-2">
+              <p:outputLabel for="requester-email" value="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/LabelEmail')}" />
+            </div>
+            <div class="col-8">
+              <p:inputText id="requester-email" value="#{purchasingFormBean.purchasing.requesterEmail}"
+                styleClass="w-full" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes full row -->
+        <div class="col-12 p-fluid">
+          <div class="grid field col-12 align-items-start">
+            <div class="col-2 pr-2 pt-2">
+              <p:outputLabel for="notes" value="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/LabelNotes')}" />
+            </div>
+            <div class="col-10">
+              <p:inputTextarea id="notes" value="#{purchasingFormBean.purchasing.notes}"
+                rows="3" styleClass="w-full" autoResize="false" />
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== SECTION: Line Items ===== -->
+        <div class="col-12 mt-3">
+          <h3 class="mb-2">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/SectionLineItems')}</h3>
+
+          <p:dataTable id="line-items" value="#{purchasingFormBean.purchasing.lineItems}" var="lineItem"
+            styleClass="w-full">
+
+            <p:column headerText="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ColumnItemName')}">
+              <p:inputText value="#{lineItem.item.name}" required="true"
+                requiredMessage="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ItemNameRequired')}" styleClass="w-full" />
+            </p:column>
+
+            <p:column headerText="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ColumnItemType')}">
+              <p:selectOneMenu value="#{lineItem.item.itemType}" styleClass="w-full">
+                <f:selectItem itemLabel="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/SelectPlaceholder')}" itemValue="#{null}" noSelectionOption="true" />
+                <f:selectItems value="#{purchasingFormBean.itemTypeValues}" var="t"
+                  itemLabel="#{ivy.cms.co(t.titleCms)}" itemValue="#{t}" />
+              </p:selectOneMenu>
+            </p:column>
+
+            <p:column headerText="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ColumnDescription')}">
+              <p:inputText value="#{lineItem.item.description}" styleClass="w-full" />
+            </p:column>
+
+            <p:column headerText="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ColumnQuantity')}">
+              <p:inputNumber value="#{lineItem.quantity}" minValue="1"
+                required="true" requiredMessage="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/QuantityRequired')}" styleClass="w-full"
+                onchange="this.form.submit()" />
+            </p:column>
+
+            <p:column headerText="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ColumnUnitPrice')}">
+              <p:inputNumber value="#{lineItem.unitPrice}" minValue="0"
+                required="true" requiredMessage="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/UnitPriceRequired')}" styleClass="w-full"
+                onchange="this.form.submit()" />
+            </p:column>
+
+            <p:column headerText="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ColumnTotal')}" styleClass="text-right">
+              <h:outputText id="total" value="#{lineItem.totalPrice}" />
+            </p:column>
+
+          </p:dataTable>
+        </div>
+
+        <!-- ===== SECTION: Tax Summary (shown after agent processes document) ===== -->
+        <h:panelGroup rendered="#{data.purchasing.totalWithTax != null}" styleClass="col-12">
+          <div class="grid justify-content-end mt-2">
+            <div class="col-12 md:col-4">
+              <div class="flex justify-content-between border-bottom-1 pb-1 mb-1">
+                <span class="font-bold">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/LabelSubtotal')}</span>
+                <h:outputText value="#{data.purchasing.subtotal}">
+                  <f:convertNumber type="currency" currencySymbol="$" groupingUsed="true" />
+                </h:outputText>
+              </div>
+              <div class="flex justify-content-between border-bottom-1 pb-1 mb-1">
+                <span class="font-bold">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/LabelTax')}</span>
+                <h:outputText value="#{data.purchasing.taxAmount}">
+                  <f:convertNumber type="currency" currencySymbol="$" groupingUsed="true" />
+                </h:outputText>
+              </div>
+              <div class="flex justify-content-between font-bold text-lg">
+                <span>#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/LabelTotalWithTax')}</span>
+                <h:outputText value="#{data.purchasing.totalWithTax}">
+                  <f:convertNumber type="currency" currencySymbol="$" groupingUsed="true" />
+                </h:outputText>
+              </div>
+              <h:panelGroup rendered="#{not empty data.purchasing.taxBreakdown}">
+                <div class="mt-2 text-sm text-color-secondary white-space-pre-line">#{data.purchasing.taxBreakdown}</div>
+              </h:panelGroup>
+            </div>
+          </div>
+        </h:panelGroup>
+
+        <!-- ===== SECTION: Statistics (shown after agent processes document) ===== -->
+        <h:panelGroup rendered="#{data.purchasing.itemCount != null}" styleClass="col-12">
+          <h4 class="mt-3 mb-2">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/SectionStatistics')}</h4>
+          <div class="grid">
+            <div class="col-12 md:col-3">
+              <div class="border-1 border-round p-3 text-center">
+                <div class="text-2xl font-bold text-primary">#{data.purchasing.itemCount}</div>
+                <div class="text-sm text-color-secondary mt-1">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/LabelItemCount')}</div>
+              </div>
+            </div>
+            <div class="col-12 md:col-3">
+              <div class="border-1 border-round p-3 text-center">
+                <div class="text-2xl font-bold text-primary">#{data.purchasing.uniqueProductCount}</div>
+                <div class="text-sm text-color-secondary mt-1">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/LabelUniqueProductCount')}</div>
+              </div>
+            </div>
+            <div class="col-12 md:col-3">
+              <div class="border-1 border-round p-3 text-center">
+                <div class="text-2xl font-bold text-primary">
+                  <h:outputText value="#{data.purchasing.averageUnitPrice}">
+                    <f:convertNumber type="currency" currencySymbol="$" groupingUsed="true" maxFractionDigits="2" />
+                  </h:outputText>
+                </div>
+                <div class="text-sm text-color-secondary mt-1">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/LabelAverageUnitPrice')}</div>
+              </div>
+            </div>
+            <div class="col-12 md:col-3">
+              <div class="border-1 border-round p-3 text-center">
+                <div class="text-2xl font-bold text-primary">
+                  <h:outputText value="#{data.purchasing.taxPercentage}">
+                    <f:convertNumber maxFractionDigits="1" />
+                  </h:outputText>%
+                </div>
+                <div class="text-sm text-color-secondary mt-1">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/LabelTaxPercentage')}</div>
+              </div>
+            </div>
+          </div>
+        </h:panelGroup>
+
+        <!-- ===== SECTION: AI Summary ===== -->
+        <h:panelGroup rendered="#{not empty data.purchasing.aiSummary}" styleClass="col-12">
+          <h4 class="mt-3 mb-2">#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/SectionAiSummary')}</h4>
+          <div class="border-1 border-round p-3 surface-50 line-height-3">
+            #{data.purchasing.aiSummary}
+          </div>
+        </h:panelGroup>
+
+        <!-- ===== ACTION BUTTONS ===== -->
+        <div class="col-12 mt-3 text-right">
+          <p:commandLink id="cancel" actionListener="#{ivyWorkflowView.cancel()}"
+            process="@this" value="#{ivy.cms.co('/Labels/Cancel')}" styleClass="ui-button-secondary mr-2" />
+
+          <p:commandButton id="submit-btn" value="#{ivy.cms.co('/Labels/Submit')}" icon="si si-check-1"
+            actionListener="#{purchasingFormBean.validate()}"
+            process="@form" update="form"
+            oncomplete="if(!args.validationFailed) doSubmit();"
+            styleClass="ui-button-primary" />
+
+          <p:remoteCommand name="doSubmit" actionListener="#{logic.submit}" process="@this">
+            <f:setPropertyActionListener target="#{data.purchasing}" value="#{purchasingFormBean.purchasing}" />
+          </p:remoteCommand>
+        </div>
+
+      </h:form>
+
+    </ui:define>
+  </ui:composition>
+</h:body>
+</html>

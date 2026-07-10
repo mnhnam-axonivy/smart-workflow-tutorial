@@ -1,0 +1,66 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/process.json",
+  "id" : "19F45A3C9CE35E33",
+  "kind" : "CALLABLE_SUB",
+  "config" : {
+    "data" : "exercise.purchasing.DocumentReaderData"
+  },
+  "elements" : [ {
+      "id" : "f0",
+      "type" : "CallSubStart",
+      "name" : "extractDocument(InputStream)",
+      "config" : {
+        "signature" : "extractDocument",
+        "input" : {
+          "params" : [
+            { "name" : "documentStream", "type" : "java.io.InputStream", "desc" : "The document to read" }
+          ],
+          "map" : {
+            "out.documentStream" : "param.documentStream"
+          }
+        },
+        "result" : {
+          "params" : [
+            { "name" : "extractedText", "type" : "String", "desc" : "All text extracted from the document" }
+          ],
+          "map" : {
+            "result.extractedText" : "in.extractedText"
+          }
+        }
+      },
+      "tags" : [
+        "tool"
+      ],
+      "visual" : {
+        "at" : { "x" : 96, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f2", "to" : "f1" }
+      ]
+    }, {
+      "id" : "f1",
+      "type" : "ProgramInterface",
+      "name" : "Read Document",
+      "config" : {
+        "javaClass" : "com.axonivy.utils.smart.workflow.AgenticProcessCall",
+        "userConfig" : {
+          "system" : "You are a document reader assistant. Extract all readable text content from the provided document. Return the complete text as-is, preserving structure where possible. Do not summarize, translate, or interpret.",
+          "tools" : "[]",
+          "resultMapping" : "in.extractedText",
+          "query" : "Extract and return all readable text from this document:\n<%= in.documentStream %>"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 256, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f3", "to" : "f4" }
+      ]
+    }, {
+      "id" : "f4",
+      "type" : "CallSubEnd",
+      "visual" : {
+        "at" : { "x" : 416, "y" : 64 }
+      }
+    } ]
+}

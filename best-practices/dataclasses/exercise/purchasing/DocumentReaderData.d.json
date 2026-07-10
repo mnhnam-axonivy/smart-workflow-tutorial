@@ -1,0 +1,13 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "DocumentReaderData",
+  "namespace" : "exercise.purchasing",
+  "fields" : [ {
+    "name" : "documentStream",
+    "type" : "java.io.InputStream",
+    "modifiers" : [ ]
+  }, {
+    "name" : "extractedText",
+    "modifiers" : [ ]
+  } ]
+}

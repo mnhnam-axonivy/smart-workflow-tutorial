@@ -1,0 +1,20 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "ObjectMapperAgentData",
+  "namespace" : "exercise.purchasing",
+  "fields" : [ {
+    "name" : "extractedText",
+    "modifiers" : [ ]
+  }, {
+    "name" : "instruction",
+    "modifiers" : [ ]
+  }, {
+    "name" : "objectClass",
+    "type" : "java.lang.Class",
+    "modifiers" : [ ]
+  }, {
+    "name" : "resultObject",
+    "type" : "java.lang.Object",
+    "modifiers" : [ ]
+  } ]
+}

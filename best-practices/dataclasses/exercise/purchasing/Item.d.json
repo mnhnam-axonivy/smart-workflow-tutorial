@@ -1,0 +1,16 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "Item",
+  "namespace" : "exercise.purchasing",
+  "fields" : [ {
+    "name" : "name",
+    "modifiers" : [ ]
+  }, {
+    "name" : "description",
+    "modifiers" : [ ]
+  }, {
+    "name" : "itemType",
+    "type" : "exercise.purchasing.ItemType",
+    "modifiers" : [ ]
+  } ]
+}

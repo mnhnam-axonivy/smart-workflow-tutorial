@@ -1,0 +1,75 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "PurchasingData",
+  "namespace" : "exercise.purchasing",
+  "fields" : [ {
+    "name" : "title",
+    "modifiers" : [ ]
+  }, {
+    "name" : "requesterName",
+    "modifiers" : [ ]
+  }, {
+    "name" : "requesterEmail",
+    "modifiers" : [ ]
+  }, {
+    "name" : "department",
+    "modifiers" : [ ]
+  }, {
+    "name" : "lineItems",
+    "type" : "List<exercise.purchasing.LineItem>",
+    "modifiers" : [ ]
+  }, {
+    "name" : "totalAmount",
+    "type" : "java.lang.Double",
+    "modifiers" : [ ]
+  }, {
+    "name" : "status",
+    "type" : "exercise.purchasing.PurchasingStatus",
+    "modifiers" : [ ]
+  }, {
+    "name" : "region",
+    "type" : "exercise.purchasing.Region",
+    "modifiers" : [ ]
+  }, {
+    "name" : "notes",
+    "modifiers" : [ ]
+  }, {
+    "name" : "subtotal",
+    "type" : "java.lang.Double",
+    "modifiers" : [ ]
+  }, {
+    "name" : "taxAmount",
+    "type" : "java.lang.Double",
+    "modifiers" : [ ]
+  }, {
+    "name" : "totalWithTax",
+    "type" : "java.lang.Double",
+    "modifiers" : [ ]
+  }, {
+    "name" : "taxBreakdown",
+    "modifiers" : [ ]
+  }, {
+    "name" : "itemCount",
+    "type" : "java.lang.Integer",
+    "modifiers" : [ ]
+  }, {
+    "name" : "uniqueProductCount",
+    "type" : "java.lang.Integer",
+    "modifiers" : [ ]
+  }, {
+    "name" : "averageUnitPrice",
+    "type" : "java.lang.Double",
+    "modifiers" : [ ]
+  }, {
+    "name" : "taxPercentage",
+    "type" : "java.lang.Double",
+    "modifiers" : [ ]
+  }, {
+    "name" : "aiSummary",
+    "modifiers" : [ ]
+  }, {
+    "name" : "approvalRecords",
+    "type" : "List<exercise.common.ApprovalRecord>",
+    "modifiers" : [ ]
+  } ]
+}

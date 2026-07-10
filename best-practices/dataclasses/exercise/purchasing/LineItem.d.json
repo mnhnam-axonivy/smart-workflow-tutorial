@@ -1,0 +1,22 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "simpleName" : "LineItem",
+  "namespace" : "exercise.purchasing",
+  "fields" : [ {
+    "name" : "item",
+    "type" : "exercise.purchasing.Item",
+    "modifiers" : [ ]
+  }, {
+    "name" : "quantity",
+    "type" : "java.lang.Double",
+    "modifiers" : [ ]
+  }, {
+    "name" : "unitPrice",
+    "type" : "java.lang.Double",
+    "modifiers" : [ ]
+  }, {
+    "name" : "totalPrice",
+    "type" : "java.lang.Double",
+    "modifiers" : [ ]
+  } ]
+}
