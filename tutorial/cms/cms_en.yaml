@@ -54,6 +54,17 @@ Dialogs:
       IntermediateTitle: Intermediate
       NavAdvanced: Advanced
       NavBeginner: Beginner
+      NavBestPractices: Best Practices
       NavExpert: Expert
       NavIntermediate: Intermediate
+      BestPracticesTitle: Best Practices
+      BestPracticesDesc: Patterns and anti-patterns for production-ready AI workflows
+      Practice01Title: "Agent Pattern: AI Task"
+      Practice01Desc: Replace routine human approvals with an AI decision that writes a typed result directly into the process data.
+      Practice02Title: "Agent Pattern: Subprocess Design and Tool Co-location"
+      Practice02Desc: Decide when to extract a callable subprocess and when to keep tools co-located with their orchestrator.
+      Practice03Title: "Agent Organisation: Folder Structure and Naming Conventions"
+      Practice03Desc: Group agent files in a dedicated agents/ folder and apply consistent naming across process files, callables, and data classes.
+      Practice05Title: "Agent Prompts: Clarity and Dynamic Context"
+      Practice05Desc: "Write tool-name-free system prompts and inject live Java values — today's date, user locale, process data — directly into prompts using EL expressions."
       PageTitle: Smart Workflow Feature Guide
