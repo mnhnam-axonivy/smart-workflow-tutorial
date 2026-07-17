@@ -77,6 +77,12 @@ If no relevant documents are found, say so — do not invent answers.
 - `smart-workflow-demo/processes/Features/RagChatBotDemo.p.json`
 - `doc/RAG.md`
 
+## Sample document for ingestion
+
+If you need a ready-made document to test RAG ingestion, use the included sample:
+
+- `doc/company-benefits.md` — a fictional company HR benefits guide covering 14 topics (health insurance, leave, remote work, learning budget, and more). It is structured with clear headings per benefit, making it ideal for demonstrating chunk retrieval against specific HR questions such as *"How many days of annual leave do I get?"* or *"What is the parental leave policy?"*
+
 ## Key configuration
 
 | Variable | Description | Default |

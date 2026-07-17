@@ -36,6 +36,8 @@ public class TutorialPagesBean {
   private final Map<String, String> jpFeatures = new LinkedHashMap<>();
   private final Map<String, String> practices = new LinkedHashMap<>();
   private final Map<String, String> jpPractices = new LinkedHashMap<>();
+  private final Map<String, String> appendices = new LinkedHashMap<>();
+  private final Map<String, String> jpAppendices = new LinkedHashMap<>();
   private List<String> cmsImagePaths = new ArrayList<>();
   private List<String> jpCmsImagePaths = new ArrayList<>();
   private final Map<String, String> jpImageDataUrls = new LinkedHashMap<>();
@@ -43,7 +45,7 @@ public class TutorialPagesBean {
   @PostConstruct
   public void init() {
     Set<String> seen = new LinkedHashSet<>();
-    for (int i = 1; i <= 13; i++) {
+    for (int i = 1; i <= 14; i++) {
       String id = String.format("%02d", i);
       String en = readCmsMarkdown("/Files/Features/feature-" + id);
       String jp = readCmsMarkdownLocale("/Files/Features/feature-" + id, "ja");
@@ -58,6 +60,15 @@ public class TutorialPagesBean {
       String jp = readCmsMarkdownLocale("/Files/Practices/practice-" + id, "ja");
       practices.put(id, en);
       jpPractices.put(id, jp);
+      collectImagePaths(en, seen);
+      collectImagePaths(jp, seen);
+    }
+    for (int i = 1; i <= 9; i++) {
+      String id = String.format("%02d", i);
+      String en = readCmsMarkdown("/Files/Appendix/appendix-" + id);
+      String jp = readCmsMarkdownLocale("/Files/Appendix/appendix-" + id, "ja");
+      appendices.put(id, en);
+      jpAppendices.put(id, jp);
       collectImagePaths(en, seen);
       collectImagePaths(jp, seen);
     }
@@ -89,6 +100,14 @@ public class TutorialPagesBean {
 
   public String getJpPractice(String id) {
     return jpPractices.getOrDefault(id, "");
+  }
+
+  public String getAppendix(String id) {
+    return appendices.getOrDefault(id, "");
+  }
+
+  public String getJpAppendix(String id) {
+    return jpAppendices.getOrDefault(id, "");
   }
 
   public List<String> getCmsImagePaths() {

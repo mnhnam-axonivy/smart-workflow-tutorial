@@ -1,4 +1,83 @@
 Dialogs:
+  com:
+    axonivy:
+      utils:
+        smart:
+          workflow:
+            demo:
+              rag:
+                RagDemo:
+                  PageTitle: RAG Demo
+                  Title: Smart Workflow RAG
+                  Subtitle: A guided walkthrough of Retrieval-Augmented Generation with Smart Workflow
+                  IndexNameLabel: Vector store name
+                  IndexNameDesc: "A unique name to identify this knowledge base in the vector store."
+                  ChooseFileLabel: 'Choose file (.pdf / .md / .txt)'
+                  UploadLabel: Upload
+                  EmbedButton: Embed
+                  EmbeddedChunksCount: 'Embedded Chunks ({0})'
+                  ProviderLabel: Provider
+                  ModelLabel: Model
+                  CreatedLabel: Created
+                  ChunkSizeLabel: Chunk Size
+                  OverlapLabel: Overlap
+                  TokensUnit: tokens
+                  NoDocumentsTitle: No documents yet
+                  NoDocumentsDesc: 'Upload <strong>.txt</strong> or <strong>.md</strong> files and click <strong>Embed</strong> to index them.'
+                  SourceColumn: Source
+                  ChunkIdColumn: Chunk ID
+                  Wizard:
+                    Step1Label: Configuration
+                    Step2Label: "Upload & Embed"
+                    Step3Label: Results
+                    Step4Label: Chat
+                    BackToUploadButton: Back to Results
+                  Step1:
+                    VectorStoreTitle: Vector Store
+                    UrlLabel: Server URL
+                    UrlDesc: Base URL of the OpenSearch server.
+                    AuthTypeLabel: Authentication
+                    AuthTypeDesc: Authentication method configured for this OpenSearch instance.
+                    TestConnectionButton: Test Connection
+                    Title: RAG Configuration
+                    Subtitle: "Read-only settings loaded from Ivy variables. To change them, update the variables in the Ivy configuration."
+                    ContinueButton: Continue
+                    ProviderLabel: Embedding Provider
+                    ProviderDesc: "AI provider used to generate vector embeddings. Falls back to AI.DefaultProvider when blank."
+                    ModelLabel: Embedding Model
+                    ModelDesc: "Model used for embedding. When blank, the provider default is used."
+                    ChunkSizeLabel: Chunk Size
+                    ChunkSizeDesc: "Maximum tokens per document chunk when splitting source text."
+                    ChunkSizeUnit: tokens
+                    ChunkOverlapLabel: Chunk Overlap
+                    ChunkOverlapDesc: "Overlapping tokens between consecutive chunks to preserve context at boundaries."
+                    ChunkOverlapUnit: tokens
+                    MaxResultsLabel: Max Results
+                    MaxResultsDesc: "Maximum matching chunks returned per search query."
+                    MinScoreLabel: Min Score
+                    MinScoreDesc: "Cosine similarity threshold. Chunks below this score are excluded."
+                  Step2:
+                    Title: "Upload & Embed Documents"
+                    Subtitle: "Enter a vector store name, upload one file (.pdf, .md or .txt), then embed it into the vector store."
+                    EmbedButton: Embed
+                    IndexExistsWarning: Index Already Exists
+                    IndexExistsWarningDesc: "An index with this name already exists. Please choose a different index name."
+                    FileUploadContainerTitle: Drag & drop files here
+                    FileUploadContainerHint: "Supports .pdf, .md and .txt — one file at a time"
+                    PdfNote: "PDF files may take longer to process — AI is used to extract their content."
+                    StagedFilesTitle: Staged for embedding
+                    FileNameColumn: File Name
+                    FileSizeColumn: Size
+                  Step3:
+                    Title: Embedding Results
+                    ChatButton: Start Chatting
+                    ReloadButton: Reload
+                  Chatbot:
+                    WelcomeTitle: "Hello, I'm your AI Assistant"
+                    WelcomeDesc: I can help you find information from your indexed documents.
+                    InputPlaceholder: Ask about your documents...
+                    AssistantName: AI Assistant
+                    ThinkingText: Searching documents...
   tutorial:
     TutorialPages:
       AdvancedDesc: Patterns & Orchestration — design sophisticated workflows
@@ -34,8 +113,8 @@ Dialogs:
       Feature12Title: Conversation Memory
       Feature13Desc: Pause agent execution and route decisions to human tasks — the agent resumes automatically with the user's choice.
       Feature13Title: Human in the Loop
-      Feature14Desc: Pseudonymise personal data before sending to the LLM, restore in the output.
-      Feature14Title: PII Masking Guardrail
+      Feature14Desc: Connect an OpenSearch vector store to let agents semantically search business documents.
+      Feature14Title: RAG / Semantic Search
       Feature15Desc: Connect an OpenSearch vector store to let agents semantically search business documents.
       Feature15Title: RAG / Semantic Search
       Feature16Desc: Coordinate multiple specialised agents to complete a complex business task.
@@ -67,4 +146,11 @@ Dialogs:
       Practice03Desc: Group agent files in a dedicated agents/ folder and apply consistent naming across process files, callables, and data classes.
       Practice05Title: "Agent Prompts: Clarity and Dynamic Context"
       Practice05Desc: "Write tool-name-free system prompts and inject live Java values — today's date, user locale, process data — directly into prompts using EL expressions."
+      NavAppendix: Appendix
+      AppendixTitle: Appendix
+      AppendixDesc: Reference materials and background concepts
+      AppendixA01Title: What is RAG
+      AppendixA01Desc: A conceptual overview of Retrieval-Augmented Generation — how it works and when to use it
       PageTitle: Smart Workflow Feature Guide
+Labels:
+  Close: Close
