@@ -7,11 +7,11 @@
   "elements" : [ {
       "id" : "f0",
       "type" : "RequestStart",
-      "name" : "Tutorial Feature 14: RAG / Semantic Search",
+      "name" : "Tutorial Feature 14: RAG as a Tool",
       "config" : {
         "signature" : "start",
         "request" : {
-          "name" : "Tutorial Feature 14: RAG / Semantic Search"
+          "name" : "Tutorial Feature 14: RAG as a Tool"
         }
       },
       "visual" : {
@@ -31,7 +31,7 @@
       "type" : "DialogCall",
       "name" : "RAG Demo",
       "config" : {
-        "dialog" : "com.axonivy.utils.smart.workflow.demo.rag.RagDemo:start()"
+        "dialog" : "tutorial.RagDemo:start()"
       },
       "visual" : {
         "at" : { "x" : 232, "y" : 64 }
@@ -43,7 +43,7 @@
       "id" : "fn1",
       "type" : "ProcessAnnotation",
       "name" : [
-        "   Feature 14 — RAG / Semantic Search:",
+        "   Feature 14 — RAG as a Tool:",
         "   Launches the full RAG wizard from smart-workflow-demo (com.axonivy.utils.smart.workflow.demo.rag.RagDemo).",
         "   Step 1: Configure — review OpenSearch connection settings and test connection.",
         "   Step 2: Upload & Embed — upload .txt/.md files and embed into OpenSearch as vector chunks.",
@@ -51,7 +51,7 @@
         "   Step 4: Chat — ask questions answered by an AI agent using the openSearchSearch tool."
       ],
       "visual" : {
-        "at" : { "x" : 421, "y" : 160 },
+        "at" : { "x" : 439, "y" : 200 },
         "size" : { "width" : 725, "height" : 144 }
       }
     } ],

@@ -1,15 +1,12 @@
-# RAG / Semantic Search
+# RAG as a Tool
 
 Connect an OpenSearch vector store to let agents semantically search your business documents, knowledge bases, or internal data at query time.
 
 ## What is it?
 
-**Retrieval-Augmented Generation (RAG)** is a pattern where an agent searches a document store for relevant content at query time, adds that content to its context, and generates a grounded response. Smart Workflow integrates with **OpenSearch** as the vector store for this purpose.
+**Retrieval-Augmented Generation (RAG)** is a pattern where an agent searches a document store for relevant content at query time, adds that content to its context, and generates a grounded response. Smart Workflow integrates with **OpenSearch** as the vector store for this purpose. For a conceptual overview of how RAG works, see [What is RAG (Appendix A)].
 
-Two built-in processes support RAG:
-
-- `createVectorStore` — ingest documents, chunk them, embed them, and store in OpenSearch
-- `openSearchSearch` — a built-in tool the agent calls to perform semantic search at runtime
+The key built-in tool is `openSearchSearch` — the agent calls this at runtime to perform semantic search against the indexed knowledge base.
 
 ## Why use it?
 
@@ -23,7 +20,9 @@ Two built-in processes support RAG:
 
 **Ingestion (one-time or periodic):**
 
-Upload documents → `createVectorStore` callable → Split into chunks → Embedding model converts chunks to vectors → Store in OpenSearch index.
+Upload documents → split into chunks → embedding model converts chunks to vectors → store in OpenSearch index.
+
+> **Chunking strategy:** Smart Workflow currently supports a single built-in strategy — fixed-size recursive chunking via `RagDocumentSplitter`. Chunk size and overlap are configured through `AI.RAG.ChunkSize` and `AI.RAG.ChunkOverlap`. Additional strategies (such as heading-aware or contextual chunk headers) may be introduced in a future release if there is strong demand.
 
 **Retrieval (per query):**
 
@@ -65,17 +64,20 @@ Always cite the source document when providing information.
 If no relevant documents are found, say so — do not invent answers.
 ```
 
-> **Try the live demo:** start **"RAG Chatbot Demo"** from the portal (`smart-workflow-demo/processes/Features/RagChatBotDemo.p.json`). The wizard walks through all four phases with a full UI: configure your OpenSearch connection → upload `.txt`/`.md` files → inspect the embedded chunks → chat with the agent.
->
-> For the minimal code skeleton (just the `AgenticProcessCall` wired to `openSearchSearch`), see `tutorial/processes/tutorial/features/Feature14.p.json`.
+> **Try the live demo:** start **Feature 14** from the tutorial. The wizard walks through four phases: configure your OpenSearch connection → upload `.txt`/`.md` files → inspect the embedded chunks → chat with the agent.
 
 ## Where to find it
 
 - `rag/  (RAG module with OpenSearch integration)`
 - `smart-workflow/src/com/axonivy/utils/smart/workflow/rag/  (RAG search pipeline)`
 - `tutorial/processes/tutorial/features/Feature14.p.json`
-- `smart-workflow-demo/processes/Features/RagChatBotDemo.p.json`
-- `doc/RAG.md`
+- `tutorial/src_hd/tutorial/RagDemo/  (RAG demo wizard — 4-step UI)`
+
+## Sample document for ingestion
+
+If you need a ready-made document to test RAG ingestion, use the included sample:
+
+- `external-resources/demo-documents/company-benefits.md` — a fictional company HR benefits guide covering 14 topics (health insurance, leave, remote work, learning budget, and more). It is structured with clear headings per benefit, making it ideal for demonstrating chunk retrieval against specific HR questions such as *"How many days of annual leave do I get?"* or *"What is the parental leave policy?"*
 
 ## Key configuration
 
@@ -95,9 +97,10 @@ If no relevant documents are found, say so — do not invent answers.
 - **Mismatched embedding models** — The same embedding model must be used for both ingestion and querying. If you re-embed with a different model, all previously stored vectors are incompatible. Re-ingest the entire document set.
 - **Agent answering without searching** — Without explicit system prompt instructions, the agent may answer from training data instead of searching. Instruct it explicitly: "Always use openSearchSearch before answering domain questions."
 
+To learn more about what RAG is, how the ingestion and retrieval pipelines work, and why it is designed this way, see [What is RAG (Appendix A)].
+
 ## See also
 
-- [RAG Chatbot Pipeline]
 - [Web Search Tool]
 - [Java Tools]
 - [Human in the Loop]
