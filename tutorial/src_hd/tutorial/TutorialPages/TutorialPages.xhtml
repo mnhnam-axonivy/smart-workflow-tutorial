@@ -33,6 +33,10 @@
         <div id="sw-md-11">#{tutorialPagesBean.getFeature('11')}</div>
         <div id="sw-md-12">#{tutorialPagesBean.getFeature('12')}</div>
         <div id="sw-md-13">#{tutorialPagesBean.getFeature('13')}</div>
+        <div id="sw-md-14">#{tutorialPagesBean.getFeature('14')}</div>
+        <div id="sw-md-a01">#{tutorialPagesBean.getAppendix('01')}</div>
+        <div id="sw-md-a02">#{tutorialPagesBean.getAppendix('02')}</div>
+        <div id="sw-md-a03">#{tutorialPagesBean.getAppendix('03')}</div>
       </div>
 
       <!-- JP markdown content (hidden) -->
@@ -50,10 +54,14 @@
         <div id="sw-md-jp-11">#{tutorialPagesBean.getJpFeature('11')}</div>
         <div id="sw-md-jp-12">#{tutorialPagesBean.getJpFeature('12')}</div>
         <div id="sw-md-jp-13">#{tutorialPagesBean.getJpFeature('13')}</div>
+        <div id="sw-md-jp-14">#{tutorialPagesBean.getJpFeature('14')}</div>
         <div id="sw-md-jp-p01">#{tutorialPagesBean.getJpPractice('01')}</div>
         <div id="sw-md-jp-p02">#{tutorialPagesBean.getJpPractice('02')}</div>
         <div id="sw-md-jp-p03">#{tutorialPagesBean.getJpPractice('03')}</div>
         <div id="sw-md-jp-p05">#{tutorialPagesBean.getJpPractice('05')}</div>
+        <div id="sw-md-jp-a01">#{tutorialPagesBean.getJpAppendix('01')}</div>
+        <div id="sw-md-jp-a02">#{tutorialPagesBean.getJpAppendix('02')}</div>
+        <div id="sw-md-jp-a03">#{tutorialPagesBean.getJpAppendix('03')}</div>
       </div>
 
       <!-- CMS image URL bridge: JSF resolves each path → JS reads the rendered src -->
@@ -92,6 +100,7 @@
               <a class="sw-level-pill" data-lv="mid"    href="#sw-mid">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/NavIntermediate')}</a>
               <a class="sw-level-pill" data-lv="exp"    href="#sw-expert">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/NavExpert')}</a>
               <a class="sw-level-pill" data-lv="bp"     href="#sw-bp">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/NavBestPractices')}</a>
+              <a class="sw-level-pill" data-lv="appendix" href="#sw-appendix">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/NavAppendix')}</a>
             </div>
             <div class="sw-lang-toggle">
               <button class="sw-lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
@@ -201,13 +210,18 @@
                 <h2>#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/ExpertTitle')}</h2>
                 <p class="sw-level-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/ExpertDesc')}</p>
               </div>
-              <span class="sw-level-count">1 feature</span>
+              <span class="sw-level-count">2 features</span>
             </div>
             <div class="sw-feature-grid">
               <button class="sw-card expert" onclick="showFeature('13')">
                 <div class="sw-card-num">NO. 13</div>
                 <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature13Title')}</div>
                 <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature13Desc')}</div>
+              </button>
+              <button class="sw-card expert" onclick="showFeature('14')">
+                <div class="sw-card-num">NO. 14</div>
+                <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature14Title')}</div>
+                <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Feature14Desc')}</div>
               </button>
             </div>
           </div>
@@ -242,6 +256,35 @@
                 <div class="sw-card-num">NO. 05</div>
                 <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Practice05Title')}</div>
                 <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/Practice05Desc')}</div>
+              </button>
+            </div>
+          </div>
+
+          <!-- APPENDIX -->
+          <div class="sw-level-section" id="sw-appendix" data-lv="appendix">
+            <div class="sw-level-header">
+              <div class="sw-level-kanji">附</div>
+              <div class="sw-level-header-text">
+                <h2>#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/AppendixTitle')}</h2>
+                <p class="sw-level-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/AppendixDesc')}</p>
+              </div>
+              <span class="sw-level-count">3 articles</span>
+            </div>
+            <div class="sw-feature-grid">
+              <button class="sw-card appendix" onclick="showFeature('a01')">
+                <div class="sw-card-num">NO. A01</div>
+                <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/AppendixA01Title')}</div>
+                <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/AppendixA01Desc')}</div>
+              </button>
+              <button class="sw-card appendix" onclick="showFeature('a02')">
+                <div class="sw-card-num">NO. A02</div>
+                <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/AppendixA02Title')}</div>
+                <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/AppendixA02Desc')}</div>
+              </button>
+              <button class="sw-card appendix" onclick="showFeature('a03')">
+                <div class="sw-card-num">NO. A03</div>
+                <div class="sw-card-title">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/AppendixA03Title')}</div>
+                <div class="sw-card-desc">#{ivy.cms.co('/Dialogs/tutorial/TutorialPages/AppendixA03Desc')}</div>
               </button>
             </div>
           </div>

@@ -1,11 +1,100 @@
 Dialogs:
+  com:
+    axonivy:
+      utils:
+        smart:
+          workflow:
+            demo:
+              rag:
+                RagDemo:
+                  Chatbot:
+                    AssistantName: AIアシスタント
+                    InputPlaceholder: ドキュメントについて質問してください...
+                    ThinkingText: ドキュメントを検索中...
+                    WelcomeDesc: インデックスされたドキュメントから情報を検索してお答えします。
+                    WelcomeTitle: こんにちは、AIアシスタントです
+                  ChooseFileLabel: ファイルを選択 (.pdf / .md / .txt)
+                  ChunkIdColumn: チャンクID
+                  ChunkSizeLabel: チャンクサイズ
+                  CreatedLabel: 作成日時
+                  EmbedButton: 埋め込む
+                  EmbeddedChunksCount: 埋め込みチャンク ({0})
+                  IndexNameDesc: ベクターストアでこのナレッジベースを識別する一意の名前。
+                  IndexNameLabel: ベクターストア名
+                  ModelLabel: モデル
+                  NoDocumentsDesc: <strong>.txt</strong> または <strong>.md</strong> ファイルをアップロードして <strong>埋め込む</strong> をクリックしてください。
+                  NoDocumentsTitle: ドキュメントなし
+                  OverlapLabel: オーバーラップ
+                  PageTitle: RAGデモ
+                  ProviderLabel: プロバイダー
+                  SourceColumn: ソース
+                  Step1:
+                    AuthTypeDesc: このOpenSearchインスタンスに設定された認証方式。
+                    AuthTypeLabel: 認証
+                    ChunkOverlapDesc: 境界でコンテキストを保持するための連続チャンク間の重複トークン数。
+                    ChunkOverlapLabel: チャンクオーバーラップ
+                    ChunkOverlapUnit: トークン
+                    ChunkSizeDesc: ソーステキストを分割する際のドキュメントチャンクあたりの最大トークン数。
+                    ChunkSizeLabel: チャンクサイズ
+                    ChunkSizeUnit: トークン
+                    ContinueButton: 次へ
+                    MaxResultsDesc: 検索クエリごとに返す最大チャンク数。
+                    MaxResultsLabel: 最大結果数
+                    MinScoreDesc: コサイン類似度閾値。このスコア未満のチャンクは除外されます。
+                    MinScoreLabel: 最小スコア
+                    ModelDesc: 埋め込みに使用するモデル。空白の場合はプロバイダーのデフォルトを使用。
+                    ModelLabel: 埋め込みモデル
+                    ProviderDesc: ベクター埋め込みの生成に使用するAIプロバイダー。空白の場合はAI.DefaultProviderにフォールバック。
+                    ProviderLabel: 埋め込みプロバイダー
+                    Subtitle: Ivy変数から読み込まれた読み取り専用の設定。変更するにはIvy設定の変数を更新してください。
+                    TestConnectionButton: 接続テスト
+                    Title: RAG設定
+                    UrlDesc: OpenSearchサーバーのベースURL。
+                    UrlLabel: サーバーURL
+                    VectorStoreTitle: ベクターストア
+                  Step2:
+                    CompanyBenefitsDesc: HR福利厚生ガイド — 健康保険、休暇、リモートワーク、学習予算など
+                    CompanyBenefitsTitle: 会社福利厚生
+                    DocSectionTitle: サンプルドキュメントを選択
+                    DocumentPreviewTitle: ドキュメントプレビュー
+                    EmbedButton: 埋め込む
+                    IndexExistsWarning: インデックスが既に存在します
+                    IndexExistsWarningDesc: この名前のインデックスは既に存在します。別のインデックス名を選択してください。
+                    MomotaroDesc: 日本の民話 — 日本語のセマンティック検索テストに最適
+                    MomotaroTitle: 桃太郎の物語
+                    Subtitle: サンプルドキュメントを選択し、ベクターストア名を入力して、ベクターストアに埋め込みます。
+                    Title: ドキュメントの選択 & 埋め込み
+                  Step3:
+                    ChatButton: チャット開始
+                    ReloadButton: 再読み込み
+                    Title: 埋め込み結果
+                  Subtitle: Smart WorkflowによるRAGの4ステップガイド
+                  Title: Smart Workflow RAG
+                  TokensUnit: トークン
+                  UploadLabel: アップロード
+                  Wizard:
+                    BackToUploadButton: 結果に戻る
+                    Step1Label: 設定
+                    Step2Label: アップロード & 埋め込み
+                    Step3Label: 結果
+                    Step4Label: チャット
   tutorial:
     TutorialPages:
       AdvancedDesc: パターンとオーケストレーション — 高度なワークフローを設計
       AdvancedTitle: 上級
+      AppendixA01Desc: 検索拡張生成（RAG）の概念概要 — 仕組みと活用タイミング
+      AppendixA01Title: RAGとは
+      AppendixA02Desc: モデルの内部を覗く — テキストが数値、埋め込み、そして回答へと変換される仕組み
+      AppendixA02Title: LLMは言語をどのように理解するか
+      AppendixA03Desc: 開発・チュートリアル演習用にDockerでローカルのOpenSearchインスタンスをセットアップする — クラウドアカウント不要
+      AppendixA03Title: ローカルベクターストアの起動
+      AppendixDesc: 参考資料と背景概念
+      AppendixTitle: 付録
       BackButton: ← 一覧に戻る
       BeginnerDesc: コアコンセプト — ここから始めましょう
       BeginnerTitle: 初級
+      BestPracticesDesc: 本番対応AIワークフローのパターンとアンチパターン
+      BestPracticesTitle: ベストプラクティス
       ExpertDesc: 高度な統合 — 限界に挑戦
       ExpertTitle: エキスパート
       Feature01Desc: システムプロンプトを使ってAgenticProcessCall要素を設定し、初めてのAIエージェントを作成します。
@@ -34,8 +123,8 @@ Dialogs:
       Feature12Title: 会話メモリ
       Feature13Desc: エージェントの実行を一時停止し、決定を人間タスクにルーティング — ユーザーの選択後、エージェントが自動的に再開します。
       Feature13Title: ヒューマンインザループ
-      Feature14Desc: LLMに送信する前に個人データを仮名化し、出力で復元します。
-      Feature14Title: PIIマスキングガードレール
+      Feature14Desc: OpenSearchベクターストアを接続し、エージェントがビジネス文書をセマンティック検索できるようにします。
+      Feature14Title: ツールとしてのRAG
       Feature15Desc: OpenSearchベクターストアを接続し、エージェントがビジネス文書をセマンティック検索できるようにします。
       Feature15Title: RAG / セマンティック検索
       Feature16Desc: 複数の専門エージェントを調整して複雑なビジネスタスクを完遂します。
@@ -53,18 +142,23 @@ Dialogs:
       IntermediateDesc: ツールと安全性 — エージェントを実用的で安全に
       IntermediateTitle: 中級
       NavAdvanced: 上級
+      NavAppendix: 付録
       NavBeginner: 初級
       NavBestPractices: ベストプラクティス
       NavExpert: エキスパート
       NavIntermediate: 中級
-      BestPracticesTitle: ベストプラクティス
-      BestPracticesDesc: 本番対応AIワークフローのパターンとアンチパターン
-      Practice01Title: "エージェントパターン：AIタスク"
-      Practice01Desc: ルーティンの人間承認をAI決定で置き換え、型付き結果をプロセスデータに直接書き込みます。
-      Practice02Title: "エージェントパターン：サブプロセス設計とツールの同一配置"
-      Practice02Desc: 呼び出し可能なサブプロセスに抽出するタイミングと、ツールをオーケストレータと同一ファイルに配置するタイミングを判断します。
-      Practice03Title: "エージェント整理：フォルダ構造と命名規則"
-      Practice03Desc: エージェントファイルを専用のagents/フォルダに整理し、プロセスファイル・呼び出し可能プロセス・データクラスに一貫した命名規則を適用します。
-      Practice05Title: "エージェントプロンプト：明瞭さと動的コンテキスト"
-      Practice05Desc: ツールメソッド名を含まないシステムプロンプトを書き、EL式で今日の日付・ユーザーロケール・プロセスデータをリアルタイムにプロンプトへ注入します。
       PageTitle: Smart Workflow 機能ガイド
+      Practice01Desc: ルーティンの人間承認をAI決定で置き換え、型付き結果をプロセスデータに直接書き込みます。
+      Practice01Title: エージェントパターン：AIタスク
+      Practice02Desc: 呼び出し可能なサブプロセスに抽出するタイミングと、ツールをオーケストレータと同一ファイルに配置するタイミングを判断します。
+      Practice02Title: エージェントパターン：サブプロセス設計とツールの同一配置
+      Practice03Desc: エージェントファイルを専用のagents/フォルダに整理し、プロセスファイル・呼び出し可能プロセス・データクラスに一貫した命名規則を適用します。
+      Practice03Title: エージェント整理：フォルダ構造と命名規則
+      Practice05Desc: ツールメソッド名を含まないシステムプロンプトを書き、EL式で今日の日付・ユーザーロケール・プロセスデータをリアルタイムにプロンプトへ注入します。
+      Practice05Title: エージェントプロンプト：明瞭さと動的コンテキスト
+Labels:
+  Close: 閉じる
+RAG:
+  Documents:
+    CompanyBenefits: ''
+    Momotaro: ''

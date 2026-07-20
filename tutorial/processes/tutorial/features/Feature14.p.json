@@ -1,0 +1,66 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/process.json",
+  "id" : "19F14AAAAAAAAA14",
+  "config" : {
+    "data" : "tutorial.Feature14Data"
+  },
+  "elements" : [ {
+      "id" : "f0",
+      "type" : "RequestStart",
+      "name" : "Tutorial Feature 14: RAG as a Tool",
+      "config" : {
+        "signature" : "start",
+        "request" : {
+          "name" : "Tutorial Feature 14: RAG as a Tool"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f1", "to" : "f3" }
+      ]
+    }, {
+      "id" : "f2",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 360, "y" : 64 }
+      }
+    }, {
+      "id" : "f3",
+      "type" : "DialogCall",
+      "name" : "RAG Demo",
+      "config" : {
+        "dialog" : "tutorial.RagDemo:start()"
+      },
+      "visual" : {
+        "at" : { "x" : 232, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f4", "to" : "f2", "color" : "default" }
+      ]
+    }, {
+      "id" : "fn1",
+      "type" : "ProcessAnnotation",
+      "name" : [
+        "   Feature 14 — RAG as a Tool:",
+        "   Launches the full RAG wizard from smart-workflow-demo (com.axonivy.utils.smart.workflow.demo.rag.RagDemo).",
+        "   Step 1: Configure — review OpenSearch connection settings and test connection.",
+        "   Step 2: Upload & Embed — upload .txt/.md files and embed into OpenSearch as vector chunks.",
+        "   Step 3: Results — inspect indexed chunks with source file and content preview.",
+        "   Step 4: Chat — ask questions answered by an AI agent using the openSearchSearch tool."
+      ],
+      "visual" : {
+        "at" : { "x" : 439, "y" : 200 },
+        "size" : { "width" : 725, "height" : 144 }
+      }
+    } ],
+  "layout" : {
+    "colors" : {
+      "red" : "#ff0000",
+      "green" : "#1eff00",
+      "yellow" : "#fbff00",
+      "pink" : "#fb00ff"
+    }
+  }
+}
