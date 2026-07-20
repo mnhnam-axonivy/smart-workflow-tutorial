@@ -150,6 +150,16 @@ The selected chunks are injected into the LLM prompt alongside the original ques
 
 Example: the LLM receives the question `"How many days of annual leave do I get after 5 years?"` together with the retrieved chunk `"After 5 years of service, annual leave increases to 25 days."` and responds with a precise, sourced answer.
 
+#### Why not just use SQL?
+
+A natural question at this point: documents and their text are just strings — why not store them in a relational database and query with `WHERE content LIKE '%annual leave%'`?
+
+The problem is keyword matching. SQL looks for exact character sequences. A user asking *"how much vacation do I get?"* contains none of the words in a chunk titled *"Annual Leave Policy"*. The query returns nothing, even though the meaning is identical.
+
+Vector search works differently. Both the query and the stored chunks are converted into embeddings — numerical representations of meaning. The search finds chunks whose meaning is closest to the query, regardless of the exact words used.
+
+![SQL vs vector store](cms:/Files/Images/appendix01-sql-vs-vector)
+
 ---
 
 > **Note:** Although RAG greatly improves factual accuracy by grounding answers in retrieved documents, the LLM can still misinterpret retrieved information. The quality of source documents remains critical.
