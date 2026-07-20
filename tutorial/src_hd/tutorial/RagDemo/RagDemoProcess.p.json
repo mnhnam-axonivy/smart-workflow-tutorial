@@ -1,9 +1,9 @@
 {
   "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/process.json",
-  "id" : "19D8A5B3564E17B3",
+  "id" : "19F799875E5B2F69",
   "kind" : "HTML_DIALOG",
   "config" : {
-    "data" : "com.axonivy.utils.smart.workflow.demo.rag.RagDemo.RagDemoData"
+    "data" : "tutorial.RagDemo.RagDemoData"
   },
   "elements" : [ {
       "id" : "f0",
@@ -11,7 +11,7 @@
       "name" : "start()",
       "config" : {
         "signature" : "start",
-        "guid" : "19D8A5B356B3F457"
+        "guid" : "19F799876398AE40"
       },
       "visual" : {
         "at" : { "x" : 96, "y" : 64 }
@@ -30,7 +30,7 @@
       "type" : "HtmlDialogEventStart",
       "name" : "close",
       "config" : {
-        "guid" : "19D8A5B3573B72DB"
+        "guid" : "19F7998767F8530C"
       },
       "visual" : {
         "at" : { "x" : 96, "y" : 160 }
@@ -134,7 +134,7 @@
           "code" : [
             "import java.time.LocalDateTime;",
             "import java.time.format.DateTimeFormatter;",
-            "import com.axonivy.utils.smart.workflow.demo.rag.RagDemo.ChatMessage;",
+            "import tutorial.rag.ChatMessage;",
             "",
             "ChatMessage msg = new ChatMessage();",
             "msg.setRole(\"user\");",
@@ -182,7 +182,7 @@
           "code" : [
             "import java.time.LocalDateTime;",
             "import java.time.format.DateTimeFormatter;",
-            "import com.axonivy.utils.smart.workflow.demo.rag.RagDemo.ChatMessage;",
+            "import tutorial.rag.ChatMessage;",
             "",
             "String answer;",
             "if (in.ragResult != null && in.ragResult.getAnswer() != null && !in.ragResult.getAnswer().trim().isEmpty()) {",
@@ -319,7 +319,7 @@
       "config" : {
         "output" : {
           "code" : [
-            "import Features.RagDemo.UploadedFile;",
+            "import tutorial.rag.UploadedFile;",
             "",
             "String fileName = in.uploadEvent.getFile().getFileName();",
             "",
@@ -433,8 +433,8 @@
         "output" : {
           "code" : [
             "import com.axonivy.utils.smart.workflow.rag.opensearch.internal.OpenSearchRestClient;",
-            "import Features.RagDemo.IndexMetaView;",
-            "import Features.RagDemo.EmbeddedChunkView;",
+            "import tutorial.rag.IndexMetaView;",
+            "import tutorial.rag.EmbeddedChunkView;",
             "import javax.faces.application.FacesMessage;",
             "import javax.faces.context.FacesContext;",
             "import dev.langchain4j.data.segment.TextSegment;",
@@ -683,6 +683,84 @@
       "type" : "HtmlDialogEnd",
       "visual" : {
         "at" : { "x" : 472, "y" : 448 }
+      }
+    }, {
+      "id" : "fsc1",
+      "type" : "HtmlDialogMethodStart",
+      "name" : "selectCompanyBenefits()",
+      "config" : {
+        "signature" : "selectCompanyBenefits",
+        "guid" : "RAG_WIZARD_SELCB_01"
+      },
+      "visual" : {
+        "at" : { "x" : 88, "y" : 736 }
+      },
+      "connect" : [
+        { "id" : "fsc2", "to" : "fsc3" }
+      ]
+    }, {
+      "id" : "fsc3",
+      "type" : "Script",
+      "name" : "Load Company Benefits",
+      "config" : {
+        "output" : {
+          "code" : [
+            "in.sources.clear();",
+            "in.sources.add(ivy.cms.co(\"/RAG/Documents/CompanyBenefits\"));",
+            "in.selectedDocument = \"CompanyBenefits\";"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 280, "y" : 736 }
+      },
+      "connect" : [
+        { "id" : "fsc4", "to" : "fsc5" }
+      ]
+    }, {
+      "id" : "fsc5",
+      "type" : "HtmlDialogEnd",
+      "visual" : {
+        "at" : { "x" : 472, "y" : 736 }
+      }
+    }, {
+      "id" : "fsm1",
+      "type" : "HtmlDialogMethodStart",
+      "name" : "selectMomotaro()",
+      "config" : {
+        "signature" : "selectMomotaro",
+        "guid" : "RAG_WIZARD_SELMT_01"
+      },
+      "visual" : {
+        "at" : { "x" : 88, "y" : 832 }
+      },
+      "connect" : [
+        { "id" : "fsm2", "to" : "fsm3" }
+      ]
+    }, {
+      "id" : "fsm3",
+      "type" : "Script",
+      "name" : "Load Momotaro",
+      "config" : {
+        "output" : {
+          "code" : [
+            "in.sources.clear();",
+            "in.sources.add(ivy.cms.co(\"/RAG/Documents/Momotaro\"));",
+            "in.selectedDocument = \"Momotaro\";"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 280, "y" : 832 }
+      },
+      "connect" : [
+        { "id" : "fsm4", "to" : "fsm5" }
+      ]
+    }, {
+      "id" : "fsm5",
+      "type" : "HtmlDialogEnd",
+      "visual" : {
+        "at" : { "x" : 472, "y" : 832 }
       }
     } ]
 }

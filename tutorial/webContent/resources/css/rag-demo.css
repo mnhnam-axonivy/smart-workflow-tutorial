@@ -228,19 +228,83 @@
 }
 
 /* ========================================
-   STEP 2 — UPLOAD ZONE
+   STEP 2 — DOCUMENT SELECTION CARDS
    ======================================== */
 
-.rag-upload-zone {
-  border: 2px dashed var(--ivy-primary-light-color);
-  background: var(--surface-50);
-  transition: border-color 0.2s, background 0.2s;
-  text-align: center;
+.rag-doc-card.ui-commandlink {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex: 1;
+  min-height: 9rem;
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--surface-border);
+  background: var(--surface-0);
+  color: var(--text-color);
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
-.rag-upload-zone:hover {
+.rag-doc-card.ui-commandlink:hover {
   border-color: var(--ivy-primary-color);
-  background: var(--surface-100);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--ivy-primary-color), transparent 82%);
+  text-decoration: none;
+  color: var(--text-color);
+}
+
+.rag-doc-card--selected.ui-commandlink {
+  border-color: var(--ivy-primary-color);
+  background: color-mix(in srgb, var(--ivy-primary-color), var(--surface-0) 92%);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ivy-primary-color), transparent 80%);
+}
+
+.rag-doc-card .rag-doc-card-icon {
+  font-size: 1.75rem;
+  color: var(--ivy-primary-color);
+  margin-bottom: 0.25rem;
+}
+
+.rag-doc-card .rag-doc-card-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-color);
+  line-height: 1.3;
+}
+
+.rag-doc-card .rag-doc-card-desc {
+  font-size: 0.8rem;
+  color: var(--text-color-secondary);
+  line-height: 1.4;
+  white-space: normal;
+  text-align: left;
+}
+
+/* ========================================
+   STEP 2 — DOCUMENT PREVIEW
+   ======================================== */
+
+.rag-doc-preview {
+  border: 1px solid var(--surface-border);
+  background: var(--surface-50);
+  margin-top: 0.5rem;
+}
+
+.rag-doc-preview-content {
+  font-size: 0.8rem;
+  color: var(--text-color-secondary);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+  max-height: 18rem;
+  overflow-y: auto;
+  padding: 0.75rem 1rem;
+  background: var(--surface-0);
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
 }
 
 /* ========================================

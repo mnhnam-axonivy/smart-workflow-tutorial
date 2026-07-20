@@ -1,7 +1,7 @@
 {
   "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
   "simpleName" : "RagDemoData",
-  "namespace" : "com.axonivy.utils.smart.workflow.demo.rag.RagDemo",
+  "namespace" : "tutorial.RagDemo",
   "fields" : [ {
     "name" : "indexName",
     "type" : "String"
@@ -19,19 +19,19 @@
     "type" : "String"
   }, {
     "name" : "messages",
-    "type" : "java.util.List<com.axonivy.utils.smart.workflow.demo.rag.RagDemo.ChatMessage>"
+    "type" : "java.util.List<tutorial.rag.ChatMessage>"
   }, {
     "name" : "stagedFiles",
-    "type" : "java.util.List<Features.RagDemo.UploadedFile>"
+    "type" : "java.util.List<tutorial.rag.UploadedFile>"
   }, {
     "name" : "embeddedChunks",
-    "type" : "java.util.List<Features.RagDemo.EmbeddedChunkView>"
+    "type" : "java.util.List<tutorial.rag.EmbeddedChunkView>"
   }, {
     "name" : "filteredChunks",
-    "type" : "java.util.List<Features.RagDemo.EmbeddedChunkView>"
+    "type" : "java.util.List<tutorial.rag.EmbeddedChunkView>"
   }, {
     "name" : "indexMeta",
-    "type" : "Features.RagDemo.IndexMetaView"
+    "type" : "tutorial.rag.IndexMetaView"
   }, {
     "name" : "uploadEvent",
     "type" : "org.primefaces.event.FileUploadEvent"
@@ -74,5 +74,8 @@
   }, {
     "name" : "pdfExtractIndex",
     "type" : "Integer"
+  }, {
+    "name" : "selectedDocument",
+    "type" : "String"
   } ]
 }

@@ -1,15 +1,15 @@
 {
   "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
-  "simpleName" : "ChatMessage",
-  "namespace" : "com.axonivy.utils.smart.workflow.demo.rag.RagDemo",
+  "simpleName" : "EmbeddedChunkView",
+  "namespace" : "tutorial.rag",
   "fields" : [ {
-    "name" : "role",
+    "name" : "id",
     "type" : "String"
   }, {
-    "name" : "content",
+    "name" : "source",
     "type" : "String"
   }, {
-    "name" : "timestamp",
+    "name" : "textPreview",
     "type" : "String"
   } ]
 }

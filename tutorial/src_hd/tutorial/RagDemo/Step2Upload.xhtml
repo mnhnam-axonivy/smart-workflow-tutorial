@@ -12,6 +12,7 @@
     </div>
 
     <h:panelGroup id="step2-panel" layout="block" styleClass="grid">
+
       <!-- Index name -->
       <div class="col-12 md:col-5">
         <div class="rag-config-card border-round-xl p-4 h-full">
@@ -40,47 +41,45 @@
         </div>
       </div>
 
-      <!-- File upload -->
+      <!-- Document selection -->
       <div class="col-12 md:col-7">
-        <div class="rag-upload-zone border-round-xl p-4 h-full">
-          <p class="font-semibold m-0 mb-1">#{ivy.cms.co('/Dialogs/com/axonivy/utils/smart/workflow/demo/rag/RagDemo/Step2/FileUploadContainerTitle')}</p>
-          <p class="m-0 mb-3 text-color-secondary">#{ivy.cms.co('/Dialogs/com/axonivy/utils/smart/workflow/demo/rag/RagDemo/Step2/FileUploadContainerHint')}</p>
-          <p class="m-0 mb-3 text-color-secondary text-sm">
-            <i class="si si-information-circle mr-1" />#{ivy.cms.co('/Dialogs/com/axonivy/utils/smart/workflow/demo/rag/RagDemo/Step2/PdfNote')}
-          </p>
-          <p:fileUpload auto="true" multiple="false" accept=".txt,.md,.pdf"
-            listener="#{logic.handleFileUpload}"
+        <p class="font-semibold m-0 mb-3">#{ivy.cms.co('/Dialogs/com/axonivy/utils/smart/workflow/demo/rag/RagDemo/Step2/DocSectionTitle')}</p>
+        <div class="flex gap-3">
+          <p:commandLink
+            styleClass="rag-doc-card #{data.selectedDocument eq 'CompanyBenefits' ? 'rag-doc-card--selected' : ''}"
+            actionListener="#{logic.selectCompanyBenefits}"
             update="step2-panel rag-footer"
-            allowTypes="/(\.|\/)(txt|md|pdf)$/"
-            label="#{ivy.cms.co('/Dialogs/com/axonivy/utils/smart/workflow/demo/rag/RagDemo/ChooseFileLabel')}"
-            styleClass="rag-file-upload" />
+            process="@this">
+            <i class="si si-office-building-3 rag-doc-card-icon" />
+            <div class="rag-doc-card-title">#{ivy.cms.co('/Dialogs/com/axonivy/utils/smart/workflow/demo/rag/RagDemo/Step2/CompanyBenefitsTitle')}</div>
+            <div class="rag-doc-card-desc">#{ivy.cms.co('/Dialogs/com/axonivy/utils/smart/workflow/demo/rag/RagDemo/Step2/CompanyBenefitsDesc')}</div>
+          </p:commandLink>
+          <p:commandLink
+            styleClass="rag-doc-card #{data.selectedDocument eq 'Momotaro' ? 'rag-doc-card--selected' : ''}"
+            actionListener="#{logic.selectMomotaro}"
+            update="step2-panel rag-footer"
+            process="@this">
+            <i class="si si-book-open rag-doc-card-icon" />
+            <div class="rag-doc-card-title">#{ivy.cms.co('/Dialogs/com/axonivy/utils/smart/workflow/demo/rag/RagDemo/Step2/MomotaroTitle')}</div>
+            <div class="rag-doc-card-desc">#{ivy.cms.co('/Dialogs/com/axonivy/utils/smart/workflow/demo/rag/RagDemo/Step2/MomotaroDesc')}</div>
+          </p:commandLink>
         </div>
       </div>
 
-      <!-- Staged files -->
+      <!-- Document preview -->
       <div class="col-12">
-        <h:panelGroup id="staged-panel">
-          <h:panelGroup rendered="#{not empty data.stagedFiles}" layout="block">
-            <div class="flex align-items-center gap-2 mb-2">
-              <i class="si si-common-file-stack text-sm rag-primary-icon" />
-              <span class="font-semibold text-color">#{ivy.cms.co('/Dialogs/com/axonivy/utils/smart/workflow/demo/rag/RagDemo/Step2/StagedFilesTitle')}</span>
-              <span class="rag-count-badge ml-1">#{data.stagedFiles.size()}</span>
+        <h:panelGroup rendered="#{not empty data.selectedDocument and not empty data.sources}" layout="block">
+          <div class="rag-doc-preview border-round-xl p-4">
+            <div class="flex align-items-center gap-2 mb-3">
+              <i class="si si-common-file-text rag-config-icon" />
+              <span class="font-semibold text-sm">#{ivy.cms.co('/Dialogs/com/axonivy/utils/smart/workflow/demo/rag/RagDemo/Step2/DocumentPreviewTitle')}</span>
             </div>
-            <p:dataTable value="#{data.stagedFiles}" var="f" styleClass="w-full">
-              <p:column headerText="#{ivy.cms.co('/Dialogs/com/axonivy/utils/smart/workflow/demo/rag/RagDemo/Step2/FileNameColumn')}">
-                <i class="si si-common-file-text text-xs rag-primary-icon mr-2" />
-                <h:outputText value="#{f.name}" />
-              </p:column>
-              <p:column headerText="#{ivy.cms.co('/Dialogs/com/axonivy/utils/smart/workflow/demo/rag/RagDemo/Step2/FileSizeColumn')}" styleClass="rag-col-source">
-                <h:outputText value="#{f.sizeKb} KB" rendered="#{f.sizeKb gt 0}" />
-                <h:outputText value="&lt;1 KB" rendered="#{f.sizeKb eq 0}" />
-              </p:column>
-            </p:dataTable>
-          </h:panelGroup>
+            <div class="rag-doc-preview-content">
+              <h:outputText value="#{data.sources.get(0)}" />
+            </div>
+          </div>
         </h:panelGroup>
       </div>
-
-
 
     </h:panelGroup>
 

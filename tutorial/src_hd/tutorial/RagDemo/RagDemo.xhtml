@@ -75,7 +75,7 @@
               update="step2-panel messages rag-footer"
               process="form"
               oncomplete="afterEmbedCmd()"
-              disabled="#{empty data.stagedFiles}" />
+              disabled="#{empty data.selectedDocument}" />
             <p:commandButton
               rendered="#{data.currentStep eq 3}"
               value="#{ivy.cms.co('/Dialogs/com/axonivy/utils/smart/workflow/demo/rag/RagDemo/Step3/ChatButton')}"
