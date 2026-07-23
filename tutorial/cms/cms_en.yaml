@@ -10,6 +10,9 @@ Dialogs:
                   Chatbot:
                     AssistantName: AI Assistant
                     InputPlaceholder: Ask about your documents...
+                    ThinkingPhase1: Searching documents...
+                    ThinkingPhase2: Analyzing relevant content...
+                    ThinkingPhase3: Generating response...
                     ThinkingText: Searching documents...
                     WelcomeDesc: I can help you find information from your indexed documents.
                     WelcomeTitle: Hello, I'm your AI Assistant
@@ -47,6 +50,8 @@ Dialogs:
                     ProviderDesc: AI provider used to generate vector embeddings. Falls back to AI.DefaultProvider when blank.
                     ProviderLabel: Embedding Provider
                     Subtitle: Read-only settings loaded from Ivy variables. To change them, update the variables in the Ivy configuration.
+                    ConnectionError: 'Cannot connect:'
+                    ConnectionSuccess: Connected successfully.
                     TestConnectionButton: Test Connection
                     Title: RAG Configuration
                     UrlDesc: Base URL of the OpenSearch server.
