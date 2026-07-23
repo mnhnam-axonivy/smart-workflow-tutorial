@@ -122,6 +122,10 @@ public class TutorialPagesBean {
     return jpImageDataUrls;
   }
 
+  public String getSessionLang() {
+    return "ja".equals(Ivy.session().getContentLocale().getLanguage()) ? "jp" : "en";
+  }
+
   public void exportZip() {
     FacesContext ctx = FacesContext.getCurrentInstance();
     ExternalContext ec = ctx.getExternalContext();
@@ -131,21 +135,42 @@ public class TutorialPagesBean {
     ec.setResponseHeader("Content-Disposition", "attachment; filename=\"tutorial-docs.zip\"");
 
     try (ZipOutputStream zos = new ZipOutputStream(ec.getResponseOutputStream())) {
-      // EN markdown
       for (Map.Entry<String, String> e : features.entrySet()) {
         if (!e.getValue().isEmpty()) {
           addZipEntry(zos, "en/feature-" + e.getKey() + ".md",
-              rewriteImageRefs(e.getValue()).getBytes(StandardCharsets.UTF_8));
+              rewriteImageRefs(e.getValue(), false).getBytes(StandardCharsets.UTF_8));
         }
       }
-      // JP markdown
+      for (Map.Entry<String, String> e : practices.entrySet()) {
+        if (!e.getValue().isEmpty()) {
+          addZipEntry(zos, "en/practice-" + e.getKey() + ".md",
+              rewriteImageRefs(e.getValue(), false).getBytes(StandardCharsets.UTF_8));
+        }
+      }
+      for (Map.Entry<String, String> e : appendices.entrySet()) {
+        if (!e.getValue().isEmpty()) {
+          addZipEntry(zos, "en/appendix-" + e.getKey() + ".md",
+              rewriteImageRefs(e.getValue(), false).getBytes(StandardCharsets.UTF_8));
+        }
+      }
       for (Map.Entry<String, String> e : jpFeatures.entrySet()) {
         if (!e.getValue().isEmpty()) {
           addZipEntry(zos, "jp/feature-" + e.getKey() + ".md",
-              rewriteImageRefs(e.getValue()).getBytes(StandardCharsets.UTF_8));
+              rewriteImageRefs(e.getValue(), true).getBytes(StandardCharsets.UTF_8));
         }
       }
-      // Images
+      for (Map.Entry<String, String> e : jpPractices.entrySet()) {
+        if (!e.getValue().isEmpty()) {
+          addZipEntry(zos, "jp/practice-" + e.getKey() + ".md",
+              rewriteImageRefs(e.getValue(), true).getBytes(StandardCharsets.UTF_8));
+        }
+      }
+      for (Map.Entry<String, String> e : jpAppendices.entrySet()) {
+        if (!e.getValue().isEmpty()) {
+          addZipEntry(zos, "jp/appendix-" + e.getKey() + ".md",
+              rewriteImageRefs(e.getValue(), true).getBytes(StandardCharsets.UTF_8));
+        }
+      }
       for (String imgPath : cmsImagePaths) {
         String filename = imgPath.substring(imgPath.lastIndexOf('/') + 1) + ".png";
         Optional<ContentObject> obj = Ivy.cm().findObject(imgPath);
@@ -157,6 +182,22 @@ public class TutorialPagesBean {
           }
         }
       }
+      for (String imgPath : jpCmsImagePaths) {
+        String filename = imgPath.substring(imgPath.lastIndexOf('/') + 1) + ".png";
+        Optional<ContentObject> obj = Ivy.cm().findObject(imgPath);
+        if (obj.map(ContentObject::exists).orElse(false)) {
+          for (ContentObjectValue v : obj.get().values()) {
+            if ("ja".equals(v.locale().getLanguage())) {
+              try (InputStream is = v.read().inputStream()) {
+                if (is != null) {
+                  addZipEntry(zos, "images-jp/" + filename, is.readAllBytes());
+                }
+              }
+              break;
+            }
+          }
+        }
+      }
     } catch (IOException e) {
       Ivy.log().error("Export ZIP failed", e);
     }
@@ -164,12 +205,17 @@ public class TutorialPagesBean {
     ctx.responseComplete();
   }
 
-  private static String rewriteImageRefs(String md) {
+  private String rewriteImageRefs(String md, boolean jpMode) {
     Matcher m = CMS_IMG_PATTERN.matcher(md);
     StringBuffer sb = new StringBuffer();
     while (m.find()) {
-      String filename = m.group(1).substring(m.group(1).lastIndexOf('/') + 1);
-      m.appendReplacement(sb, "(../images/" + filename + ".png)");
+      String path = m.group(1);
+      String filename = path.substring(path.lastIndexOf('/') + 1);
+      if (jpMode && jpImageDataUrls.containsKey(path)) {
+        m.appendReplacement(sb, "(../images-jp/" + filename + ".png)");
+      } else {
+        m.appendReplacement(sb, "(../images/" + filename + ".png)");
+      }
     }
     m.appendTail(sb);
     return sb.toString();
@@ -238,9 +284,18 @@ public class TutorialPagesBean {
       Ivy.log().warn("CMS file not found: " + cmsPath);
       return "";
     }
-    try (InputStream is = obj.map(ContentObject::values)
-                             .map(v -> v.getFirst().read().inputStream())
-                             .orElse(null)) {
+    ContentObjectValue target = null;
+    for (ContentObjectValue v : obj.get().values()) {
+      String lang = v.locale() != null ? v.locale().getLanguage() : "";
+      if (!"ja".equals(lang)) {
+        target = v;
+        break;
+      }
+    }
+    if (target == null) {
+      target = obj.get().values().getFirst();
+    }
+    try (InputStream is = target.read().inputStream()) {
       if (is == null) return "";
       return new String(is.readAllBytes(), StandardCharsets.UTF_8);
     } catch (Exception e) {

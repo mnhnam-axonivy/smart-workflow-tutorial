@@ -14,6 +14,8 @@
       <h:outputScript library="js" name="marked.min.js" />
       <h:outputScript library="js" name="tutorial-pages.js" />
 
+      <span id="sw-session-lang" data-lang="#{tutorialPagesBean.sessionLang}" style="display:none"></span>
+
       <!-- EN markdown content (hidden) -->
       <div style="display:none">
         <div id="sw-md-p01">#{tutorialPagesBean.getPractice('01')}</div>
