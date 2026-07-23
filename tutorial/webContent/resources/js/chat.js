@@ -1,8 +1,10 @@
-const thinkingPhases = [
-  'Searching documents',
-  'Analyzing relevant content',
-  'Generating response'
-];
+function getThinkingPhases() {
+  return [
+    document.getElementById('thinking-phase-1')?.textContent || 'Searching documents...',
+    document.getElementById('thinking-phase-2')?.textContent || 'Analyzing relevant content...',
+    document.getElementById('thinking-phase-3')?.textContent || 'Generating response...'
+  ];
+}
 
 let thinkingPhaseIndex = 0;
 let thinkingInterval = null;
@@ -67,15 +69,16 @@ function showThinking() {
   thinkingPhaseIndex = 0;
 
   if (thinkingText) {
-    thinkingText.textContent = thinkingPhases[0] + '...';
+    const phases = getThinkingPhases();
+    thinkingText.textContent = phases[0];
 
     if (thinkingInterval) {
       clearInterval(thinkingInterval);
     }
 
     thinkingInterval = setInterval(function() {
-      thinkingPhaseIndex = (thinkingPhaseIndex + 1) % thinkingPhases.length;
-      thinkingText.textContent = thinkingPhases[thinkingPhaseIndex] + '...';
+      thinkingPhaseIndex = (thinkingPhaseIndex + 1) % phases.length;
+      thinkingText.textContent = phases[thinkingPhaseIndex];
     }, 2000);
   }
 

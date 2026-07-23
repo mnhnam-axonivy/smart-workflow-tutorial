@@ -77,5 +77,11 @@
   }, {
     "name" : "selectedDocument",
     "type" : "String"
+  }, {
+    "name" : "translatedAnswer",
+    "type" : "String"
+  }, {
+    "name" : "language",
+    "type" : "String"
   } ]
 }

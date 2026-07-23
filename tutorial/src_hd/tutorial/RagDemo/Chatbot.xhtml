@@ -58,6 +58,13 @@
             </h:panelGroup>
           </ui:repeat>
 
+          <!-- Thinking phase labels (read by chat.js) -->
+          <div id="chat-thinking-phases" style="display:none">
+            <span id="thinking-phase-1">#{ivy.cms.co('/Dialogs/com/axonivy/utils/smart/workflow/demo/rag/RagDemo/Chatbot/ThinkingPhase1')}</span>
+            <span id="thinking-phase-2">#{ivy.cms.co('/Dialogs/com/axonivy/utils/smart/workflow/demo/rag/RagDemo/Chatbot/ThinkingPhase2')}</span>
+            <span id="thinking-phase-3">#{ivy.cms.co('/Dialogs/com/axonivy/utils/smart/workflow/demo/rag/RagDemo/Chatbot/ThinkingPhase3')}</span>
+          </div>
+
           <!-- Thinking Indicator -->
           <div class="assistant-message-row mb-4 thinking-status rag-hidden" id="thinking-indicator">
             <div class="assistant-content">

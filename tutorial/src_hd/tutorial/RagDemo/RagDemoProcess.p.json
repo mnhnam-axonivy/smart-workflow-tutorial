@@ -52,7 +52,7 @@
         "guid" : "19D8A5B300000001"
       },
       "visual" : {
-        "at" : { "x" : 872, "y" : 432 }
+        "at" : { "x" : 872, "y" : 640 }
       },
       "connect" : [
         { "id" : "fe2", "to" : "fe3" }
@@ -77,7 +77,7 @@
         }
       },
       "visual" : {
-        "at" : { "x" : 1160, "y" : 432 },
+        "at" : { "x" : 1160, "y" : 640 },
         "size" : { "width" : 160, "height" : 62 }
       },
       "connect" : [
@@ -87,7 +87,7 @@
       "id" : "fe5",
       "type" : "HtmlDialogEnd",
       "visual" : {
-        "at" : { "x" : 1456, "y" : 432 }
+        "at" : { "x" : 1456, "y" : 640 }
       }
     }, {
       "id" : "f6",
@@ -120,9 +120,9 @@
         { "id" : "fa3", "to" : "f7", "label" : {
             "name" : "no"
           } },
-        { "id" : "fa4", "to" : "f10", "via" : [ { "x" : 968, "y" : 128 }, { "x" : 1640, "y" : 128 } ], "label" : {
+        { "id" : "fa4", "to" : "f10", "via" : [ { "x" : 968, "y" : 224 }, { "x" : 1952, "y" : 224 } ], "label" : {
             "name" : "yes",
-            "segment" : 1.5
+            "segment" : 1.54
           } }
       ]
     }, {
@@ -142,7 +142,8 @@
             "msg.setTimestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern(\"h:mm a\")));",
             "in.messages.add(msg);",
             "in.question = in.userInput;",
-            "in.userInput = \"\";"
+            "in.userInput = \"\";",
+            "in.language = ivy.session.getContentLocale().getDisplayLanguage();"
           ]
         }
       },
@@ -171,7 +172,50 @@
         "size" : { "width" : 160, "height" : 62 }
       },
       "connect" : [
-        { "id" : "f13", "to" : "f9" }
+        { "id" : "f13", "to" : "fa_lang" }
+      ]
+    }, {
+      "id" : "fa_lang",
+      "type" : "Alternative",
+      "name" : "English?",
+      "config" : {
+        "conditions" : {
+          "fa_c1" : "in.language.equalsIgnoreCase(\"English\")"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 1448, "y" : 64 },
+        "labelOffset" : { "y" : -24 }
+      },
+      "connect" : [
+        { "id" : "fa_c1", "to" : "f9", "via" : [ { "x" : 1448, "y" : 144 }, { "x" : 1816, "y" : 144 } ], "label" : {
+            "name" : "yes",
+            "segment" : 0.4,
+            "offset" : { "x" : 17, "y" : -5 }
+          } },
+        { "id" : "fa_c2", "to" : "ft1", "label" : {
+            "name" : "no"
+          } }
+      ]
+    }, {
+      "id" : "ft1",
+      "type" : "ProgramInterface",
+      "name" : "Translate Response",
+      "config" : {
+        "javaClass" : "com.axonivy.utils.smart.workflow.AgenticProcessCall",
+        "userConfig" : {
+          "system" : "You are a professional translator. Translate the provided text faithfully into <%= in.language %>. Preserve all numbers, dates, names, and document structure. Return only the translated text without any explanation.",
+          "tools" : "[]",
+          "resultMapping" : "in.translatedAnswer",
+          "query" : "<%= in.ragResult.answer %>"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 1624, "y" : 64 },
+        "size" : { "width" : 160, "height" : 62 }
+      },
+      "connect" : [
+        { "id" : "ft2", "to" : "f9" }
       ]
     }, {
       "id" : "f9",
@@ -185,11 +229,14 @@
             "import tutorial.rag.ChatMessage;",
             "",
             "String answer;",
-            "if (in.ragResult != null && in.ragResult.getAnswer() != null && !in.ragResult.getAnswer().trim().isEmpty()) {",
+            "if (in.translatedAnswer != null && !in.translatedAnswer.trim().isEmpty()) {",
+            "  answer = in.translatedAnswer;",
+            "} else if (in.ragResult != null && in.ragResult.getAnswer() != null && !in.ragResult.getAnswer().trim().isEmpty()) {",
             "  answer = in.ragResult.getAnswer();",
             "} else {",
             "  answer = \"I could not find relevant information for your question.\";",
             "}",
+            "in.translatedAnswer = null;",
             "ChatMessage msg = new ChatMessage();",
             "msg.setRole(\"assistant\");",
             "msg.setContent(answer);",
@@ -199,7 +246,7 @@
         }
       },
       "visual" : {
-        "at" : { "x" : 1528, "y" : 64 }
+        "at" : { "x" : 1808, "y" : 64 }
       },
       "connect" : [
         { "id" : "f14", "to" : "f10" }
@@ -208,7 +255,7 @@
       "id" : "f10",
       "type" : "HtmlDialogEnd",
       "visual" : {
-        "at" : { "x" : 1640, "y" : 64 }
+        "at" : { "x" : 1952, "y" : 64 }
       }
     }, {
       "id" : "f15",
@@ -307,7 +354,7 @@
         "guid" : "19D8A5B300000010"
       },
       "visual" : {
-        "at" : { "x" : 872, "y" : 216 }
+        "at" : { "x" : 872, "y" : 424 }
       },
       "connect" : [
         { "id" : "f30", "to" : "f20" }
@@ -341,7 +388,7 @@
         }
       },
       "visual" : {
-        "at" : { "x" : 1064, "y" : 216 }
+        "at" : { "x" : 1064, "y" : 424 }
       },
       "connect" : [
         { "id" : "f31", "to" : "fup_is_pdf", "color" : "default" }
@@ -356,10 +403,10 @@
         }
       },
       "visual" : {
-        "at" : { "x" : 1256, "y" : 216 }
+        "at" : { "x" : 1256, "y" : 424 }
       },
       "connect" : [
-        { "id" : "fup_c1", "to" : "fup_extract", "via" : [ { "x" : 1256, "y" : 312 } ], "label" : {
+        { "id" : "fup_c1", "to" : "fup_extract", "via" : [ { "x" : 1256, "y" : 520 } ], "label" : {
             "name" : "yes"
           } },
         { "id" : "fup_c2", "to" : "f21", "label" : {
@@ -381,7 +428,7 @@
         }
       },
       "visual" : {
-        "at" : { "x" : 1416, "y" : 312 },
+        "at" : { "x" : 1416, "y" : 520 },
         "size" : { "width" : 160, "height" : 62 }
       },
       "connect" : [
@@ -400,16 +447,16 @@
         }
       },
       "visual" : {
-        "at" : { "x" : 1616, "y" : 312 }
+        "at" : { "x" : 1616, "y" : 520 }
       },
       "connect" : [
-        { "id" : "fup_c4", "to" : "f21", "via" : [ { "x" : 1736, "y" : 312 } ] }
+        { "id" : "fup_c4", "to" : "f21", "via" : [ { "x" : 1736, "y" : 520 } ] }
       ]
     }, {
       "id" : "f21",
       "type" : "HtmlDialogEnd",
       "visual" : {
-        "at" : { "x" : 1736, "y" : 216 }
+        "at" : { "x" : 1736, "y" : 424 }
       }
     }, {
       "id" : "f22",
@@ -606,6 +653,7 @@
       "config" : {
         "output" : {
           "code" : [
+            "import ch.ivyteam.ivy.environment.Ivy;",
             "import com.axonivy.utils.smart.workflow.rag.opensearch.internal.OpenSearchRestClient;",
             "import javax.faces.application.FacesMessage;",
             "import javax.faces.context.FacesContext;",
@@ -614,11 +662,11 @@
             "  OpenSearchRestClient.fromIvyVars().ping();",
             "  in.connectionOk = true;",
             "  FacesContext.getCurrentInstance().addMessage(null,",
-            "    new FacesMessage(FacesMessage.SEVERITY_INFO, \"Connected successfully.\", null));",
+            "    new FacesMessage(FacesMessage.SEVERITY_INFO, Ivy.cms().co(\"/Dialogs/com/axonivy/utils/smart/workflow/demo/rag/RagDemo/Step1/ConnectionSuccess\"), null));",
             "} catch (Exception ex) {",
             "  in.connectionOk = false;",
             "  FacesContext.getCurrentInstance().addMessage(null,",
-            "    new FacesMessage(FacesMessage.SEVERITY_ERROR, \"Cannot connect: \" + ex.getMessage(), null));",
+            "    new FacesMessage(FacesMessage.SEVERITY_ERROR, Ivy.cms().co(\"/Dialogs/com/axonivy/utils/smart/workflow/demo/rag/RagDemo/Step1/ConnectionError\") + \" \" + ex.getMessage(), null));",
             "}"
           ]
         }

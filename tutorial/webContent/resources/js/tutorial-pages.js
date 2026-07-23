@@ -118,96 +118,92 @@
     }
   };
 
-  // ── EN originals snapshot (captured once from the DOM on first lang switch) ─
-  var _enSnapshot = null;
-
-  function _captureEnSnapshot() {
-    var snap = { hero: {}, nav: {}, levels: {}, features: {} };
-
-    var h1 = document.querySelector('.sw-hero h1');
-    var subtitle = document.querySelector('.sw-hero p');
-    snap.hero.title    = h1       ? h1.textContent       : '';
-    snap.hero.subtitle = subtitle ? subtitle.textContent : '';
-
-    document.querySelectorAll('.sw-level-pill[data-lv]').forEach(function(pill) {
-      var lv = pill.getAttribute('data-lv');
-      var text = '';
-      pill.childNodes.forEach(function(node) {
-        if (node.nodeType === Node.TEXT_NODE) text += node.textContent;
-      });
-      snap.nav[lv] = text.trim();
-    });
-
-    document.querySelectorAll('.sw-level-section[data-lv]').forEach(function(section) {
-      var lv   = section.getAttribute('data-lv');
-      var h2   = section.querySelector('.sw-level-header h2');
-      var desc = section.querySelector('.sw-level-desc');
-      snap.levels[lv] = {
-        title: h2   ? h2.textContent   : '',
-        desc:  desc ? desc.textContent : ''
-      };
-    });
-
-    document.querySelectorAll('.sw-card[onclick]').forEach(function(card) {
-      var m = card.getAttribute('onclick').match(/showFeature\('([\w]+)'\)/);
-      if (!m) return;
-      var id    = m[1];
-      var title = card.querySelector('.sw-card-title');
-      var desc  = card.querySelector('.sw-card-desc');
-      snap.features[id] = {
-        title: title ? title.textContent : '',
-        desc:  desc  ? desc.textContent  : ''
-      };
-    });
-
-    return snap;
-  }
+  // ── EN UI strings (sourced from cms_en.yaml) ────────────────────────────────
+  var EN_UI = {
+    hero: {
+      title:    'Smart Workflow Feature Guide',
+      subtitle: '20 features from first agent to full RAG pipeline'
+    },
+    nav: {
+      begin:    'Beginner',
+      mid:      'Intermediate',
+      exp:      'Expert',
+      adv:      'Advanced',
+      bp:       'Best Practices',
+      appendix: 'Appendix'
+    },
+    levels: {
+      begin:    { title: 'Beginner',       desc: 'Core concepts — start here' },
+      mid:      { title: 'Intermediate',   desc: 'Tools & Safety — make agents useful and safe' },
+      exp:      { title: 'Expert',         desc: 'Advanced Integration — push the boundaries' },
+      adv:      { title: 'Advanced',       desc: 'Patterns & Orchestration — design sophisticated workflows' },
+      bp:       { title: 'Best Practices', desc: 'Patterns and anti-patterns for production-ready AI workflows' },
+      appendix: { title: 'Appendix',       desc: 'Reference materials and background concepts' }
+    },
+    features: {
+      '01':  { title: 'Basic Agent Setup',                                       desc: 'Configure the AgenticProcessCall element with a system prompt to create your first AI agent.' },
+      '02':  { title: 'Structured Output',                                       desc: 'Instruct the agent to respond as a typed Java object instead of free text.' },
+      '03':  { title: 'Model Provider Selection',                                desc: 'Choose from 6 supported AI providers and configure them via variables.' },
+      '04':  { title: 'File Extraction',                                         desc: 'Attach images or PDFs and let the model visually read and extract structured data.' },
+      '05':  { title: 'Callable Process Tools',                                  desc: 'Turn any Ivy callable subprocess into an AI-discoverable tool with a single tag.' },
+      '06':  { title: 'Java Tools',                                              desc: 'Implement SmartWorkflowTool in Java for pure-code tool logic, registered via SPI.' },
+      '07':  { title: 'Web Search Tool',                                         desc: 'Built-in tool that lets agents search the internet via DuckDuckGo for up-to-date info.' },
+      '08':  { title: 'Observability',                                           desc: 'Record every agent conversation to Ivy history and trace LLM calls in Arize Phoenix — with zero code changes.' },
+      '09':  { title: 'Output Guardrail',                                        desc: 'Validate AI responses before they reach the user — block harmful or sensitive content using a built-in output guardrail.' },
+      '10':  { title: 'Input Guardrail',                                         desc: 'Validate user messages before they reach the model — block prompt injection and other malicious inputs with a built-in input guardrail.' },
+      '11':  { title: 'PII Masking Guardrail',                                   desc: 'Anonymise personal data in user messages before the LLM sees it and restore original values in the response — GDPR-friendly.' },
+      '12':  { title: 'Conversation Memory',                                     desc: 'Enable agents to remember previous turns and build coherent multi-turn dialogues using a single data class field.' },
+      '13':  { title: 'Human in the Loop',                                       desc: 'Pause agent execution and route decisions to human tasks — the agent resumes automatically with the user\'s choice.' },
+      '14':  { title: 'RAG as a Tool',                                           desc: 'Connect an OpenSearch vector store to let agents semantically search business documents.' },
+      'p01': { title: 'Agent Pattern: AI Task',                                  desc: 'Replace routine human approvals with an AI decision that writes a typed result directly into the process data.' },
+      'p02': { title: 'Agent Pattern: Subprocess Design and Tool Co-location',   desc: 'Decide when to extract a callable subprocess and when to keep tools co-located with their orchestrator.' },
+      'p03': { title: 'Agent Organisation: Folder Structure and Naming Conventions', desc: 'Group agent files in a dedicated agents/ folder and apply consistent naming across process files, callables, and data classes.' },
+      'p05': { title: 'Agent Prompts: Clarity and Dynamic Context',              desc: 'Write tool-name-free system prompts and inject live Java values — today\'s date, user locale, process data — directly into prompts using EL expressions.' },
+      'a01': { title: 'What is RAG',                                             desc: 'A conceptual overview of Retrieval-Augmented Generation — how it works and when to use it' },
+      'a02': { title: 'How LLMs Understand Language',                            desc: 'A look inside the model — how text becomes numbers, embeddings, and a generated response' },
+      'a03': { title: 'Running a Local Vector Store',                            desc: 'Set up a local OpenSearch instance with Docker for development and tutorial exercises — no cloud account required' }
+    }
+  };
 
   function _applyLangToIndex(lang) {
-    if (!_enSnapshot) _enSnapshot = _captureEnSnapshot();
+    var src = lang === 'jp' ? JP_UI : EN_UI;
 
-    var src = lang === 'jp' ? JP_UI : null; // null → restore EN
-
-    // Hero
     var h1 = document.querySelector('.sw-hero h1');
     var subtitle = document.querySelector('.sw-hero p');
-    if (h1)       h1.textContent       = src ? src.hero.title    : _enSnapshot.hero.title;
-    if (subtitle) subtitle.textContent = src ? src.hero.subtitle : _enSnapshot.hero.subtitle;
+    if (h1)       h1.textContent       = src.hero.title;
+    if (subtitle) subtitle.textContent = src.hero.subtitle;
 
-    // Nav pills (text node after the kanji <span>)
     document.querySelectorAll('.sw-level-pill[data-lv]').forEach(function(pill) {
       var lv = pill.getAttribute('data-lv');
-      var jpText = src && src.nav[lv];
-      var enText = _enSnapshot.nav[lv];
+      var text = src.nav[lv];
+      if (!text) return;
       pill.childNodes.forEach(function(node) {
         if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
-          node.textContent = ' ' + (jpText || enText || '');
+          node.textContent = ' ' + text;
         }
       });
     });
 
-    // Level section headers
     document.querySelectorAll('.sw-level-section[data-lv]').forEach(function(section) {
       var lv   = section.getAttribute('data-lv');
       var h2   = section.querySelector('.sw-level-header h2');
       var desc = section.querySelector('.sw-level-desc');
-      var jpLv = src && src.levels[lv];
-      var enLv = _enSnapshot.levels[lv] || {};
-      if (h2)   h2.textContent   = jpLv ? jpLv.title : (enLv.title || '');
-      if (desc) desc.textContent = jpLv ? jpLv.desc  : (enLv.desc  || '');
+      var lvData = src.levels[lv];
+      if (!lvData) return;
+      if (h2)   h2.textContent   = lvData.title;
+      if (desc) desc.textContent = lvData.desc;
     });
 
-    // Feature cards
     document.querySelectorAll('.sw-card[onclick]').forEach(function(card) {
       var m = card.getAttribute('onclick').match(/showFeature\('([\w]+)'\)/);
       if (!m) return;
-      var id    = m[1];
+      var id      = m[1];
       var titleEl = card.querySelector('.sw-card-title');
       var descEl  = card.querySelector('.sw-card-desc');
-      var jpFeat  = src && src.features[id];
-      var enFeat  = _enSnapshot.features[id] || {};
-      if (titleEl) titleEl.textContent = jpFeat ? jpFeat.title : (enFeat.title || '');
-      if (descEl)  descEl.textContent  = jpFeat ? jpFeat.desc  : (enFeat.desc  || '');
+      var feat    = src.features[id];
+      if (!feat) return;
+      if (titleEl) titleEl.textContent = feat.title;
+      if (descEl)  descEl.textContent  = feat.desc;
     });
   }
 
@@ -392,12 +388,12 @@
   // ── Boot ───────────────────────────────────────────────────────────────────
 
   document.addEventListener('DOMContentLoaded', function() {
+    var sessionEl = document.getElementById('sw-session-lang');
+    var sessionLang = sessionEl ? (sessionEl.getAttribute('data-lang') || 'en') : 'en';
+    currentLang = localStorage.getItem('sw-lang') === 'jp' ? 'jp' : sessionLang;
     initLevelNav();
     window.swRenderer = new FeatureRenderer();
-    // Apply saved language preference immediately
-    if (currentLang !== 'en') {
-      _applyLangToIndex(currentLang);
-    }
+    _applyLangToIndex(currentLang);
     _updateLangButtons();
   });
 
