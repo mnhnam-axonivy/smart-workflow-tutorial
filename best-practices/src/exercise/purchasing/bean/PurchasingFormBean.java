@@ -3,10 +3,10 @@ package exercise.purchasing.bean;
 import java.io.Serializable;
 import java.util.Locale;
 
-import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
-import javax.faces.context.FacesContext;
+import jakarta.faces.application.FacesMessage;
+import jakarta.inject.Named;
+import jakarta.faces.view.ViewScoped;
+import jakarta.faces.context.FacesContext;
 
 import ch.ivyteam.ivy.environment.Ivy;
 import ch.ivyteam.ivy.scripting.objects.List;
@@ -18,7 +18,7 @@ import exercise.purchasing.PurchasingData;
 import exercise.purchasing.PurchasingStatus;
 import exercise.purchasing.Region;
 
-@ManagedBean
+@Named
 @ViewScoped
 public class PurchasingFormBean implements Serializable {
 
