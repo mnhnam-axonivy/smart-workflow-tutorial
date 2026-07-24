@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.axonivy.ivy.api</groupId>
     <artifactId>ivy-project-parent</artifactId>
-    <version>14.0.0-SNAPSHOT</version>
+    <version>14.0.0-jakarta-SNAPSHOT</version>
     <relativePath></relativePath>
   </parent>
   <groupId>tutorial</groupId>
@@ -20,13 +20,13 @@
     <dependency>
       <groupId>com.axonivy.utils.ai</groupId>
       <artifactId>smart-workflow</artifactId>
-      <version>14.0.0-b5</version>
+      <version>14.0.0-SNAPSHOT</version>
       <type>iar</type>
     </dependency>
     <dependency>
       <groupId>com.axonivy.utils.ai</groupId>
       <artifactId>smart-workflow-opensearch-rag</artifactId>
-      <version>14.0.0-b5</version>
+      <version>14.0.0-SNAPSHOT</version>
       <type>iar</type>
     </dependency>
   </dependencies>
