@@ -1,0 +1,67 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/process-1.json",
+  "id" : "19F13BBBBBBBB13",
+  "kind" : "CALLABLE_SUB",
+  "config" : {
+    "data" : "tutorial.Feature13ToolsData"
+  },
+  "elements" : [ {
+      "id" : "f30",
+      "type" : "CallSubStart",
+      "name" : "askUserFeedback(HumanFeedback)",
+      "config" : {
+        "signature" : "askUserFeedback",
+        "input" : {
+          "params" : [
+            { "name" : "feedback", "type" : "tutorial.HumanFeedback", "desc" : "required: a question for the human to answer in free text" }
+          ],
+          "map" : {
+            "out.feedback" : "param.feedback"
+          }
+        },
+        "result" : {
+          "params" : [
+            { "name" : "answer", "type" : "String", "desc" : "the human's free-text response" }
+          ],
+          "map" : {
+            "result.answer" : "in.feedback.answer"
+          }
+        }
+      },
+      "tags" : [
+        "tool"
+      ],
+      "visual" : {
+        "at" : { "x" : 144, "y" : 96 },
+        "description" : "Ask the human user a question and wait for a free-text answer. Use this when you need a human judgment or explanation before proceeding. Execution pauses until the user submits their response."
+      },
+      "connect" : [
+        { "id" : "f31", "to" : "f32" }
+      ]
+    }, {
+      "id" : "f32",
+      "type" : "ErrorEnd",
+      "name" : "human:decision",
+      "config" : {
+        "throws" : {
+          "error" : "human:decision"
+        },
+        "code" : "error.setAttribute(\"decision\", in.feedback);"
+      },
+      "visual" : {
+        "at" : { "x" : 416, "y" : 96 },
+        "icon" : "std:EscalationThrow"
+      }
+    }, {
+      "id" : "f33",
+      "type" : "ProcessAnnotation",
+      "name" : "Suspends the agent by throwing human:decision — the error boundary on the calling ProgramInterface catches it and routes to the UserTask.",
+      "visual" : {
+        "at" : { "x" : 336, "y" : 176 },
+        "size" : { "width" : 440, "height" : 46 }
+      },
+      "connect" : [
+        { "id" : "f34", "to" : "f32" }
+      ]
+    } ]
+}

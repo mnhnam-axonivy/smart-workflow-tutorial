@@ -1,0 +1,88 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/process-1.json",
+  "id" : "19F09C1F4DB1091C",
+  "config" : {
+    "data" : "tutorial.Feature04Data"
+  },
+  "elements" : [ {
+      "id" : "f0",
+      "type" : "RequestStart",
+      "name" : "Acme Corp invoice document extraction",
+      "config" : {
+        "signature" : "start",
+        "request" : {
+          "name" : "Tutorial Feature 04: Invoice File Extraction"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f2", "to" : "f3" }
+      ]
+    }, {
+      "id" : "f1",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 768, "y" : 64 }
+      }
+    }, {
+      "id" : "f3",
+      "type" : "TaskSwitchEvent",
+      "name" : "Submit Invoice Document",
+      "config" : {
+        "task" : {
+          "skipTasklist" : true
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 248, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f4", "to" : "f5", "color" : "default" }
+      ]
+    }, {
+      "id" : "f5",
+      "type" : "ProgramInterface",
+      "name" : "Invoice Extraction Agent",
+      "config" : {
+        "javaClass" : "com.axonivy.utils.smart.workflow.AgenticProcessCall",
+        "userConfig" : {
+          "system" : "You are an invoice extraction agent for Acme Corp.\r\nYou receive an invoice document (image or PDF) and extract the following fields:\r\n- invoiceNumber (String)\r\n- supplierName (String)\r\n- totalAmount (BigDecimal)\r\n- currency (String, ISO 4217)\r\n- invoiceDate (LocalDate, format yyyy-MM-dd)\r\n\r\nReturn only the structured data. Do not add commentary.\r\nIf a field is missing in the document, return null for that field.",
+          "resultType" : "tutorial.InvoiceData.class",
+          "resultMapping" : "in.invoiceResult",
+          "query" : "Extract the invoice data from this document:\r\n<%=ivy.cms.co(\"/Files/Documents/InvoiceSample\")%>"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 424, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f6", "to" : "fA", "color" : "default" }
+      ]
+    }, {
+      "id" : "fA",
+      "type" : "Script",
+      "name" : "Show result from AI",
+      "config" : {
+        "output" : {
+          "code" : "ivy.log.error(dev.langchain4j.internal.Json.toJson(in.invoiceResult));"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 600, "y" : 64 },
+        "color" : "yellow"
+      },
+      "connect" : [
+        { "id" : "f7", "to" : "f1", "color" : "default" }
+      ]
+    } ],
+  "layout" : {
+    "colors" : {
+      "red" : "#ff0000",
+      "green" : "#1eff00",
+      "yellow" : "#fbff00",
+      "pink" : "#fb00ff"
+    }
+  }
+}

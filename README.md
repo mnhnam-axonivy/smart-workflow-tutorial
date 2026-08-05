@@ -15,8 +15,8 @@ This is a tutorial project for **Axon Ivy Smart Workflow** developers. It is int
 
 | Component | Version |
 |---|---|
-| Axon Ivy Engine | [Sprint Release 23.07.2026](https://download.axonivy.com/sprint/AxonIvyEngine14.0.0.2607231347.S29_Windows_x64.zip) |
-| Smart Workflow | 14.0.0-beta5 |
+| Axon Ivy Engine | [Nightly Engine 05.06.2026](https://download.axonivy.com/nightly/AxonIvyEngine14.0.0.2608050112_Slim_All_x64.zip) |
+| Smart Workflow | In this repo |
 
 ### Project Structure
 
@@ -84,8 +84,8 @@ All `cms:/` image references in the markdown files are automatically rewritten t
 
 | コンポーネント | バージョン |
 |---|---|
-| Axon Ivy Engine | [スプリントリリース 23.07.2026](https://download.axonivy.com/sprint/AxonIvyEngine14.0.0.2607231347.S29_Windows_x64.zip) |
-| Smart Workflow | 14.0.0-beta5 |
+| Axon Ivy Engine | [スプリントリリース 05.06.2026](https://download.axonivy.com/nightly/AxonIvyEngine14.0.0.2608050112_Slim_All_x64.zip) |
+| Smart Workflow | In this repo |
 
 ### プロジェクト構成
 
