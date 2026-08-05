@@ -1,0 +1,204 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/process-1.json",
+  "id" : "19F0D760FD09436D",
+  "kind" : "CALLABLE_SUB",
+  "config" : {
+    "data" : "tutorial.Feature05ToolsData"
+  },
+  "elements" : [ {
+      "id" : "f0",
+      "type" : "CallSubStart",
+      "name" : "lookupApprovalPolicy(String)",
+      "config" : {
+        "signature" : "lookupApprovalPolicy",
+        "input" : {
+          "params" : [
+            { "name" : "amount", "type" : "String", "desc" : "Invoice total amount as a plain number string" }
+          ],
+          "map" : {
+            "out.amount" : "param.amount"
+          }
+        },
+        "result" : {
+          "params" : [
+            { "name" : "policy", "type" : "String", "desc" : "Approval policy: STANDARD or REQUIRES_APPROVAL" }
+          ],
+          "map" : {
+            "result.policy" : "in.policy"
+          }
+        }
+      },
+      "tags" : [
+        "tool"
+      ],
+      "visual" : {
+        "at" : { "x" : 96, "y" : 64 },
+        "description" : "Use this tool to determine the approval policy for an invoice amount. Returns STANDARD if the invoice can be auto-approved, or REQUIRES_APPROVAL if manual sign-off is needed."
+      },
+      "connect" : [
+        { "id" : "f2", "to" : "f3" }
+      ]
+    }, {
+      "id" : "f1",
+      "type" : "CallSubEnd",
+      "visual" : {
+        "at" : { "x" : 544, "y" : 64 }
+      }
+    }, {
+      "id" : "f3",
+      "type" : "Script",
+      "name" : "Determine approval policy",
+      "config" : {
+        "output" : {
+          "code" : [
+            "try {",
+            "  double amount = Double.parseDouble(in.amount.trim());",
+            "  in.policy = amount > 5000 ? \"REQUIRES_APPROVAL\" : \"STANDARD\";",
+            "} catch (NumberFormatException e) {",
+            "  in.policy = \"STANDARD\";",
+            "}"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 320, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f4", "to" : "f1", "color" : "default" }
+      ]
+    }, {
+      "id" : "f10",
+      "type" : "CallSubStart",
+      "name" : "calculateEffectiveTaxRate(String)",
+      "config" : {
+        "signature" : "calculateEffectiveTaxRate",
+        "input" : {
+          "params" : [
+            { "name" : "currency", "type" : "String", "desc" : "ISO 4217 currency code of the invoice" }
+          ],
+          "map" : {
+            "out.currency" : "param.currency"
+          }
+        },
+        "result" : {
+          "params" : [
+            { "name" : "taxRate", "type" : "String", "desc" : "Effective tax rate as a percentage string, e.g. 21%" }
+          ],
+          "map" : {
+            "result.taxRate" : "in.taxRate"
+          }
+        }
+      },
+      "tags" : [
+        "tool"
+      ],
+      "visual" : {
+        "at" : { "x" : 96, "y" : 192 },
+        "description" : "Use this tool to look up the applicable VAT rate for an invoice. Pass the ISO 4217 currency code (e.g. EUR, JPY) and receive the effective tax rate as a percentage string."
+      },
+      "connect" : [
+        { "id" : "f12", "to" : "f13" }
+      ]
+    }, {
+      "id" : "f11",
+      "type" : "CallSubEnd",
+      "visual" : {
+        "at" : { "x" : 544, "y" : 192 }
+      }
+    }, {
+      "id" : "f13",
+      "type" : "Script",
+      "name" : "Calculate effective tax rate",
+      "config" : {
+        "output" : {
+          "code" : [
+            "String currency = in.currency != null ? in.currency.toUpperCase() : \"\";",
+            "if (\"EUR\".equals(currency)) {",
+            "  in.taxRate = \"21%\";",
+            "} else if (\"GBP\".equals(currency)) {",
+            "  in.taxRate = \"20%\";",
+            "} else if (\"USD\".equals(currency)) {",
+            "  in.taxRate = \"10%\";",
+            "} else if (\"JPY\".equals(currency)) {",
+            "  in.taxRate = \"8%\";",
+            "} else {",
+            "  in.taxRate = \"10%\";",
+            "}"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 320, "y" : 192 }
+      },
+      "connect" : [
+        { "id" : "f14", "to" : "f11", "color" : "default" }
+      ]
+    }, {
+      "id" : "f20",
+      "type" : "CallSubStart",
+      "name" : "chooseApprover(String)",
+      "config" : {
+        "signature" : "chooseApprover",
+        "input" : {
+          "params" : [
+            { "name" : "amount", "type" : "String", "desc" : "Invoice total amount as a plain number string" }
+          ],
+          "map" : {
+            "out.amount" : "param.amount"
+          }
+        },
+        "result" : {
+          "params" : [
+            { "name" : "approver", "type" : "String", "desc" : "Username of the responsible approver (e.g. alice.chen, bob.smith, or carol.jones)" }
+          ],
+          "map" : {
+            "result.approver" : "in.approver"
+          }
+        }
+      },
+      "tags" : [
+        "tool"
+      ],
+      "visual" : {
+        "at" : { "x" : 96, "y" : 320 },
+        "description" : "Use this tool to select the responsible approver for an invoice. Pass the total amount as a plain number string and receive the username of the approver who must sign off."
+      },
+      "connect" : [
+        { "id" : "f22", "to" : "f23" }
+      ]
+    }, {
+      "id" : "f21",
+      "type" : "CallSubEnd",
+      "visual" : {
+        "at" : { "x" : 544, "y" : 320 }
+      }
+    }, {
+      "id" : "f23",
+      "type" : "Script",
+      "name" : "Choose approver by amount",
+      "config" : {
+        "output" : {
+          "code" : [
+            "try {",
+            "  double amount = Double.parseDouble(in.amount.trim());",
+            "  if (amount > 50000) {",
+            "    in.approver = \"alice.chen\";",
+            "  } else if (amount > 10000) {",
+            "    in.approver = \"bob.smith\";",
+            "  } else {",
+            "    in.approver = \"carol.jones\";",
+            "  }",
+            "} catch (NumberFormatException e) {",
+            "  in.approver = \"carol.jones\";",
+            "}"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 320, "y" : 320 }
+      },
+      "connect" : [
+        { "id" : "f24", "to" : "f21", "color" : "default" }
+      ]
+    } ]
+}
