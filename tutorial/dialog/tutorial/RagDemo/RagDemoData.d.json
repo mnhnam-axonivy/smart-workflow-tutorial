@@ -1,87 +1,114 @@
 {
-  "$schema" : "https://json-schema.axonivy.com/14.0-dev/project/data-class.json",
+  "$schema" : "https://json-schema.axonivy.com/14.0/project/data-class.json",
   "simpleName" : "RagDemoData",
   "namespace" : "tutorial.RagDemo",
   "fields" : [ {
     "name" : "indexName",
-    "type" : "String"
+    "type" : "String",
+    "modifiers" : [ ]
   }, {
     "name" : "sources",
-    "type" : "java.util.List<String>"
+    "type" : "java.util.List<String>",
+    "modifiers" : [ ]
   }, {
     "name" : "ragResult",
-    "type" : "com.axonivy.utils.smart.workflow.rag.pipeline.RagResult"
+    "type" : "com.axonivy.utils.smart.workflow.rag.pipeline.RagResult",
+    "modifiers" : [ ]
   }, {
     "name" : "question",
-    "type" : "String"
+    "type" : "String",
+    "modifiers" : [ ]
   }, {
     "name" : "userInput",
-    "type" : "String"
+    "type" : "String",
+    "modifiers" : [ ]
   }, {
     "name" : "messages",
-    "type" : "java.util.List<tutorial.rag.ChatMessage>"
+    "type" : "java.util.List<tutorial.rag.ChatMessage>",
+    "modifiers" : [ ]
   }, {
     "name" : "stagedFiles",
-    "type" : "java.util.List<tutorial.rag.UploadedFile>"
+    "type" : "java.util.List<tutorial.rag.UploadedFile>",
+    "modifiers" : [ ]
   }, {
     "name" : "embeddedChunks",
-    "type" : "java.util.List<tutorial.rag.EmbeddedChunkView>"
+    "type" : "java.util.List<tutorial.rag.EmbeddedChunkView>",
+    "modifiers" : [ ]
   }, {
     "name" : "filteredChunks",
-    "type" : "java.util.List<tutorial.rag.EmbeddedChunkView>"
+    "type" : "java.util.List<tutorial.rag.EmbeddedChunkView>",
+    "modifiers" : [ ]
   }, {
     "name" : "indexMeta",
-    "type" : "tutorial.rag.IndexMetaView"
+    "type" : "tutorial.rag.IndexMetaView",
+    "modifiers" : [ ]
   }, {
     "name" : "uploadEvent",
-    "type" : "org.primefaces.event.FileUploadEvent"
+    "type" : "org.primefaces.event.FileUploadEvent",
+    "modifiers" : [ ]
   }, {
     "name" : "currentStep",
-    "type" : "Integer"
+    "type" : "Integer",
+    "modifiers" : [ ]
   }, {
     "name" : "cfgEmbeddingProvider",
-    "type" : "String"
+    "type" : "String",
+    "modifiers" : [ ]
   }, {
     "name" : "cfgEmbeddingModel",
-    "type" : "String"
+    "type" : "String",
+    "modifiers" : [ ]
   }, {
     "name" : "cfgChunkSize",
-    "type" : "String"
+    "type" : "String",
+    "modifiers" : [ ]
   }, {
     "name" : "cfgChunkOverlap",
-    "type" : "String"
+    "type" : "String",
+    "modifiers" : [ ]
   }, {
     "name" : "cfgMaxResults",
-    "type" : "String"
+    "type" : "String",
+    "modifiers" : [ ]
   }, {
     "name" : "cfgMinScore",
-    "type" : "String"
+    "type" : "String",
+    "modifiers" : [ ]
   }, {
     "name" : "indexExists",
-    "type" : "Boolean"
+    "type" : "Boolean",
+    "modifiers" : [ ]
   }, {
     "name" : "cfgOpenSearchUrl",
-    "type" : "String"
+    "type" : "String",
+    "modifiers" : [ ]
   }, {
     "name" : "cfgOpenSearchAuthType",
-    "type" : "String"
+    "type" : "String",
+    "modifiers" : [ ]
   }, {
     "name" : "connectionOk",
-    "type" : "Boolean"
+    "type" : "Boolean",
+    "modifiers" : [ ]
   }, {
     "name" : "pdfBinary",
-    "type" : "ch.ivyteam.ivy.scripting.objects.Binary"
+    "type" : "ch.ivyteam.ivy.scripting.objects.Binary",
+    "modifiers" : [ ]
   }, {
     "name" : "pdfExtractIndex",
-    "type" : "Integer"
+    "type" : "Integer",
+    "modifiers" : [ ]
   }, {
     "name" : "selectedDocument",
-    "type" : "String"
+    "type" : "String",
+    "modifiers" : [ ]
   }, {
     "name" : "translatedAnswer",
-    "type" : "String"
+    "type" : "String",
+    "modifiers" : [ ]
   }, {
     "name" : "language",
-    "type" : "String"
+    "type" : "String",
+    "modifiers" : [ ]
   } ]
 }
