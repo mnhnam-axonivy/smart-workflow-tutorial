@@ -1,26 +1,28 @@
 package com.axonivy.utils.smart.workflow.model.anthropic.internal;
 
+import static com.axonivy.utils.smart.workflow.model.utils.ModelOptionUtils.resolveTemperature;
+
 import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.axonivy.utils.smart.workflow.client.SmartHttpClientBuilderFactory;
+import com.axonivy.utils.smart.workflow.model.spi.ModelOptions;
 
 import ch.ivyteam.ivy.environment.Ivy;
 import dev.langchain4j.model.anthropic.AnthropicChatModel;
+import dev.langchain4j.model.anthropic.AnthropicChatModel.AnthropicChatModelBuilder;
 import dev.langchain4j.model.anthropic.AnthropicChatModelName;
 import dev.langchain4j.model.chat.request.ChatRequestParameters;
-import dev.langchain4j.model.anthropic.AnthropicChatModel.AnthropicChatModelBuilder;
 
 public class AnthropicServiceConnector {
 
   private static final String DEFAULT_MODEL = AnthropicChatModelName.CLAUDE_HAIKU_4_5_20251001.toString();
 
   private static final Set<String> KNOWN_ALIASES = Set.of(
-    "claude-haiku-4-5", "claude-sonnet-4-5", "claude-opus-4-5", "claude-opus-4-1",
-    "claude-sonnet-4-0", "claude-opus-4-0"
-  );
+      "claude-haiku-4-5", "claude-sonnet-4-5", "claude-opus-4-5", "claude-opus-4-1",
+      "claude-sonnet-4-0", "claude-opus-4-0");
 
   public interface AnthropicConf {
     String PREFIX = "AI.Providers.Anthropic.";
@@ -29,19 +31,12 @@ public class AnthropicServiceConnector {
     String DEFAULT_MODEL = PREFIX + "DefaultModel";
   }
 
-  public static AnthropicChatModelBuilder buildAnthropicModel() {
-    return buildAnthropicModel(DEFAULT_MODEL);
-  }
-
-  public static AnthropicChatModelBuilder buildAnthropicModel(String modelName) {
-    return initBuilder(resolveModelName(modelName));
-  }
-
-  private static AnthropicChatModelBuilder initBuilder(String modelName) {
+  public static AnthropicChatModelBuilder buildAnthropicModel(ModelOptions options) {
     AnthropicChatModelBuilder builder = initBuilder();
     var request = ChatRequestParameters.builder()
-      .modelName(modelName);
-    builder.defaultRequestParameters(request.build()); 
+        .modelName(resolveModelName(options.modelName()))
+        .temperature(resolveTemperature(options.temperature()));
+    builder.defaultRequestParameters(request.build());
     return builder;
   }
 
