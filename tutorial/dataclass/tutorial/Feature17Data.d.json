@@ -1,0 +1,18 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0/project/data-class.json",
+  "simpleName" : "Feature17Data",
+  "namespace" : "tutorial",
+  "fields" : [ {
+    "name" : "invoiceText",
+    "comment" : "Overdue invoice text the reminder subject lines are written for"
+  }, {
+    "name" : "temperature",
+    "comment" : "Temperature for the creative agent, e.g. \"1.0\""
+  }, {
+    "name" : "deterministicSubject",
+    "comment" : "Reminder subject line written at temperature 0.0"
+  }, {
+    "name" : "creativeSubject",
+    "comment" : "Reminder subject line written at the temperature in the temperature field"
+  } ]
+}

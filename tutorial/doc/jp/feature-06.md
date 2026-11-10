@@ -149,7 +149,7 @@ tutorial.tool.TutorialToolProvider
 
 ## Step 4 — エージェントのToolsリストに追加する
 
-`AgenticProcessCall` の設定で、ツールの `name()` を **Tools** フィールドに追加します。
+`AgenticProcessCall` の設定で **🛠️ Tools** グループを開き、**Available tools** マルチセレクトで `convertToUSD` を選択します。登録済みのJavaツールは、呼び出し可能プロセスツールと並んで `name()` の名前で一覧に表示されます。プロセスファイルには選択内容が次のように保存されます。
 
 ```json
 ["convertToUSD"]
@@ -205,7 +205,7 @@ Given an invoice text:
 
 **クエリ:** `<%=in.invoiceText%>`
 
-**Tools:** `["convertToUSD"]`
+**Available tools:** `convertToUSD`
 
 **結果のマッピング先:** `in.summary`
 
@@ -256,7 +256,7 @@ which is equivalent to approximately 70.75 USD at a rate of 0.0067.
 - `tutorial/src/tutorial/tool/TutorialToolProvider.java` — SPIプロバイダー
 - `tutorial/src/META-INF/services/com.axonivy.utils.smart.workflow.tools.provider.SmartWorkflowToolsProvider` — SPI登録ファイル
 
-DesignerでプロセスをOpenし、`Invoice Analyst Agent` 要素を確認してください — `["convertToUSD"]` が含まれた `Tools` フィールドがあります。`FxRateConverterTool.java` を開いて実装全体を確認してください。
+DesignerでプロセスをOpenし、`Invoice Analyst Agent` 要素を確認してください — **Available tools** フィールドで `convertToUSD` が選択されています。`FxRateConverterTool.java` を開いて実装全体を確認してください。
 
 ---
 

@@ -160,7 +160,7 @@ Axon Ivyは `#[password]` アノテーションが付いた変数をシークレ
 
 ### 2 — AgenticProcessCallでのエージェントごとの上書き
 
-任意の **AgenticProcessCall** 要素を開き、設定エディタの **AI Provider** セクションまでスクロールします。**Provider** と **Model** フィールドを設定すると、その要素だけグローバルデフォルトを上書きできます — プロセス内の他のエージェントはグローバル設定を引き続き使用します。
+任意の **AgenticProcessCall** 要素を開き、設定エディタの **🧠️ Model** グループまでスクロールします。一覧から **Provider** を選択し **Model** フィールドを設定すると、その要素だけグローバルデフォルトを上書きできます — プロセス内の他のエージェントはグローバル設定を引き続き使用します。
 
 ![Per-agent AI Provider override in AgenticProcessCall](cms:/Files/Images/feature03-per-agent-override)
 
@@ -186,6 +186,12 @@ Acme Corpのプロセスには3つの `AgenticProcessCall` 要素が順番に並
 
 ---
 
+## 高度なモデル設定
+
+**Provider** と **Model** は *どの* モデルが回答するかを決めます。モデルが *どのように* 回答するか — 例えば **Temperature** — を調整するには、同じ要素の **⚙️ Advanced** グループを使用します。これらの設定は [高度なモデル設定] で説明します。
+
+---
+
 ## サンプルプロセス
 
 このガイドで説明した3エージェントプロセスの動作実装がチュートリアルプロジェクトで利用できます。
@@ -201,3 +207,4 @@ Designerで開いて、3つの `AgenticProcessCall` 要素を確認してくだ�
 - [エージェントの基本設定]
 - [構造化出力]
 - [ファイル抽出]
+- [高度なモデル設定]

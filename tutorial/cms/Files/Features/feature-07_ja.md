@@ -58,7 +58,7 @@
 
 ## Step 1 — Toolsリストに webSearch を追加する
 
-`AgenticProcessCall` の設定で、**Tools** フィールドに `"webSearch"` を追加します。
+`AgenticProcessCall` の設定で **🛠️ Tools** グループを開き、**Available tools** マルチセレクトで `webSearch` を選択します。プロセスファイルには選択内容が次のように保存されます。
 
 ```json
 ["webSearch"]
@@ -125,7 +125,7 @@ Summarise the results in a clear, concise paragraph.
 
 **クエリ:** `<%=in.query%>`
 
-**Tools:** `["webSearch"]`
+**Available tools:** `webSearch`
 
 **結果のマッピング先:** `in.searchResult`
 
@@ -174,7 +174,7 @@ observability via Arize Phoenix. Source: https://developer.axonivy.com/release-n
 
 - `tutorial/processes/tutorial/features/Feature07.p.json` — エージェントプロセス
 
-DesignerでプロセスをOpenし、`Web Search Agent` 要素を確認してください — `["webSearch"]` が含まれた `Tools` フィールドと、常にソースを引用するよう指示するシステムプロンプトがあります。
+DesignerでプロセスをOpenし、`Web Search Agent` 要素を確認してください — **Available tools** フィールドで選択された `webSearch` と、常にソースを引用するよう指示するシステムプロンプトがあります。
 
 ---
 

@@ -68,14 +68,14 @@ Defines the process data field where the agent's output is written after executi
 **Example:**
 
 ```text
-out.summary
+in.summary
 ```
 
 This writes the agent's response into the `summary` field of `Feature01Data` — a plain String. The rest of the process can display it, log it, or pass it to the next step directly. No parsing, no casting — it is just a String.
 
 > To return a **typed Java object** instead of a plain String (e.g. to extract multiple fields into individual typed variables), see [Structured Output].
 >
-> The editor also shows **Tools** and **AI Provider** fields — leave both blank for this basic setup. They are covered in [Callable Process Tools] and [Model Provider Selection].
+> The editor also shows the **🛠️ Tools**, **🛡️ Guardrails**, **🧠️ Model** and **⚙️ Advanced** groups — leave them empty for this basic setup. Tools are covered in [Callable Process Tools], guardrails in [Output Guardrail], provider and model in [Model Provider Selection], and settings such as temperature in [Advanced Model Settings].
 
 ---
 

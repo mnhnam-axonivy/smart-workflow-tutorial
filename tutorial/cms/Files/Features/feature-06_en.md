@@ -149,7 +149,7 @@ Without this file the framework will never load your provider and the tool will 
 
 ## Step 4 — Add to agent Tools list
 
-In the `AgenticProcessCall` configuration, add the tool's `name()` to the **Tools** field:
+In the `AgenticProcessCall` configuration, open the **🛠️ Tools** group and select `convertToUSD` in the **Available tools** multi-select. Registered Java tools appear in the list under their `name()`, next to the callable process tools. The process file stores the selection as:
 
 ```json
 ["convertToUSD"]
@@ -205,7 +205,7 @@ Given an invoice text:
 
 **Query:** `<%=in.invoiceText%>`
 
-**Tools:** `["convertToUSD"]`
+**Available tools:** `convertToUSD`
 
 **Map result to:** `in.summary`
 
@@ -256,7 +256,7 @@ The working implementation is available in the tutorial project:
 - `tutorial/src/tutorial/tool/TutorialToolProvider.java` — the SPI provider
 - `tutorial/src/META-INF/services/com.axonivy.utils.smart.workflow.tools.provider.SmartWorkflowToolsProvider` — the SPI registration file
 
-Open the process in the Designer and inspect the `Invoice Analyst Agent` element — note the `Tools` field containing `["convertToUSD"]`. Open `FxRateConverterTool.java` to see the full implementation.
+Open the process in the Designer and inspect the `Invoice Analyst Agent` element — note `convertToUSD` selected in the **Available tools** field. Open `FxRateConverterTool.java` to see the full implementation.
 
 ---
 

@@ -1,0 +1,119 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0/project/process.json",
+  "id" : "19F2C4A7B3D51E71",
+  "config" : {
+    "data" : "tutorial.Feature17Data"
+  },
+  "elements" : [ {
+      "id" : "f0",
+      "type" : "RequestStart",
+      "name" : "Temperature demo",
+      "config" : {
+        "signature" : "start",
+        "request" : {
+          "name" : "Tutorial Feature 17: Temperature demo"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f2", "to" : "fA" }
+      ]
+    }, {
+      "id" : "fA",
+      "type" : "Script",
+      "name" : "Mock data",
+      "config" : {
+        "output" : {
+          "code" : [
+            "in.invoiceText = \"Invoice Number: INV-2024-00123\\n\" +",
+            "\"Supplier: Acme Supplies Ltd.\\n\" +",
+            "\"Total Amount Due: JPY 10,560.00\\n\" +",
+            "\"Due Date: 2024-06-30\\n\";",
+            "in.temperature = \"1.0\";"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 224, "y" : 64 },
+        "color" : "yellow"
+      },
+      "connect" : [
+        { "id" : "f3", "to" : "f5", "color" : "default" }
+      ]
+    }, {
+      "id" : "f5",
+      "type" : "ProgramInterface",
+      "name" : "Reminder Subject (deterministic)",
+      "config" : {
+        "javaClass" : "com.axonivy.utils.smart.workflow.AgenticProcessCall",
+        "userConfig" : {
+          "system" : "You write email subject lines for Acme Corp's accounts payable team.\r\nGiven an overdue invoice, write one friendly payment reminder subject line.\r\nReturn only the subject line. No quotes, no explanation.",
+          "temperature" : "\"0.0\"",
+          "resultMapping" : "in.deterministicSubject",
+          "query" : "<%=in.invoiceText%>"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 400, "y" : 64 },
+        "size" : { "width" : 160, "height" : 62 }
+      },
+      "connect" : [
+        { "id" : "f6", "to" : "f7", "color" : "default" }
+      ]
+    }, {
+      "id" : "f7",
+      "type" : "ProgramInterface",
+      "name" : "Reminder Subject (creative)",
+      "config" : {
+        "javaClass" : "com.axonivy.utils.smart.workflow.AgenticProcessCall",
+        "userConfig" : {
+          "system" : "You write email subject lines for Acme Corp's accounts payable team.\r\nGiven an overdue invoice, write one friendly payment reminder subject line.\r\nReturn only the subject line. No quotes, no explanation.",
+          "temperature" : "in.temperature",
+          "resultMapping" : "in.creativeSubject",
+          "query" : "<%=in.invoiceText%>"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 592, "y" : 64 },
+        "size" : { "width" : 160, "height" : 62 }
+      },
+      "connect" : [
+        { "id" : "f8", "to" : "f9", "color" : "default" }
+      ]
+    }, {
+      "id" : "f9",
+      "type" : "Script",
+      "name" : "Show result from AI",
+      "config" : {
+        "output" : {
+          "code" : [
+            "ivy.log.error(\"temperature 0.0: \" + in.deterministicSubject);",
+            "ivy.log.error(\"temperature \" + in.temperature + \": \" + in.creativeSubject);"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 768, "y" : 64 },
+        "color" : "yellow"
+      },
+      "connect" : [
+        { "id" : "f10", "to" : "f1", "color" : "default" }
+      ]
+    }, {
+      "id" : "f1",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 896, "y" : 64 }
+      }
+    } ],
+  "layout" : {
+    "colors" : {
+      "red" : "#ff0000",
+      "green" : "#1eff00",
+      "yellow" : "#fbff00",
+      "pink" : "#fb00ff"
+    }
+  }
+}
