@@ -2,7 +2,7 @@
 
 デフォルトでは、エージェントはクエリで与えられた情報のみで推論できます。**呼び出し可能プロセスツール** はこれを拡張します: エージェントは実行中にAxon Ivyプロセスにコールバックして、リアルタイムデータの取得・ビジネスルールの適用・副作用のトリガーを行い、その結果を応答に利用できます。
 
-> **[エージェントの基本設定] をベースにしています。** エージェント設定は同じです — 追加点は **Tools** フィールドのみで、エージェントが呼び出せる呼び出し可能サブプロセスのリストを指定します。
+> **[エージェントの基本設定] をベースにしています。** エージェント設定は同じです — 追加点は **Available tools** フィールドのみで、エージェントが呼び出せる呼び出し可能サブプロセスを選択します。
 >
 > **このガイドで使用する例: Acme Corp 請求書承認**
 >
@@ -60,9 +60,11 @@ Smart Workflowはエージェントのツールを定義するための2つの�
 
 ### Tools
 
-エージェントが呼び出せる呼び出し可能サブプロセスをシグネチャ名のJSON配列として列挙します。
+**🛠️ Tools** グループの **Available tools** マルチセレクトで、エージェントが呼び出せるツールを選択します。一覧には、ツールとしてタグ付けされたアプリケーション内のすべての呼び出し可能サブプロセスと、登録済みのすべてのJavaツールが表示されます。
 
-**例:**
+> **重要:** **Available tools** が空の場合、エージェントは **ツールを一切使用できません** — ツールはグローバルに検出されますが、使用権限はエージェントごとに付与されます。
+
+**例:** `lookupApprovalPolicy`・`calculateEffectiveTaxRate`・`chooseApprover` を選択します。プロセスファイルには、選択内容がシグネチャ名のリストとして保存されます。
 
 ```json
 ["lookupApprovalPolicy", "calculateEffectiveTaxRate", "chooseApprover"]
@@ -70,7 +72,7 @@ Smart Workflowはエージェントのツールを定義するための2つの�
 
 **仕組み:** 実行時に、Smart Workflowは列挙した各ツールを使用可能な関数としてLLMに登録します。エージェントのシステムプロンプトが、いつどのように使用するかを伝えます。LLMがツールを呼び出すと判断すると、Smart Workflowが一致する呼び出し可能サブプロセスを実行し、パラメータを渡し、結果をLLM会話にフィードバックします。エージェントは新しい情報を元に推論を続けます。
 
-> **AI Provider** と **Model** フィールドは [エージェントの基本設定] と同様に機能します — グローバルデフォルトを使用するには空白のままにします。
+> **🧠️ Model** グループは [エージェントの基本設定] と同様に機能します — グローバルデフォルトを使用するには空のままにします。詳細は [モデルプロバイダーの選択] を参照してください。
 
 ---
 
@@ -207,7 +209,7 @@ Given invoice text:
 
 **クエリ:** `<%=in.invoiceText%>`
 
-**Tools:** `["lookupApprovalPolicy", "calculateEffectiveTaxRate", "chooseApprover"]`
+**Available tools:** `lookupApprovalPolicy`・`calculateEffectiveTaxRate`・`chooseApprover`
 
 **期待する結果の型:** `tutorial.InvoiceDecision.class`
 
@@ -229,7 +231,7 @@ in.invoiceDecision.approverUsername   // → "bob.smith"
 
 ## よくあるミス
 
-- **ツールが見つからない** — `tools` 配列の名前は `CallSubStart` 要素の `signature` と完全に一致する必要があります。不一致はツール登録がサイレントに失敗し、エージェントはツールが利用できないかのように動作します。
+- **ツールが見つからない** — 保存されたツール名は `CallSubStart` 要素の `signature` と完全に一致する必要があります。**Available tools** から選択すれば一致が保証されますが、選択後にシグネチャ名を変更すると保存済みの名前と一致しなくなり、ツール登録がサイレントに失敗し、エージェントはツールが利用できないかのように動作します。名前を変更したらツールを選択し直してください。
 - **`tool` タグがない** — `CallSubStart` に `tags: ["tool"]` がなければ、Smart WorkflowはそのCallSubをツールとして登録しません。エージェントは呼び出せません。
 - **エージェントがツールを無視する** — ツールをいつどの入力で呼び出すかについてシステムプロンプトに明確な指示がない場合、LLMはそれをスキップして推測する可能性があります。各ツールに名前をつけ、期待する入力を明確に記述してください。
 - **型の不一致** — ツールパラメータはあらゆるJava型をサポートしますが、LLMは会話コンテキストからその型の有効な値を構築できる必要があります。複雑なオブジェクト型を宣言する場合は、LLMが値を入力する方法を理解できるよう `desc` フィールドを明確にしてください。スカラー値には `String` が最も安全な選択肢です。
@@ -243,7 +245,7 @@ in.invoiceDecision.approverUsername   // → "bob.smith"
 - `tutorial/processes/tutorial/features/Feature05.p.json` — Alternative ゲートウェイを持つエージェントプロセス
 - `tutorial/processes/tutorial/tools/Feature05Tools.p.json` — 1つのCallSubに3つのツール全て
 
-両方をDesignerで開きます。`Feature05.p.json` で `Invoice Approval Agent` 要素を確認してください — 3つのシグネチャがすべて記載された `Tools` フィールドがあります。`Feature05Tools.p.json` で各 `CallSubStart` を確認してください — `tool` タグ・個別の入力/結果パラメータマッピング・LLMに送信される **Description** フィールドがあります。
+両方をDesignerで開きます。`Feature05.p.json` で `Invoice Approval Agent` 要素を確認してください — 3つのシグネチャがすべて選択された **Available tools** フィールドがあります。`Feature05Tools.p.json` で各 `CallSubStart` を確認してください — `tool` タグ・個別の入力/結果パラメータマッピング・LLMに送信される **Description** フィールドがあります。
 
 ---
 

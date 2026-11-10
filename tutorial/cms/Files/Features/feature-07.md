@@ -58,7 +58,7 @@ The tool is registered globally by the framework at startup — no SPI registrat
 
 ## Step 1 — Add webSearch to the Tools list
 
-In the `AgenticProcessCall` configuration, add `"webSearch"` to the **Tools** field:
+In the `AgenticProcessCall` configuration, open the **🛠️ Tools** group and select `webSearch` in the **Available tools** multi-select. The process file stores the selection as:
 
 ```json
 ["webSearch"]
@@ -125,7 +125,7 @@ Summarise the results in a clear, concise paragraph.
 
 **Query:** `<%=in.query%>`
 
-**Tools:** `["webSearch"]`
+**Available tools:** `webSearch`
 
 **Map result to:** `in.searchResult`
 
@@ -174,7 +174,7 @@ The working implementation is available in the tutorial project:
 
 - `tutorial/processes/tutorial/features/Feature07.p.json` — the agent process
 
-Open the process in the Designer and inspect the `Web Search Agent` element — note the `Tools` field containing `["webSearch"]` and the System Prompt instructing the agent to always cite sources.
+Open the process in the Designer and inspect the `Web Search Agent` element — note `webSearch` selected in the **Available tools** field and the System Prompt instructing the agent to always cite sources.
 
 ---
 

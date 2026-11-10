@@ -2,7 +2,7 @@
 
 By default an agent can only reason over the information you give it in the Query. **Callable Process Tools** extend this: the agent can call back into your Axon Ivy process during execution to fetch real-time data, apply business rules, or trigger side effects — and then use the result in its response.
 
-> **This builds on [Basic Agent Setup].** The agent configuration is the same — the only addition is the **Tools** field, which lists the callable sub-processes the agent is allowed to invoke.
+> **This builds on [Basic Agent Setup].** The agent configuration is the same — the only addition is the **Available tools** field, which selects the callable sub-processes the agent is allowed to invoke.
 >
 > **Example used in this guide: Acme Corp invoice approval**
 >
@@ -60,9 +60,11 @@ The agent decides **when** to call a tool based on its description and your Syst
 
 ### Tools
 
-Lists the callable sub-processes the agent is allowed to invoke, as a JSON array of signature names.
+In the **🛠️ Tools** group, select the tools the agent is allowed to invoke in the **Available tools** multi-select. The list offers every callable sub-process tagged as a tool and every registered Java tool in the application.
 
-**Example:**
+> **Important:** An empty **Available tools** field means the agent has **no tools at all** — tools are discovered globally but granted per agent.
+
+**Example:** select `lookupApprovalPolicy`, `calculateEffectiveTaxRate` and `chooseApprover`. The process file stores the selection as a list of signature names:
 
 ```json
 ["lookupApprovalPolicy", "calculateEffectiveTaxRate", "chooseApprover"]
@@ -70,7 +72,7 @@ Lists the callable sub-processes the agent is allowed to invoke, as a JSON array
 
 **How it works:** At runtime, Smart Workflow registers each listed tool with the LLM as an available function. The agent's System Prompt tells it when and how to use them. When the LLM decides to call a tool, Smart Workflow invokes the matching callable sub-process, passes the parameters, and feeds the result back into the LLM conversation. The agent then continues reasoning with the new information.
 
-> The **AI Provider** and **Model** fields work the same way as in [Basic Agent Setup] — leave them blank to use the global default.
+> The **🧠️ Model** group works the same way as in [Basic Agent Setup] — leave it empty to use the global default. See [Model Provider Selection] for details.
 
 ---
 
@@ -207,7 +209,7 @@ Given invoice text:
 
 **Query:** `<%=in.invoiceText%>`
 
-**Tools:** `["lookupApprovalPolicy", "calculateEffectiveTaxRate", "chooseApprover"]`
+**Available tools:** `lookupApprovalPolicy`, `calculateEffectiveTaxRate`, `chooseApprover`
 
 **Expect result of type:** `tutorial.InvoiceDecision.class`
 
@@ -229,7 +231,7 @@ The process gateway checks `in.invoiceDecision.isAutoApprove == false` and route
 
 ## Common mistakes
 
-- **Tool not found** — The name in the `tools` array must exactly match the `signature` of the `CallSubStart` element. A mismatch causes the tool registration to fail silently and the agent will act as if no tools are available.
+- **Tool not found** — The stored tool name must exactly match the `signature` of the `CallSubStart` element. Selecting the tool from **Available tools** guarantees this, but if you rename a signature afterwards the stored name no longer matches — the tool registration fails silently and the agent acts as if no tools are available. Re-select the tool after renaming it.
 - **Missing `tool` tag** — Without `tags: ["tool"]` on the `CallSubStart`, Smart Workflow does not register the callable sub as a tool. The agent will not be able to invoke it.
 - **Agent ignores a tool** — If the System Prompt does not clearly instruct the agent to call a tool (when, with what input), the LLM may skip it and guess instead. Be explicit: name each tool and describe the input it expects.
 - **Type mismatch** — Tool parameters support any Java type, but the LLM must be able to construct a valid value for that type from the conversation context. If you declare a complex object type, make sure its fields have clear `desc` values so the LLM knows how to populate them. When in doubt, `String` is the safest choice for scalar values.
@@ -243,7 +245,7 @@ The working implementation is available in the tutorial project:
 - `tutorial/processes/tutorial/features/Feature05.p.json` — the agent process with the Alternative gateway
 - `tutorial/processes/tutorial/tools/Feature05Tools.p.json` — all three tools in one callable sub
 
-Open both in the Designer. In `Feature05.p.json`, inspect the `Invoice Approval Agent` element — note the `Tools` field listing all three signatures. In `Feature05Tools.p.json`, inspect each `CallSubStart` — note the `tool` tag, the individual input/result parameter mappings, and the **Description** field that is sent to the LLM.
+Open both in the Designer. In `Feature05.p.json`, inspect the `Invoice Approval Agent` element — note the **Available tools** field with all three signatures selected. In `Feature05Tools.p.json`, inspect each `CallSubStart` — note the `tool` tag, the individual input/result parameter mappings, and the **Description** field that is sent to the LLM.
 
 ---
 

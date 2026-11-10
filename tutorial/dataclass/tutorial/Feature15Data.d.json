@@ -1,0 +1,20 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0/project/data-class.json",
+  "simpleName" : "Feature15Data",
+  "namespace" : "tutorial",
+  "fields" : [ {
+    "name" : "invoiceText",
+    "comment" : "Raw invoice text pasted by the employee"
+  }, {
+    "name" : "summary",
+    "comment" : "Plain text summary produced by the Invoice Summary Agent, or the fallback message"
+  }, {
+    "name" : "isStopped",
+    "type" : "Boolean",
+    "comment" : "True if the agent call was stopped by the circuit breaker"
+  }, {
+    "name" : "error",
+    "type" : "ch.ivyteam.ivy.bpm.error.BpmError",
+    "comment" : "Captured BPM error when the circuit breaker stops the agent"
+  } ]
+}

@@ -1,2 +1,7 @@
 # yaml-language-server: $schema=https://json-schema.axonivy.com/14.0/config/variables.json
 Variables:
+  AI:
+    Observability:
+      Ivy:
+        # Record every agent conversation so the Governance Dashboard (Feature 16) has data to show.
+        Enabled: "true"

@@ -65,6 +65,12 @@
       <version>14.0.0</version>
       <type>iar</type>
     </dependency>
+    <dependency>
+      <groupId>com.axonivy.utils.ai</groupId>
+      <artifactId>smart-workflow-dashboard</artifactId>
+      <version>14.0.0</version>
+      <type>iar</type>
+    </dependency>
   </dependencies>
   <repositories>
     <repository>

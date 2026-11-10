@@ -160,7 +160,7 @@ Open **Engine Cockpit → Applications → your application → Variables**, fin
 
 ### 2 — Per-agent override in AgenticProcessCall
 
-Open any **AgenticProcessCall** element and scroll to the **AI Provider** section in the configuration editor. Set the **Provider** and **Model** fields to override the global default for that element only — all other agents in the process continue using the global setting.
+Open any **AgenticProcessCall** element and scroll to the **🧠️ Model** group in the configuration editor. Pick a **Provider** from the list and set the **Model** field to override the global default for that element only — all other agents in the process continue using the global setting.
 
 ![Per-agent AI Provider override in AgenticProcessCall](cms:/Files/Images/feature03-per-agent-override)
 
@@ -186,6 +186,12 @@ Acme Corp's process has three `AgenticProcessCall` elements in sequence. Each st
 
 ---
 
+## Advanced model settings
+
+**Provider** and **Model** decide *which* model answers. To tune *how* it answers — for example its **Temperature** — use the **⚙️ Advanced** group of the same element. These settings are covered in [Advanced Model Settings].
+
+---
+
 ## Example process
 
 The working implementation of the three-agent process described in this guide is available in the tutorial project:
@@ -201,3 +207,4 @@ Open it in the Designer to see all three `AgenticProcessCall` elements in sequen
 - [Basic Agent Setup]
 - [Structured Output]
 - [File Extraction]
+- [Advanced Model Settings]

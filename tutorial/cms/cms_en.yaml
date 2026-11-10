@@ -116,7 +116,7 @@ Dialogs:
       Feature06Title: Java Tools
       Feature07Desc: Built-in tool that lets agents search the internet via DuckDuckGo for up-to-date info.
       Feature07Title: Web Search Tool
-      Feature08Desc: Record every agent conversation to Ivy history and trace LLM calls in Arize Phoenix — with zero code changes.
+      Feature08Desc: Mark AI-assisted cases, record every agent conversation to Ivy history, and trace LLM calls in Arize Phoenix — with zero code changes.
       Feature08Title: Observability
       Feature09Desc: Validate AI responses before they reach the user — block harmful or sensitive content using a built-in output guardrail.
       Feature09Title: Output Guardrail
@@ -130,12 +130,12 @@ Dialogs:
       Feature13Title: Human in the Loop
       Feature14Desc: Connect an OpenSearch vector store to let agents semantically search business documents.
       Feature14Title: RAG as a Tool
-      Feature15Desc: Connect an OpenSearch vector store to let agents semantically search business documents.
-      Feature15Title: RAG / Semantic Search
-      Feature16Desc: Coordinate multiple specialised agents to complete a complex business task.
-      Feature16Title: Multi-Agent Orchestration
-      Feature17Desc: Configure agent prompt, tools, and model at runtime from process data.
-      Feature17Title: Dynamic Agents
+      Feature15Desc: Stop every AI agent call in the application with one switch — and let processes fall back to a non-AI path.
+      Feature15Title: Circuit Breaker
+      Feature16Desc: Browse every recorded agent conversation, track token usage, and get statistics and an AI assessment per case.
+      Feature16Title: Governance Dashboard
+      Feature17Desc: Tune how the model answers — starting with temperature — per agent in the Advanced settings.
+      Feature17Title: Advanced Model Settings
       Feature18Desc: 'End-to-end: upload docs, embed into OpenSearch, chat — guided 4-step wizard.'
       Feature18Title: RAG Chatbot Pipeline
       Feature19Desc: Plug any LLM into Smart Workflow by implementing the ChatModelProvider SPI.
