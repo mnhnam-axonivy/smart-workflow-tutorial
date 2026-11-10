@@ -15,15 +15,14 @@ This is a tutorial project for **Axon Ivy Smart Workflow** developers. It is int
 
 | Component | Version |
 |---|---|
-| Axon Ivy Engine | [Axon Engine Nightly 14.0](https://download.axonivy.com/nightly-14.0/AxonIvyEngine14.0.1.2610190441_Slim_All_x64.zip) |
-| Smart Workflow | In this repo |
+| Axon Ivy Engine | [Axon Ivy Engine 14.0.1](https://download.axonivy.com/14.0.1/AxonIvyEngine14.0.1.2610231214_Slim_All_x64.zip) |
+| Smart Workflow | 14.0.0 (resolved from [maven.axonivy.com](https://maven.axonivy.com)) |
 
 ### Project Structure
 
 ```
 tutorial-repo/
-├── models/          # Supported Smart Workflow AI model providers
-├── smart-workflow/  # Core project of Axon Ivy Smart Workflow
+├── best-practices/  # Best-practice exercise Axon Ivy project
 └── tutorial/        # Tutorial Axon Ivy project
 ```
 
@@ -84,15 +83,14 @@ All `cms:/` image references in the markdown files are automatically rewritten t
 
 | コンポーネント | バージョン |
 |---|---|
-| Axon Ivy Engine | [Axon Ivy Nightly 14.0](https://download.axonivy.com/nightly-14.0/AxonIvyEngine14.0.1.2610190441_Slim_All_x64.zip) |
-| Smart Workflow | In this repo |
+| Axon Ivy Engine | [Axon Ivy Engine 14.0.1](https://download.axonivy.com/14.0.1/AxonIvyEngine14.0.1.2610231214_Slim_All_x64.zip) |
+| Smart Workflow | 14.0.0（[maven.axonivy.com](https://maven.axonivy.com) から取得） |
 
 ### プロジェクト構成
 
 ```
 tutorial-repo/
-├── models/          # 対応する Smart Workflow AI モデルプロバイダー
-├── smart-workflow/  # Axon Ivy Smart Workflow のコアプロジェクト
+├── best-practices/  # ベストプラクティス演習用 Axon Ivy プロジェクト
 └── tutorial/        # Axon Ivy チュートリアルプロジェクト
 ```
 

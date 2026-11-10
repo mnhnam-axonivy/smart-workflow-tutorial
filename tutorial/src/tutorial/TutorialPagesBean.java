@@ -32,6 +32,9 @@ import ch.ivyteam.ivy.environment.Ivy;
 public class TutorialPagesBean implements Serializable {
 
   private static final Pattern CMS_IMG_PATTERN = Pattern.compile("\\(cms:(/[^)]+)\\)");
+  // Must match the pages rendered in TutorialPages.xhtml
+  private static final List<String> PRACTICE_IDS = List.of("01", "02", "03", "05");
+  private static final List<String> APPENDIX_IDS = List.of("01", "02", "03");
 
   private final Map<String, String> features = new LinkedHashMap<>();
   private final Map<String, String> jpFeatures = new LinkedHashMap<>();
@@ -55,8 +58,7 @@ public class TutorialPagesBean implements Serializable {
       collectImagePaths(en, seen);
       collectImagePaths(jp, seen);
     }
-    for (int i = 1; i <= 5; i++) {
-      String id = String.format("%02d", i);
+    for (String id : PRACTICE_IDS) {
       String en = readCmsMarkdown("/Files/Practices/practice-" + id);
       String jp = readCmsMarkdownLocale("/Files/Practices/practice-" + id, "ja");
       practices.put(id, en);
@@ -64,8 +66,7 @@ public class TutorialPagesBean implements Serializable {
       collectImagePaths(en, seen);
       collectImagePaths(jp, seen);
     }
-    for (int i = 1; i <= 9; i++) {
-      String id = String.format("%02d", i);
+    for (String id : APPENDIX_IDS) {
       String en = readCmsMarkdown("/Files/Appendix/appendix-" + id);
       String jp = readCmsMarkdownLocale("/Files/Appendix/appendix-" + id, "ja");
       appendices.put(id, en);
