@@ -1,6 +1,0 @@
-# yaml-language-server: $schema=https://json-schema.axonivy.com/14.0/config/rest-clients.json
-RestClients:
-  langChain:
-    Url: https://api.openai.com
-    Properties:
-      SensitiveData: true
