@@ -6,6 +6,10 @@
  * is not evaluated but loaded from the CMS: a PNG, JPG, JPEG or PDF file is attached to the
  * message, a TXT or MD file and a text object become text, and a path that does not exist
  * contributes nothing.
+ *
+ * Only the User message is expanded that way. In the System message (`attachFiles: false`) a
+ * file is not read: the expression yields the file object, which is converted with toString(),
+ * so the text holds something like "Binary@4f9c2a" instead of the document.
  */
 import { evalExpression, validateExpression, IvyScriptError } from './ivyscript.js';
 
@@ -43,16 +47,27 @@ export function parseMacro(template) {
   return parts;
 }
 
+/** What toString() of a file object prints: its class and a hash, the same for the same path. */
+export function binaryText(path) {
+  let hash = 0;
+  for (const ch of String(path)) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+  return 'Binary@' + (hash % 0xffffff).toString(16).padStart(6, '0');
+}
+
 /**
  * What a CMS path contributes to the message. `ctx.cms` maps paths to the objects of the
  * lesson: { name, extension, reads } for a file (`reads` is what a model reads in it) or
- * { name, text } for a text object.
+ * { name, text } for a text object. Without `attachFiles` (the System message) a file that is
+ * not text becomes its toString().
  */
-function loadCms(path, code, ctx) {
+function loadCms(path, code, ctx, attachFiles = true) {
   const object = ctx.cms ? ctx.cms[path] : null;
   if (!object) return { type: 'missing', code, path, value: '' };
   const extension = String(object.extension || '').toLowerCase();
   if (!extension) return { type: 'expr', code, value: String(object.text == null ? '' : object.text) };
+  if (!attachFiles && !TEXT_TYPES.includes(extension)) {
+    return { type: 'binary', code, path, name: object.name + '.' + extension, value: binaryText(path) };
+  }
   if (FILE_TYPES[extension]) {
     return { type: 'file', code, path, name: object.name + '.' + extension, ...FILE_TYPES[extension], reads: object.reads || '', value: '' };
   }
@@ -62,18 +77,20 @@ function loadCms(path, code, ctx) {
 
 /**
  * Resolves every expression against the script context.
+ * @param {{ attachFiles?: boolean }} [options]  false for the System message: files are not read
  * @returns {{ text: string, parts: Object[], files: Object[], error: IvyScriptError|null }}
  *   parts: { type: 'text' | 'expr', value } for text, { type: 'file', name, kind, mime, path, reads }
- *   for an attached file, { type: 'missing', path } for a CMS path that does not exist
+ *   for an attached file, { type: 'missing', path } for a CMS path that does not exist,
+ *   { type: 'binary', name, path, value } for a file that was turned into text instead
  */
-export function expandMacro(template, ctx) {
+export function expandMacro(template, ctx, { attachFiles = true } = {}) {
   const resolved = [];
   let error = null;
   for (const part of parseMacro(template)) {
     if (part.type === 'text') { resolved.push({ type: 'text', value: part.value }); continue; }
     try {
       if (part.cms) {
-        resolved.push(loadCms(part.cms, part.code, ctx));
+        resolved.push(loadCms(part.cms, part.code, ctx, attachFiles));
         continue;
       }
       const value = evalExpression(part.code, ctx);

@@ -104,6 +104,8 @@ async function mapResult(d) {
 - **User dialogs**: in a `dialog:<id>` hook, `d.answer(text)` types an answer into the open dialog and submits it; `'dialog'` is a note target.
 - **Tabs**: `d.tab('process' | 'tools' | 'src:<id>' | 'variables' | 'view:<id>')`. Switching to the tools file while a tool runs shows the token travelling through the tool; a tool that runs behind another tab runs at once.
 - **Every chapter opens with a black title screen** that shows only its name, `tour.chapter.<id>`. Use the heading of the tutorial section the chapter belongs to, word for word, so learners can find it in the text.
+- **Chapters with parts**: a chapter can be split, for example into the causes of a problem: `{ id, label: 'cause', play: intro, parts: [{ id, play }] }`. `play` runs first, then each part: the process is put back as the tutorial ships it, a black screen shows the chapter's name, `tour.screen.<label>` ("Cause {n} of {total}") and `tour.<part id>.title`, and the part plays. The player lists the parts of the current chapter as 1.1, 1.2, … (the current one with its name), each can be started on its own, and Back at the start of a part goes to the one before. The intro card counts them with `tour.count.<label>` ("6 causes"). Troubleshooting (appendix 05) splits its chapters this way.
+- **A screen without parts**: `d.screen(key, { label, n, total })` shows the same screen anywhere in a chapter.
 - **Every chapter starts from the original process**, so chapters can be replayed on their own and need not undo their changes.
 
 Pause freezes notes and animations alike. With `prefers-reduced-motion`, notes wait for **Next** instead of advancing by themselves. `tourPace` in `window.swInteractiveOptions` plays everything faster; the smoke test uses it.

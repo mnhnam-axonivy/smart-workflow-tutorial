@@ -140,6 +140,17 @@ async function atTitle(page, id) {
   await settle(page, 450);
 }
 
+/** Waits for a screen inside a chapter (d.screen), e.g. the one before a cause, and pauses on it. */
+async function atScreen(page, key) {
+  await page.waitForFunction(k => {
+    const tour = window.swInteractive.instances()[0].app.tour;
+    if (!tour.screen || tour.screen.key !== k) return false;
+    tour.setPaused(true);
+    return true;
+  }, { timeout: 90000, polling: 20 }, key);
+  await settle(page, 350);
+}
+
 const resume = page => page.evaluate(() => window.swInteractive.instances()[0].app.tour.setPaused(false));
 
 const clickInApp = (page, selector) => page.evaluate(sel => {
@@ -1341,53 +1352,132 @@ try {
   await showFeaturePage(page, 'a05');
   await openWalkthrough(page);
   check(await withApp(page, app => app.def.id === 'appendix-05' && app.def.file === 'Feature13.p.json'), 'the Troubleshooting page opens a walkthrough on the Human in the Loop process');
+  // the guide starts the walkthrough at once; the intro card is what other hosts open on
+  await withApp(page, app => app.tour.showIntro());
+  check(await withApp(page, (app, h) => [...h.host.shadowRoot.querySelectorAll('.tour-cover .tour-card-count')].map(n => n.textContent).join('|') === ' · 6 causes| · 11 causes| · 4 behaviours| · 7 problems| · 3 messages'),
+    'the intro card says how many causes each problem has');
   await withApp(page, app => { app.tour.start(0); });
   const lastLog = () => withApp(page, app => { const logs = app.panel.logs; return logs.length ? String(logs[logs.length - 1].message) : ''; });
-  const symptoms = [
-    ['breakerLog', m => m.startsWith('Unhandled error smartworkflow:stop'), 'the circuit breaker: an unhandled smartworkflow:stop'],
-    ['skippedLog', m => m === 'Agent call was skipped, since there was no user query', 'a blank user message: the call is skipped'],
-    ['mapLog', m => m === 'Failed to map result to in.decision', 'a target of another type: the mapping fails and is logged'],
-    ['queryFailed', m => m === 'Agent call was skipped, since there was no user query', 'an expression that fails in the user message: the call is skipped'],
-    ['unknownProvider', m => m === 'Unknown model provider Open AI', 'a provider that is not installed'],
-    ['unauthorized', m => m.includes('401 Unauthorized'), 'no API key: 401 Unauthorized'],
-    ['modelLog', m => m === "Failed to extract config 'model' for value 'gpt-4o'", 'an unquoted model name does not compile'],
-    ['noMemory', m => m.includes('Found no pending ChatMemory for id: INV-2025-0892'), 'the wrong id: no pending ChatMemory'],
-    ['noRequest', m => m.includes('Found no pending ToolExecutionRequest'), 'resolve() twice: no pending ToolExecutionRequest'],
-    ['unhandled', m => m.startsWith('Unhandled error smartworkflow:stop'), 'a BPM error with another code goes past the boundary event']
-  ];
   const quoteOf = () => withApp(page, app => { const q = app.tour.current.quote; return Array.isArray(q) ? q.map(l => l.text).join('|') : String(q || ''); });
-  const between = {
-    mapLog: async () => {
-      await atNote(page, 'explains');
-      check((await quoteOf()).includes('I have no tool to ask for one'), 'no tools: the agent explains instead of asking');
-      await resume(page);
-      await atNote(page, 'dropped');
-      check(await quoteOf() === 'askUserFeedback', 'a start without the tool tag: the selected tool is dropped');
-      await resume(page);
-    },
-    queryFailed: async () => {
-      await atNote(page, 'noSystem');
-      check(await withApp(page, app => app.panel.call.system === '' && app.state.panelTab === 'chat'), 'an expression that fails in the system message: the call is sent without one');
-      await resume(page);
-      await atNote(page, 'withoutRules');
-      check((await quoteOf()).includes('My instructions do not say how to get one'), 'and the agent answers without its rules');
-      await resume(page);
-    }
-  };
-  for (const [key, fits, label] of symptoms) {
+  /** The screen before a cause: its chapter, its label ("Cause 1 of 6") and its name, on black. */
+  const screenShows = (context, label, name) => withApp(page, (app, h, context, label, name) => {
+    const box = h.host.shadowRoot.querySelector('.tour-title:not([hidden]) .tour-screen');
+    const text = sel => (box.querySelector(sel) || {}).textContent;
+    return Boolean(box) && text('.tour-screen-context') === context && text('.tour-screen-label') === label && text('h3') === name && !app.tour.current;
+  }, context, label, name);
+  const step = async (key, fits, label) => {
     await atNote(page, key);
-    const message = await lastLog();
-    check(fits(message), label + (fits(message) ? '' : ': ' + message));
+    const ok = await fits();
+    check(ok, label);
     await resume(page);
-    if (between[key]) await between[key]();
-  }
+  };
+  const logIs = expected => async () => { const m = await lastLog(); return typeof expected === 'function' ? expected(m) : m === expected; };
+  const SKIPPED = 'Agent call was skipped, since there was no user query';
+  /** The parts of the chapter that plays, as the player lists them. */
+  const parts = () => withApp(page, (app, h) => [...h.host.shadowRoot.querySelectorAll('.player .tour-parts .tour-part')].map(b => ({
+    n: b.querySelector('.tour-part-n').textContent, current: b.classList.contains('current'), done: b.classList.contains('done'),
+    name: (b.querySelector('.tour-part-title') || {}).textContent || '', title: b.getAttribute('title')
+  })));
+
+  // The player splits a chapter into its causes, 1.1 to 1.6, and each can be started on its own
+  await atScreen(page, 'causeBreaker');
+  let list = await parts();
+  check(list.map(x => x.n).join(' ') === '1.1 1.2 1.3 1.4 1.5 1.6' && list[0].current && list[0].name === 'The circuit breaker is on' && list[2].title === 'Cause 3 of 6: A guardrail blocked it',
+    'the player lists the six causes of the chapter as 1.1 to 1.6, the current one with its name');
+  await clickInApp(page, '.player .tour-part:nth-child(5)');
+  await atScreen(page, 'causeFile');
+  list = await parts();
+  check(await withApp(page, app => app.tour.index === 0 && app.tour.part === 4) && list[4].current && list.slice(0, 4).every(x => x.done) && list[4].name === 'A file emptied the User message',
+    'clicking 1.5 starts that cause directly; the causes before it show as done');
+  await shot(page, 'a05-player-parts');
+  await withApp(page, app => app.tour.back());
+  await atScreen(page, 'causeMapping');
+  check(await withApp(page, app => app.tour.part === 3), 'back, at the very start of a cause, goes to the cause before it (1.4)');
+  await withApp(page, app => { app.tour.start(0); });
+
+  // 1 — The agent did not answer: six causes, each after a screen of its own
+  await atScreen(page, 'causeBreaker');
+  check(await screenShows('The agent did not answer', 'Cause 1 of 6', 'The circuit breaker is on'), 'a screen before each cause: "Cause 1 of 6 — The circuit breaker is on"');
+  await shot(page, 'a05-cause-screen');
+  await resume(page);
+  await step('breakerLog', logIs(m => m.startsWith('Unhandled error smartworkflow:stop')), 'cause 1: the circuit breaker, an unhandled smartworkflow:stop');
+  await step('skippedLog', logIs(SKIPPED), 'cause 2: a blank user message, the call is skipped');
+  await atScreen(page, 'causeGuardrail');
+  check(await screenShows('The agent did not answer', 'Cause 3 of 6', 'A guardrail blocked it'), 'cause 3 has its screen');
+  await resume(page);
+  await atNote(page, 'guardBlocked');
+  check(await withApp(page, app => /DefaultInput: "PromptInjectionInputGuardrail"/.test(app.variablesText) && app.panel.call.guardrails[0].name === 'PromptInjectionInputGuardrail' && !app.panel.call.guardrails[0].allowed &&
+    !app.model.elements.find(e => e.id === 'f5').config.userConfig.inputGuardrails), 'cause 3: the default guardrail blocks the agent, which has none of its own');
+  await shot(page, 'a05-default-guardrail');
+  await resume(page);
+  await step('guardLog', logIs(m => m.startsWith('Unhandled error smartworkflow:guardrail:input:violation')), 'and the log has the unhandled violation');
+  await step('mapLog', logIs('Failed to map result to in.decision'), 'cause 4: a target of another type, the mapping fails and is logged');
+  await step('fileSkipped', async () => (await lastLog()) === SKIPPED && (await quoteOf()).includes('Unsupported CMS file type for object: PurchaseOrder with extension: docx'), 'cause 5: a Word file takes the whole user message down');
+  await step('toolsWhy', () => withApp(page, app => !app.model.elements.find(e => e.id === 'f5').config.userConfig.tools), 'cause 6: no tools selected');
+
+  // 2 — The agent answered, but not as expected: eleven causes
+  await step('explains', async () => (await quoteOf()).includes('I have no tool to ask for one'), 'not as expected, cause 1: without tools the agent explains instead of asking');
+  await step('dropped', async () => (await quoteOf()) === 'askUserFeedback', 'cause 2: a start without the tool tag, the selected tool is dropped');
+  await step('noPause', async () => (await quoteOf()).includes('My instructions do not say how to get one'), 'cause 5: the tool is offered but not named, so the agent never pauses');
+  await step('nothingAttached', () => withApp(page, (app, h) => app.panel.call.files.length === 0 && Boolean(h.host.shadowRoot.querySelector('.chat .file-chip.missing'))), 'cause 6: a misspelled CMS path attaches nothing');
+  await step('pdfRejected', logIs('Ollama does not accept PDF files, so the call with InvoiceSample.pdf failed'), 'cause 7: a PDF sent to Ollama fails at the provider');
+  await atScreen(page, 'causeTemperature');
+  check(await screenShows('The agent answered, but not as expected', 'Cause 11 of 11', 'The output varies more, or less, than expected'), 'the causes the simulator cannot run have their screens too (cause 11 of 11)');
+  list = await parts();
+  check(list.length === 11 && list[10].n === '2.11' && list[10].current && list.slice(0, 10).every(x => x.done), 'chapter 2 lists its causes as 2.1 to 2.11');
+  await resume(page);
+  await atNote(page, 'temperatureWhy');
+  check(await withApp(page, (app, h) => {
+    const spot = h.host.shadowRoot.querySelector('.tour-spot').getBoundingClientRect();
+    const fieldBox = h.host.shadowRoot.querySelector('[data-tour="temperature"]').getBoundingClientRect();
+    return Math.abs(spot.top - fieldBox.top) < 12;
+  }), 'and are explained on their field');
+  await resume(page);
+
+  // 3 — Messages and expressions: four behaviours
+  await atNote(page, 'binarySent');
+  check(await withApp(page, (app, h) => /^Binary@[0-9a-f]{6}$/.test(app.panel.call.system) && app.state.panelTab === 'chat' && app.panel.call.files.length === 0 &&
+    Boolean(h.host.shadowRoot.querySelector('.chat .msg.system .file-chip.binary')) && app.tour.current.quote[0].wrong === true),
+    'messages, behaviour 1: a PDF in the System message reaches the model as Binary@…, marked as wrong in the note and in the conversation');
+  await shot(page, 'a05-system-file');
+  await resume(page);
+  await atNote(page, 'systemFromScript');
+  check(await withApp(page, (app, h) => !h.host.shadowRoot.querySelector('.tour-spot').hidden && app.tour.current.quote.some(l => l.text === '<%=in.systemPrompt%>')),
+    'and the other fix: read the text in a Script before the agent, then use the field');
+  await resume(page);
+  await atScreen(page, 'behaviourRaw');
+  check(await screenShows('Messages and expressions', 'Behaviour 2 of 4', 'An unresolved expression is inserted as its own raw text'), 'messages: behaviour 2 has its screen');
+  await resume(page);
+  await step('rawSent', () => withApp(page, app => app.panel.call.user === '<%=in.query%'), 'behaviour 2: an unclosed expression goes to the model as raw text');
+  await step('queryFailed', logIs(SKIPPED), 'behaviour 3: an expression that fails in the user message, the call is skipped');
+  await step('noSystem', () => withApp(page, app => app.panel.call.system === '' && app.state.panelTab === 'chat'), 'behaviour 4: an expression that fails in the system message, the call is sent without one');
+  await step('withoutRules', async () => (await quoteOf()).includes('My instructions do not say how to get one'), 'and the agent answers without its rules');
+
+  // 4 — Configuration: seven problems
+  await step('unknownProvider', logIs('Unknown model provider Open AI'), 'configuration, problem 1: a provider that is not installed');
+  await step('unauthorized', logIs(m => m.includes('401 Unauthorized')), 'problem 2: no API key, 401 Unauthorized');
+  await step('modelLog', logIs("Failed to extract config 'model' for value 'gpt-4o'"), 'problem 3: an unquoted model name does not compile');
+  await step('stillDefault', () => withApp(page, app => /\n {8}Model: "gpt-4o"\n/.test(app.variablesText) && app.panel.call.model === 'gpt-4.1-mini'), 'problem 4: a variable called Model is ignored');
+  await atScreen(page, 'problemSpi');
+  check(await screenShows('Configuration', 'Problem 7 of 7', 'A custom tool or guardrail does not appear in the pickers'), 'problem 7 has its screen');
+  await resume(page);
+
+  // 5 — Human in the loop: three messages
+  await step('noMemory', logIs(m => m.includes('Found no pending ChatMemory for id: INV-2025-0892')), 'human in the loop, message 1: the wrong id, no pending ChatMemory');
+  await atScreen(page, 'messageAiMessage');
+  check(await screenShows('Human in the loop', 'Message 2 of 3', 'Found no pending AiMessage for id'), 'message 2 has its screen');
+  await resume(page);
+  await step('noRequest', logIs(m => m.includes('Found no pending ToolExecutionRequest')), 'message 3: resolve() twice, no pending ToolExecutionRequest');
+
+  // 6 and 7
+  await step('unhandled', logIs(m => m.startsWith('Unhandled error smartworkflow:stop')), 'a BPM error with another code goes past the boundary event');
   await atNote(page, 'conversation');
   check(await withApp(page, app => app.tour.index === 6 && app.state.panelTab === 'chat' && app.panel.call.tools.length === 1), 'last chapter: the Agent conversation shows what the model received');
   await shot(page, '95-a05-conversation');
   await resume(page);
   await page.waitForFunction(() => window.swInteractive.instances()[0].app.mode === 'explore', { timeout: 60000, polling: 50 });
   await settle(page, 500);
-  check(await withApp(page, app => app.model.elements.find(e => e.id === 'f5').config.userConfig.query === '<%=in.query%>' && /Enabled: "false"/.test(app.variablesText)), 'afterwards the process and variables.yaml are as the tutorial ships them');
+  check(await withApp(page, app => app.model.elements.find(e => e.id === 'f5').config.userConfig.query === '<%=in.query%>' && /Enabled: "false"/.test(app.variablesText) && !/Guardrails:|Model: "gpt-4o"/.test(app.variablesText)), 'afterwards the process and variables.yaml are as the tutorial ships them');
   await clickInApp(page, '.tour-cover .tour-play');
   await page.keyboard.press('Escape');
   await settle(page, 300);

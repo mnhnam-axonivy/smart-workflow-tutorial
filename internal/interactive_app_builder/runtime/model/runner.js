@@ -370,7 +370,7 @@ export class ProcessRunner {
    */
   #remember(run, element, call) {
     const id = invocationId(++run.invocations);
-    run.memory[id] = { system: call.system, user: call.user, userParts: call.userParts, steps: call.steps };
+    run.memory[id] = { system: call.system, systemParts: call.systemParts, user: call.user, userParts: call.userParts, steps: call.steps };
     if (this.model.dataClass.fields.some(f => f.name === MEMORY_FIELD)) {
       run.data[MEMORY_FIELD] = id;
       this.io.data(MEMORY_FIELD, id, element);
@@ -512,12 +512,16 @@ export class ProcessRunner {
     const provider = resolveProvider(run.variables, providers[0], modelName == null ? '' : String(modelName));
     if (!provider.ok) this.#fail(run, element, 'provider', provider.message, { provider: provider.name });
 
-    // 4 — system message (sent only when not blank)
+    // 4 — system message (sent only when not blank); a file in it is not read, only its toString()
     let system = '';
+    let systemParts = null;
     if (cfg.system != null && String(cfg.system) !== '') {
-      const expanded = expandMacro(String(cfg.system), ctx);
+      const expanded = expandMacro(String(cfg.system), ctx, { attachFiles: false });
       if (expanded.error) this.#log(run, 'error', element, expanded.error.message);
-      else if (expanded.text.trim() !== '') system = expanded.text;
+      else if (expanded.text.trim() !== '') {
+        system = expanded.text;
+        if (expanded.parts.some(p => p.type === 'binary')) systemParts = expanded.parts;
+      }
     }
 
     // 4a — a conversation that was suspended (HumanInTheLoop): the id in aiMemoryId leads to it
@@ -543,6 +547,7 @@ export class ProcessRunner {
       model: provider.model,
       url: provider.url,
       system,
+      systemParts, // only when a file in it was turned into text: the panel marks that part
       user: user.text,
       userParts: user.parts,
       files: user.files.map(f => ({ name: f.name, kind: f.kind, mime: f.mime, path: f.path })),
@@ -557,7 +562,7 @@ export class ProcessRunner {
     if (memory) {
       // the stored messages come first, the system message stays the one of the first call,
       // and the user message of this call is a fixed sentence
-      Object.assign(call, { restored: true, memoryId, system: memory.system, user: memory.user, userParts: memory.userParts, steps: memory.steps, continuation: CONTINUE });
+      Object.assign(call, { restored: true, memoryId, system: memory.system, systemParts: memory.systemParts || null, user: memory.user, userParts: memory.userParts, steps: memory.steps, continuation: CONTINUE });
       if (call.steps.some(step => step.result === undefined)) {
         this.#fail(run, element, 'memory', 'The conversation ' + memoryId + ' still waits for the result of a tool call: DecisionMaker.resolve() has not been called');
       }

@@ -148,8 +148,14 @@ export class BottomPanel {
         h('span.chat-url', null, 'POST ' + call.url)));
     }
     if (call.user !== undefined) {
+      // a file in the System message reached the model as its toString(): marked as such
+      const systemText = call.systemParts
+        ? call.systemParts.map(part => (part.type === 'binary'
+          ? h('span.file-chip.binary', { title: t('chat.binary', { name: part.name }) }, icon('warning', 12), part.value)
+          : part.value))
+        : call.system;
       this.chatView.append(call.system
-        ? h('div.msg.system', null, h('div.msg-role', null, t('chat.system')), h('div.msg-text', null, call.system))
+        ? h('div.msg.system', null, h('div.msg-role', null, t('chat.system')), h('div.msg-text', null, systemText))
         : h('div.msg.system.none', null, h('div.msg-role', null, t('chat.system')), h('div.msg-text', null, t('chat.noSystem'))));
       const userText = h('div.msg-text');
       (call.userParts || [{ type: 'text', value: call.user }]).forEach(part => {
