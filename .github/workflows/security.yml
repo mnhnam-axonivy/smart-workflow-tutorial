@@ -59,7 +59,8 @@ jobs:
         with:
           fetch-depth: 0 # the whole history, so the commits of a push or PR can be scanned
       # a push or PR: its new commits; the weekly run: the whole history
-      - uses: trufflesecurity/trufflehog@v3.99.9
+      # pinned to a commit: a tag of a third-party action can be moved; Dependabot keeps it current
+      - uses: trufflesecurity/trufflehog@3bd2b5887eb0efb8fa18bfd1d296032924e4ffdc # v3.99.9
         with:
           # fail on keys that are confirmed to work, or that could not be checked
           extra_args: --results=verified,unknown

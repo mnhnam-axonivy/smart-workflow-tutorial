@@ -45,6 +45,21 @@ const cssAsText = {
   }
 };
 
+/**
+ * Source files of the tutorial project that a lesson shows are imported as text. Their line
+ * endings are made LF, so the bundle is the same whether git checked them out with LF or CRLF
+ * (core.autocrlf on Windows) - otherwise "--check" fails in CI for a bundle built on Windows.
+ */
+const sourceAsText = {
+  name: 'source-as-text',
+  setup(b) {
+    b.onLoad({ filter: /\.(java|SmartWorkflowToolsProvider)$/ }, async file => ({
+      contents: (await readFile(file.path, 'utf8')).replace(/\r\n?/g, '\n'),
+      loader: 'text'
+    }));
+  }
+};
+
 const shared = {
   bundle: true,
   format: 'iife',
@@ -52,8 +67,7 @@ const shared = {
   minify: true,
   charset: 'ascii', // no encoding surprises, however the file is served
   legalComments: 'none', // the three.js notice is part of the banner below
-  // source files of the tutorial project that a lesson shows: imported as text
-  loader: { '.java': 'text', '.SmartWorkflowToolsProvider': 'text' },
+  plugins: [sourceAsText],
   logLevel: 'warning'
 };
 
@@ -64,7 +78,7 @@ function runtimeOptions() {
     ...shared,
     entryPoints: [join(root, 'runtime/index.js')],
     outfile: join(outDir, RUNTIME_FILE),
-    plugins: [cssAsText],
+    plugins: [cssAsText, sourceAsText],
     define: { __SW_VERSION__: JSON.stringify(pkg.version) },
     banner: {
       js: '/*!\n * Smart Workflow tutorial - interactive simulation runtime ' + pkg.version + '\n' + generated + '\n *\n' +
