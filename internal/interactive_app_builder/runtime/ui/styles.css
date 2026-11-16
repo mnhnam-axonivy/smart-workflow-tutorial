@@ -769,6 +769,10 @@ code { font-family: var(--mono); font-size: 0.95em; }
 .player .icon-btn:hover { background: rgba(141, 184, 255, 0.16); color: #fff; }
 .player .tour-toggle { width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff; }
 .player .tour-toggle:hover { background: #4478ff; }
+/* The voice: on is lit, off is dimmed; unavailable (no voice for the language) is greyed out. */
+.player .tour-voice { color: #8193b3; }
+.player .tour-voice.on { color: #c6d6f3; }
+.player .tour-voice.inert, .player .tour-voice.inert:hover { background: none; color: #56637a; cursor: not-allowed; }
 .tour-chapters { display: flex; align-items: center; gap: 5px; min-width: 0; margin-left: 8px; }
 .tour-chapter {
   display: inline-flex;
@@ -880,6 +884,10 @@ code { font-family: var(--mono); font-size: 0.95em; }
 .tour-note[data-side="left"]::before { right: -7px; top: var(--arrow); transform: translateY(-50%) rotate(135deg); }
 .tour-note[data-side="right"]::before { left: -7px; top: var(--arrow); transform: translateY(-50%) rotate(-45deg); }
 .tour-note-title { margin: 0 0 3px; color: #fff; font-size: 15px; font-weight: 700; line-height: 1.35; }
+/* While the voice reads a note: the sentence being said is lit like a subtitle, those said are dimmed. */
+.tour-say { border-radius: 3px; transition: color 0.2s, background-color 0.2s; }
+.tour-say.said { color: #a3b3d0; }
+.tour-say.saying { color: #fff; background: rgba(141, 184, 255, 0.2); box-shadow: 0 0 0 2px rgba(141, 184, 255, 0.2); -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .tour-note-text code, .tour-card code {
   padding: 1px 4px;
   border-radius: 3px;

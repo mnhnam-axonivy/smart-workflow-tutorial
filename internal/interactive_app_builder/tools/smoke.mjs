@@ -97,7 +97,8 @@ async function shot(page, name, file = join(shots, name + '.png')) {
 /** Shows a feature page of the guide. */
 async function showFeaturePage(page, id) {
   await page.evaluate((pace, pageId) => {
-    window.swInteractiveOptions = { ...(window.swInteractiveOptions || {}), tourPace: pace };
+    // no voice unless a check brings its own speech engine: the browser's would really speak
+    window.swInteractiveOptions = { speech: null, ...(window.swInteractiveOptions || {}), tourPace: pace };
     window.showFeature(pageId);
   }, PACE, id);
   await page.waitForSelector('#feature-article h1', { timeout: 10000 });
@@ -152,6 +153,45 @@ async function atScreen(page, key) {
 }
 
 const resume = page => page.evaluate(() => window.swInteractive.instances()[0].app.tour.setPaused(false));
+
+/**
+ * A speech engine that says nothing aloud: it logs each sentence (window.__voice.log) and takes
+ * window.__voice.ms to "say" it. It has an English and a Japanese voice (window.__voice.voices).
+ */
+const installFakeVoice = page => page.evaluate(() => {
+  const fake = window.__voice = { log: [], cancels: 0, ms: 700, current: null, changed: null, voices: [
+    { name: 'Fake Aria Online (Natural)', lang: 'en-US' }, { name: 'Fake Nanami Online (Natural)', lang: 'ja-JP' }] };
+  const synth = {
+    paused: false,
+    getVoices: () => fake.voices,
+    addEventListener: (type, fn) => { if (type === 'voiceschanged') fake.changed = fn; },
+    removeEventListener: () => {},
+    speak(u) {
+      fake.log.push({ text: u.text, lang: u.lang, voice: u.voice && u.voice.name });
+      fake.current = u;
+      setTimeout(() => {
+        if (fake.current !== u) return;
+        u.onstart();
+        u.timer = setTimeout(() => { if (fake.current === u) { fake.current = null; u.onend(); } }, fake.ms);
+      }, 20);
+    },
+    cancel() {
+      fake.cancels++;
+      const u = fake.current;
+      fake.current = null;
+      if (u) { clearTimeout(u.timer); u.onerror({ error: 'interrupted' }); }
+    },
+    resume() {}
+  };
+  window.swInteractiveOptions = { ...(window.swInteractiveOptions || {}), speech: { synth, Utterance: class { constructor(text) { this.text = text; } } } };
+  try { localStorage.removeItem('swWalkthroughVoice'); } catch (e) { /* fine */ }
+});
+
+const voiceLog = page => page.evaluate(() => window.__voice.log.map(l => l.text));
+const voiceButton = page => withApp(page, (app, h) => {
+  const b = h.host.shadowRoot.querySelector('.player .tour-voice');
+  return b && { on: b.classList.contains('on'), pressed: b.getAttribute('aria-pressed'), title: b.title, disabled: b.disabled };
+});
 
 const clickInApp = (page, selector) => page.evaluate(sel => {
   const el = window.swInteractive.instances()[0].host.shadowRoot.querySelector(sel);
@@ -364,6 +404,85 @@ try {
   check(await page.evaluate(() => !document.querySelector('.sw-walkthrough-btn')), 'pages without a simulation get no button');
   check(guide.problems.length === 0, 'no console errors or warnings' + (guide.problems.length ? ': ' + guide.problems.slice(0, 4).join(' | ') : ''));
   check(guide.external.length === 0, 'no request leaves the page (offline-ready)' + (guide.external.length ? ': ' + guide.external.slice(0, 3).join(', ') : ''));
+  await page.close();
+
+  // ── 7b. Feature 01: the voice reads the notes ─────────────────────────────
+  console.log('\nFeature 01: voice');
+  const voiced = await openGuide();
+  page = voiced.page;
+  await installFakeVoice(page);
+  await openFeature01(page);
+  check(JSON.stringify(await voiceButton(page)) === JSON.stringify({ on: true, pressed: 'true', title: 'Turn the voice off', disabled: false }), 'the player has a voice button, on at first');
+  await withApp(page, app => { window.__voice.log.length = 0; app.tour.start(0); });
+  await page.waitForFunction(() => window.__voice.log.some(l => l.text === 'Element configuration'), { timeout: 10000, polling: 20 });
+  check(await page.evaluate(() => window.__voice.log[0].text === 'Element configuration' && window.__voice.log[0].voice === 'Fake Aria Online (Natural)' && window.__voice.log[0].lang === 'en-US'), 'the chapter title is said, with the natural English voice');
+  await page.waitForFunction(() => {
+    const h = window.swInteractive.instances()[0];
+    const tour = h.app.tour;
+    if (!tour.current || tour.current.key !== 'mock' || !h.host.shadowRoot.querySelector('.tour-say.saying')) return false;
+    tour.setPaused(true);
+    return true;
+  }, { timeout: 20000, polling: 20 });
+  await settle(page, 350);
+  check(await withApp(page, (app, h) => {
+    const says = [...h.host.shadowRoot.querySelectorAll('.tour-note-text .tour-say')];
+    return says.length === 2 && says[0].classList.contains('saying') && !says[1].classList.contains('saying') &&
+      getComputedStyle(says[0]).backgroundColor !== 'rgba(0, 0, 0, 0)';
+  }), 'the note shows its sentences; the one being said is lit like a subtitle');
+  check((await voiceLog(page)).slice(-2).join('|') === 'Mock data|This script stands in for the employee who pastes the invoice.', 'the note is read: its title, then its first sentence');
+  await shot(page, '18-voice-subtitle');
+  check(await page.evaluate(() => window.__voice.cancels > 0 && !window.__voice.current) && await withApp(page, app => app.tour.speech.paused), 'Pause stops the voice');
+  await resume(page);
+  await settle(page, 800);
+  check(await withApp(page, app => app.tour.current && app.tour.current.key === 'mock' && !app.tour.speech.done), 'the note waits for the voice, longer than its reading time');
+  check((await voiceLog(page)).filter(t => t === 'This script stands in for the employee who pastes the invoice.').length === 2, 'Resume says the sentence it stopped in again');
+  await page.waitForFunction(() => { const t = window.swInteractive.instances()[0].app.tour; return !t.current || t.current.key !== 'mock'; }, { timeout: 10000, polling: 20 });
+  check((await voiceLog(page)).includes('It fills in dot invoice Text with the invoice text.'), 'it moves on once the note is said; code is read as words ("in dot invoice Text")');
+
+  await atNote(page, 'query');
+  await clickInApp(page, '.tour-voice');
+  check(JSON.stringify(await voiceButton(page)) === JSON.stringify({ on: false, pressed: 'false', title: 'Turn the voice on', disabled: false }) &&
+    await withApp(page, (app, h) => app.tour.speech === null && !h.host.shadowRoot.querySelector('.tour-say.saying')) &&
+    await page.evaluate(() => localStorage.getItem('swWalkthroughVoice') === 'off'), 'the button turns the voice off, and the choice is stored');
+  const quiet = (await voiceLog(page)).length;
+  await resume(page);
+  await atNote(page, 'system');
+  check((await voiceLog(page)).length === quiet, 'without the voice the walkthrough goes on as before, silently');
+  await clickInApp(page, '.tour-voice');
+  check((await voiceLog(page)).slice(quiet).join('|') === 'System message' && (await voiceButton(page)).on, 'turning it on again says the current note from its beginning');
+  await resume(page);
+  await atNote(page, 'answer');
+  await resume(page);
+  await atNote(page, 'log');
+  check(!(await voiceLog(page)).some(t => t.includes('INV-2024-00123')), 'quotes are left to read: the answer is not said');
+  await clickInApp(page, '.tour-voice');
+  await page.keyboard.press('Escape');
+  await settle(page, 300);
+  await openWalkthrough(page);
+  check(!(await voiceButton(page)).on, 'turned off, it stays off when the walkthrough is opened again');
+  await clickInApp(page, '.tour-voice');
+  await page.keyboard.press('Escape');
+  await settle(page, 300);
+
+  await page.evaluate(() => window.setLang('jp'));
+  await settle(page, 300);
+  await openWalkthrough(page);
+  await withApp(page, app => { window.__voice.log.length = 0; app.tour.start(0); });
+  await page.waitForFunction(() => window.__voice.log.length > 0, { timeout: 10000, polling: 20 });
+  check(await page.evaluate(() => window.__voice.log[0].text === '要素の設定' && window.__voice.log[0].voice === 'Fake Nanami Online (Natural)') && (await voiceButton(page)).title === '音声をオフにする', 'in Japanese the Japanese voice speaks');
+  await page.evaluate(() => { window.__voice.voices = window.__voice.voices.slice(0, 1); window.__voice.changed(); });
+  await atNote(page, 'mock');
+  const none = await voiceButton(page);
+  check(none.disabled && !none.on && none.title === 'このブラウザーには日本語の音声がありません' && await withApp(page, app => app.tour.speech === null), 'a browser without a Japanese voice: the button says so, and nothing is said');
+  await resume(page);
+  await page.keyboard.press('Escape');
+  await settle(page, 300);
+  await page.evaluate(() => window.setLang('en'));
+  await showFeaturePage(page, '02');
+  await openWalkthrough(page);
+  check(await voiceButton(page) === null, 'lessons without a voice have no voice button');
+  await page.keyboard.press('Escape');
+  check(voiced.problems.length === 0, 'no console errors or warnings' + (voiced.problems.length ? ': ' + voiced.problems.slice(0, 4).join(' | ') : ''));
   await page.close();
 
   // ── 8. Feature 02: structured output ───────────────────────────────────────

@@ -68,9 +68,16 @@
  * of a user task is open; it is submitted when the hook returns) and 'agent:<phase>' (request,
  * thinking, tool-call, tool-done, tool-result, response, mapped, unmapped, skipped, failed, end).
  * Elements of the tools file have the ids of that file with the prefix "tools-".
+ *
+ * With `voice: true` in the definition, the walkthrough also speaks (see voice.js): each
+ * chapter title, each screen, and each note (its title, then its text sentence by sentence,
+ * with the sentence being said marked in the note; quotes are not read). A note then stays
+ * until the voice has finished, and at least as long as without it. The player has a button
+ * to turn the voice off and on.
  */
 import { h, append, clear } from '../util.js';
 import { icon } from './icons.js';
+import { Voice, sentences, speakable } from './voice.js';
 import { elementById, agentConfig } from '../model/process.js';
 import { elementBounds } from '../stage/layout.js';
 
@@ -141,6 +148,12 @@ export class Tour {
     this.target = null;
     this.cardKind = null;
     this.tracking = 0;
+    // the voice, when the lesson has one: `say` gives what is showing as parts to say (in the
+    // current language), `speech` is that being said, `sayEls` the sentences of the note on screen
+    this.voice = definition && definition.voice ? new Voice(app.options.speech, () => this.renderPlayer()) : null;
+    this.say = null;
+    this.speech = null;
+    this.sayEls = [];
 
     this.block = h('div.tour-block', { onclick: () => this.togglePause() });
     this.spotEl = h('div.tour-spot', { hidden: true });
@@ -262,8 +275,10 @@ export class Tour {
     this.#fillTitle();
     this.titleEl.hidden = false;
     this.titleEl.classList.remove('leave');
+    this.#speak(() => [speakable(this.app.t('tour.chapter.' + chapter.id))]);
     try {
-      await this.#sleep(gen, titleTime(t('tour.chapter.' + chapter.id)), { skippable: true });
+      await this.#sleep(gen, titleTime(t('tour.chapter.' + chapter.id)), { skippable: true, hold: true });
+      this.#silence();
       this.titleEl.classList.add('leave');
       await this.#sleep(gen, 220);
     } finally {
@@ -308,9 +323,14 @@ export class Tour {
     this.#fillScreen();
     this.titleEl.hidden = false;
     this.titleEl.classList.remove('leave');
+    this.#speak(() => {
+      const texts = this.#screenTexts();
+      return [texts.label, texts.name].filter(Boolean).map(speakable);
+    });
     try {
       const { label, name } = this.#screenTexts();
-      await this.#sleep(gen, screenTime(label + ' ' + name), { skippable: true });
+      await this.#sleep(gen, screenTime(label + ' ' + name), { skippable: true, hold: true });
+      this.#silence();
       this.titleEl.classList.add('leave');
       await this.#sleep(gen, 220);
     } finally {
@@ -339,6 +359,7 @@ export class Tour {
   async #halt() {
     this.gen++;
     if (this.abort) this.abort();
+    this.#silence();
     this.#effects().forEach(fx => { fx.paused = false; }); // a paused animation would never finish, and neither would what waits for it
     this.app.stop();
     this.app.cancelEffects();
@@ -371,6 +392,10 @@ export class Tour {
     this.#effects().forEach(fx => { fx.paused = paused; });
     if (!paused) this.app.viewStage().invalidate();
     this.noteEl.classList.toggle('paused', paused);
+    if (this.speech) {
+      if (paused) this.speech.pause();
+      else this.speech.resume(); // says the sentence it stopped in again
+    }
     this.renderPlayer();
   }
 
@@ -401,6 +426,32 @@ export class Tour {
     this.start(atStart && this.index > 0 ? this.index - 1 : this.index);
   }
 
+  /** Turns the voice off, or on again: then it says what is showing from its beginning. */
+  toggleVoice() {
+    if (!this.voice) return;
+    this.voice.on = !this.voice.on;
+    if (this.voice.on && this.say) this.#speak(this.say);
+    else if (!this.voice.on) {
+      this.speech = null;
+      this.#mark(-1);
+    }
+    this.renderPlayer();
+    const button = this.app.playerEl.querySelector('.tour-voice');
+    if (button) button.focus({ preventScroll: true });
+  }
+
+  /** The player's voice button: on, off, or unavailable when the browser has no voice for the language. */
+  #voiceButton() {
+    const t = this.app.t;
+    const can = this.voice.canSpeak(this.app.lang);
+    const on = can && this.voice.on;
+    const label = !can ? t('tour.voice.none') : t(on ? 'tour.voice.off' : 'tour.voice.on');
+    return h('button.icon-btn.tour-voice' + (on ? '.on' : '') + (can ? '' : '.inert'), {
+      type: 'button', title: label, 'aria-label': label, 'aria-pressed': can ? String(on) : null, disabled: !can,
+      onclick: () => this.toggleVoice()
+    }, icon(on ? 'sound' : 'mute', 15));
+  }
+
   renderPlayer() {
     const { app } = this;
     const t = app.t;
@@ -412,6 +463,7 @@ export class Tour {
       button(this.paused ? 'play' : 'pause', t(this.paused ? 'tour.resume' : 'tour.pause'), () => this.togglePause(), '.tour-toggle'),
       button('chevronLeft', t(this.part >= 0 ? 'tour.backPart' : 'tour.back'), () => this.back()),
       button('chevronRight', t('tour.next'), () => this.next()),
+      this.voice ? this.#voiceButton() : null,
       h('div.tour-chapters', {
         role: 'list',
         // a mouse wheel scrolls the list sideways when it does not fit
@@ -464,6 +516,46 @@ export class Tour {
     if (this.title) this.#fillTitle();
     if (this.screen) this.#fillScreen();
     if (this.current) this.#fill(this.current);
+    if (this.say) this.#speak(this.say); // from the beginning, in the new language
+  }
+
+  // ── the voice ──────────────────────────────────────────────────────────────
+
+  /**
+   * Has the voice say what is showing, when it is on. `say()` gives the parts to say in the
+   * current language; for a note, part 0 is its title and part k its k-th sentence, which is
+   * marked while it is said.
+   */
+  #speak(say) {
+    this.say = say;
+    this.speech = null;
+    this.#mark(-1);
+    if (!this.voice) return;
+    this.speech = this.voice.on ? this.voice.say(say(), this.app.lang, part => this.#mark(part - 1)) : null;
+    if (this.speech && this.paused) this.speech.pause();
+  }
+
+  /** Stops the voice: what it was saying is gone. */
+  #silence() {
+    this.say = null;
+    this.speech = null;
+    if (this.voice) this.voice.stop();
+    this.#mark(-1);
+  }
+
+  /** Marks sentence k of the note as being said, those before as said; -1 (or past the end) clears. */
+  #mark(k) {
+    const live = k >= 0 && k < this.sayEls.length;
+    this.sayEls.forEach((el, i) => {
+      el.classList.toggle('said', live && i < k);
+      el.classList.toggle('saying', live && i === k);
+    });
+  }
+
+  /** The voice is still speaking, or has just finished (a short breath before moving on). */
+  #held() {
+    const s = this.speech;
+    return Boolean(s) && (!s.done || (s.endedAt > 0 && Date.now() - s.endedAt < 450));
   }
 
   // ── the director handed to a chapter ───────────────────────────────────────
@@ -677,13 +769,18 @@ export class Tour {
     const manual = wait == null && this.app.reducedMotion;
     this.noteEl.classList.toggle('manual', manual);
     const ms = wait != null ? wait : readingTime(t('tour.' + key + '.title') + ' ' + t('tour.' + key + '.text', params || {})) + Math.min(1200, quoteText(quote).length * 5) + extra;
-    await this.#sleep(gen, ms, { skippable: true, progress: true, manual });
+    // the voice reads the title, then the text; the quote is left to the eyes
+    this.#speak(() => [this.app.t('tour.' + key + '.title', params || {}), ...sentences(this.app.t('tour.' + key + '.text', params || {}))].map(speakable));
+    await this.#sleep(gen, ms, { skippable: true, progress: true, manual, hold: true });
+    this.#silence();
     this.#hide();
   }
 
   #fill(note) {
     const t = this.app.t;
     this.bar = h('i');
+    // the text sentence by sentence, so the voice can mark the one it is saying
+    this.sayEls = sentences(t('tour.' + note.key + '.text', note.params || {})).map(part => h('span.tour-say', null, rich(part)));
     let quote = null;
     if (Array.isArray(note.quote)) {
       quote = h('div.tour-note-quote', null, note.quote.map(line => h('div' + (line.wrong ? '.wrong' : ''), null,
@@ -691,7 +788,7 @@ export class Tour {
     } else if (note.quote) quote = h('div.tour-note-quote', null, excerpt(note.quote));
     append(clear(this.noteEl), [
       h('div.tour-note-title', null, t('tour.' + note.key + '.title', note.params || {})),
-      h('div.tour-note-text', null, rich(t('tour.' + note.key + '.text', note.params || {}))),
+      h('div.tour-note-text', null, this.sayEls),
       quote,
       h('button.tour-note-next', { type: 'button', onclick: () => this.next() }, t('tour.next'), icon('chevronRight', 12)),
       h('div.tour-note-bar', null, this.bar)]);
@@ -720,6 +817,7 @@ export class Tour {
     cancelAnimationFrame(this.tracking);
     this.tracking = 0;
     this.current = null;
+    this.sayEls = [];
     this.target = null;
     this.noteEl.hidden = true;
     this.spotEl.hidden = true;
@@ -961,9 +1059,10 @@ export class Tour {
 
   /**
    * Waits `ms` of playing time: paused time does not count. `skippable` waits end when
-   * "Next" is pressed; `manual` ones only then (reduced motion: nothing moves by itself).
+   * "Next" is pressed; `manual` ones only then (reduced motion: nothing moves by itself);
+   * `hold` ones also wait for the voice to finish what it is saying.
    */
-  #sleep(gen, ms, { skippable = false, progress = false, manual = false } = {}) {
+  #sleep(gen, ms, { skippable = false, progress = false, manual = false, hold = false } = {}) {
     if (gen !== this.gen) return Promise.reject(CANCELLED);
     if (skippable) this.advance = false;
     return new Promise((resolve, reject) => {
@@ -979,8 +1078,10 @@ export class Tour {
         const dt = Math.min(80, now - last);
         last = now;
         if (!this.paused) elapsed += dt * this.pace;
-        if (progress && this.bar) this.bar.style.width = (manual ? 0 : Math.min(1, elapsed / ms) * 100) + '%';
-        if ((skippable && this.advance) || (!manual && elapsed >= ms)) {
+        // with the voice, the bar follows whichever takes longer: the reading time or the voice
+        const share = Math.min(1, elapsed / ms, hold && this.speech ? this.speech.progress() : 1);
+        if (progress && this.bar) this.bar.style.width = (manual ? 0 : share * 100) + '%';
+        if ((skippable && this.advance) || (!manual && elapsed >= ms && !(hold && this.#held()))) {
           if (skippable) this.advance = false;
           this.abort = null;
           resolve();
@@ -995,6 +1096,8 @@ export class Tour {
   dispose() {
     this.gen++;
     if (this.abort) this.abort();
+    this.#silence();
+    if (this.voice) this.voice.dispose();
     this.playing.catch(() => {});
     cancelAnimationFrame(this.tracking);
     this.app.playerEl.removeEventListener('keydown', this.onKey);
