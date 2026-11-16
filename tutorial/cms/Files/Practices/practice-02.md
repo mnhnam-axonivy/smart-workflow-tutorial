@@ -4,9 +4,9 @@ In Axon Ivy, any callable subprocess can be used as an agent building block. The
 
 ---
 
-> **Example from best-practices:** `PurchasingAgent.p.json` in `best-practices/processes/exercise/purchasing/agents/` uses both invocation modes in the same orchestration flow:
+> **Example from best-practices:** `PurchasingAgent.p.json` in `best-practices/process/exercise/purchasing/agents/` uses both invocation modes in the same orchestration flow:
 >
-> - `translate` is called as a **tool** — tagged `tool` on its `CallSubStart`, the Purchasing Manager Agent calls it autonomously when the system prompt instructs it to translate the extracted text
+> - `translate` is called as a **tool** — tagged `tool` on its `CallSubStart`, the Purchasing Manager Agent calls it autonomously when the system message instructs it to translate the extracted text
 > - `DocumentReader` is called via **SubProcessCall** before the agent starts — the document is always read unconditionally, before the AI has any involvement
 
 ## When to use it
@@ -104,7 +104,7 @@ y ≈ 608  ← createSummary tool           ┘
 After applying the co-location rule, the folder looks like:
 
 ```text
-processes/
+process/
   exercise/
     purchasing/
       Purchasing.p.json          ← main business process
@@ -122,5 +122,6 @@ processes/
 ## See also
 
 - [Practice 01 — Agent Pattern: AI Task]
-- [Practice 03 — Agent Organisation: Tool Tags and Folder Structure]
+- [Practice 03 — Agent Organisation: Folder Structure and Naming Conventions]
+- [Practice 04 — Agent Pattern: Agent Pipeline]
 - [Practice 05 — Agent Prompts: Clarity and Dynamic Context]

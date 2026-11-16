@@ -12,7 +12,7 @@ The **Web Search Tool** (`webSearch`) is a built-in tool that gives agents acces
 >
 > ![Example process](cms:/Files/Images/feature07-00)
 >
-> The finished process is at `tutorial/processes/tutorial/features/Feature07.p.json` — open it in the Designer to follow along as you read.
+> The finished process is at `tutorial/process/tutorial/features/Feature07.p.json` — open it in the Designer to follow along as you read.
 
 ---
 
@@ -70,7 +70,7 @@ That is the only required change. The tool is already implemented and registered
 
 ## Step 2 — Instruct the agent when to search
 
-The agent will not use the tool unless your System Prompt tells it to. Add explicit guidance:
+The agent will not use the tool unless your System message tells it to. Add explicit guidance:
 
 ```text
 You are a research assistant.
@@ -85,7 +85,7 @@ Be specific: name the tool, say when to call it, and describe what format to ret
 
 ## Step 3 — Configure search behaviour (optional)
 
-Add the following variables to your project's `variables.yaml` to control search behaviour:
+Three variables control search behaviour. Set them in the **Engine Cockpit** under **Variables**, or in your project's `variables.yaml`:
 
 ```yaml
 Variables:
@@ -102,6 +102,20 @@ Variables:
 
 If these variables are not set, the defaults apply: DuckDuckGo, 5 results, no domain filter.
 
+> **Note:** When the domain whitelist filters out every result, the tool returns an explanatory note together with the empty result list, and that text goes to the model. An agent reporting that it found nothing may be hitting the whitelist rather than an empty web.
+
+---
+
+## Plugging in your own search engine
+
+DuckDuckGo is the only engine that ships with Smart Workflow. To search somewhere else — an internal search service, a paid search API — implement `SmartWebSearchEngine` and expose it through a `SmartWebSearchEngineProvider` (both in `com.axonivy.utils.smart.workflow.tools.web`). Register the provider via SPI, the same way as the tools provider in [Java Tools]:
+
+```text
+src/META-INF/services/com.axonivy.utils.smart.workflow.tools.web.SmartWebSearchEngineProvider
+```
+
+Then select your engine with `AI.Tool.WebSearch.Engine`. The value must match the engine's `name()` — the simple class name unless you override it. Names are matched case-insensitively; when the variable is empty, the first available engine is used.
+
 ---
 
 ## Example — Axon Ivy documentation search
@@ -114,7 +128,7 @@ The process pre-fills the search query using a **Mock data** Script element:
 in.query = "What are the latest features in Axon Ivy 14?";
 ```
 
-### System Prompt
+### System message
 
 ```text
 You are a research assistant.
@@ -123,7 +137,7 @@ Always cite the source URL for each fact you use.
 Summarise the results in a clear, concise paragraph.
 ```
 
-**Query:** `<%=in.query%>`
+**User message:** `<%=in.query%>`
 
 **Available tools:** `webSearch`
 
@@ -142,8 +156,8 @@ An example output:
 ```text
 Axon Ivy 14 introduces Smart Workflow — an AI agent framework built directly into the
 process engine. Key features include AgenticProcessCall for embedding LLM agents in
-processes, support for six AI providers (OpenAI, Anthropic, Ollama, Mistral, Gemini,
-Azure OpenAI), callable process tools, Java tools, web search, guardrails, and
+processes, support for six AI providers (OpenAI, Azure OpenAI, Gemini, Anthropic,
+xAI, Ollama), callable process tools, Java tools, web search, guardrails, and
 observability via Arize Phoenix. Source: https://developer.axonivy.com/release-notes/14.0
 ```
 
@@ -154,14 +168,14 @@ observability via Arize Phoenix. Source: https://developer.axonivy.com/release-n
 | Variable | Description | Default |
 |---|---|---|
 | `AI.Tool.WebSearch.Engine` | Search engine name. Empty = first available. | `duckduckgo` |
-| `AI.Tool.WebSearch.MaxResults` | Maximum results returned per query. | `5` |
+| `AI.Tool.WebSearch.MaxResults` | Maximum results returned per query. Empty falls back to `5`. | *empty* |
 | `AI.Tool.WebSearch.WhitelistDomains` | Comma-separated allowed domains. Empty = all. | *empty* |
 
 ---
 
 ## Common mistakes
 
-- **Agent ignores the tool** — If the System Prompt does not explicitly instruct the agent to call `webSearch`, the LLM will answer from training data and skip the tool. Add a clear instruction: `"Use the webSearch tool to look up current information."`
+- **Agent ignores the tool** — If the System message does not explicitly instruct the agent to call `webSearch`, the LLM will answer from training data and skip the tool. Add a clear instruction: `"Use the webSearch tool to look up current information."`
 - **No internet access in the deployment environment** — DuckDuckGo requires outbound HTTP access. In air-gapped or firewall-restricted environments, either configure a proxy or implement a custom `SmartWebSearchEngine` pointing to an internal search service.
 - **Whitelist too restrictive** — If a whitelist is configured but results from permitted domains are rare, the agent may receive zero results and fall back to guessing. Test your whitelist with representative queries.
 - **Agent over-relying on search** — Without guidance on when to search vs. when to answer directly, the agent may call `webSearch` for every question, including those it can answer reliably from training data. Add instructions that clarify when search is needed.
@@ -172,9 +186,9 @@ observability via Arize Phoenix. Source: https://developer.axonivy.com/release-n
 
 The working implementation is available in the tutorial project:
 
-- `tutorial/processes/tutorial/features/Feature07.p.json` — the agent process
+- `tutorial/process/tutorial/features/Feature07.p.json` — the agent process
 
-Open the process in the Designer and inspect the `Web Search Agent` element — note `webSearch` selected in the **Available tools** field and the System Prompt instructing the agent to always cite sources.
+Open the process in the Designer and inspect the `Web Search Agent` element — note `webSearch` selected in the **Available tools** field and the System message instructing the agent to always cite sources.
 
 ---
 

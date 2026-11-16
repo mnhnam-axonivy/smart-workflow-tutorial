@@ -16,7 +16,7 @@ Axon Ivy is a traditional BPMN engine with a mature case and task system built f
 
 > **Example from best-practices:** In `Purchasing.p.json`, every purchasing request is evaluated by AI before any human sees it. The `Decide Approval` element returns an `ApprovalRecord` containing a professional review note and an approval decision. This record is added to `purchasingData.approvalRecords`. The `AI Approval Review` task — hidden from the task list but fully present in the case — carries the AI's reasoning as its description and as a case note, and is stamped with the `aiAssisted` custom field. For requests over 100,000, an additional human approval task is created on top of the AI review.
 >
-> The full process is at `best-practices/processes/exercise/purchasing/Purchasing.p.json`.
+> The full process is at `best-practices/process/exercise/purchasing/Purchasing.p.json`.
 > ![Example process](cms:/Files/Images/practice01-00)
 
 ## When to use it
@@ -48,12 +48,12 @@ The `AgenticProcessCall` acts as the AI approver. It receives the request data a
 
 **What to give the AI:**
 
-- **System prompt** — define the AI's role clearly: who it is, what criteria it must apply, and what it must return. Be explicit about the output fields. The AI does not infer structure from the result type alone; the prompt must describe `approvalNote` and `isApproved` by name and explain what each should contain.
-- **Query** — pass all data the AI needs to make a fair decision: title, requester, department, total amount, notes, and line items. Use EL expressions (`<%= in.purchasingData.title %>`) to inject process data at runtime. Do not hardcode values or leave out fields the AI will need.
+- **System message** — define the AI's role clearly: who it is, what criteria it must apply, and what it must return. Be explicit about the output fields. The AI does not infer structure from the result type alone; the prompt must describe `approvalNote` and `isApproved` by name and explain what each should contain.
+- **User message** — pass all data the AI needs to make a fair decision: title, requester, department, total amount, notes, and line items. Use EL expressions (`<%= in.purchasingData.title %>`) to inject process data at runtime. Do not hardcode values or leave out fields the AI will need.
 - **Result type** — set `resultType` to the fully qualified class name (`exercise.common.ApprovalRecord.class`). The engine maps the AI's structured response onto the Java object automatically.
-- **Result mapping** — set `resultMapping` to the process data field that will hold the result (`in.approvalRecord`). This field must exist in the process data class.
+- **Map result to** — set `resultMapping` to the process data field that will hold the result (`in.approvalRecord`). This field must exist in the process data class.
 
-**The system prompt has three components:**
+**The system message has three components:**
 
 **1 — Role.** Tell the AI who it is and what its job is. This anchors every decision the AI makes to a specific professional context.
 
@@ -125,5 +125,6 @@ In the purchasing example `skipTasklist: true` is set — the AI evaluates every
 ## See also
 
 - [Practice 02 — Agent Pattern: Subprocess Design and Tool Co-location]
-- [Practice 03 — Agent Organisation: Tool Tags and Folder Structure]
+- [Practice 03 — Agent Organisation: Folder Structure and Naming Conventions]
+- [Practice 04 — Agent Pattern: Agent Pipeline]
 - [Practice 05 — Agent Prompts: Clarity and Dynamic Context]

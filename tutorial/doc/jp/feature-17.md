@@ -1,24 +1,24 @@
-# 高度なモデル設定
+# モデル設定
 
-[モデルプロバイダーの選択] では、エージェントに *どの* モデルが回答するかを決めます。**高度なモデル設定** では、そのモデルが *どのように* 回答するか — 例えば表現にどれだけ変化を持たせるか — を調整します。これらは任意設定です: ほとんどのエージェントはデフォルトのままで問題なく、エージェントに異なる挙動が必要な場合にだけ変更します。
+[モデルプロバイダーの選択] では、エージェントに *どの* モデルが回答するかを決めます。**モデル設定** では、そのモデルが *どのように* 回答するか — 例えば表現にどれだけ変化を持たせるか — を調整します。これらは任意設定です: ほとんどのエージェントはデフォルトのままで問題なく、エージェントに異なる挙動が必要な場合にだけ変更します。
 
 ---
 
-> **[モデルプロバイダーの選択] をベースにしています。** プロバイダーとモデルはそのままです — 高度な設定は、同じ `AgenticProcessCall` 要素にある追加のフィールドです。
+> **[モデルプロバイダーの選択] をベースにしています。** プロバイダーとモデルはそのままです — モデル設定は、同じ `AgenticProcessCall` 要素の **🧠️ Model** グループで、そのすぐ下にある追加のフィールドです。
 >
 > **このガイドで使用する例: 支払い催促メールの件名**
 >
 > Acme Corp は期限切れの請求書に対して支払い催促を送ります。2つのエージェントが同じ請求書の件名を作成します — 一方は再現性のある出力向け、もう一方は多様な表現向けに調整されているため、設定によって何が変わるかを確認できます。
 >
-> 完成したプロセスは `tutorial/processes/tutorial/features/Feature17.p.json` にあります — Designerで開いて読み進めてください。
+> 完成したプロセスは `tutorial/process/tutorial/features/Feature17.p.json` にあります — Designerで開いて読み進めてください。
 
 ---
 
 ## 設定の場所
 
-`AgenticProcessCall` 要素を開き、設定エディタの **⚙️ Advanced** グループに移動します。Smart Workflow 14.0.0 では、同じフィールドが **🧠️ Model** グループの *Optional Settings* にも表示されます — どちらも同じ値を編集します。
+`AgenticProcessCall` 要素を開き、設定エディタの **🧠️ Model** グループに移動します。**Provider** と **Model** の下にある *Optional Settings* に **Temperature** があります。
 
-**Provider** や **Model** と同様に、高度な設定はその要素にのみ適用されます。`variables.yaml` にグローバルなデフォルト値はありません。
+**Provider** や **Model** と同様に、これらの設定はその要素にのみ適用されます。`variables.yaml` にグローバルなデフォルト値はありません。
 
 ---
 
@@ -80,7 +80,7 @@ in.temperature = "1.0";
 
 ### エージェントの設定
 
-2つのエージェントは同じシステムプロンプトとクエリを使用します。
+2つのエージェントは同じシステムメッセージとユーザーメッセージを使用します。
 
 ```text
 You write email subject lines for Acme Corp's accounts payable team.
@@ -88,7 +88,7 @@ Given an overdue invoice, write one friendly payment reminder subject line.
 Return only the subject line. No quotes, no explanation.
 ```
 
-**クエリ:** `<%=in.invoiceText%>`
+**ユーザーメッセージ:** `<%=in.invoiceText%>`
 
 | エージェント | Temperature | 結果のマッピング先 |
 | --- | --- | --- |
@@ -121,10 +121,10 @@ Return only the subject line. No quotes, no explanation.
 
 動作する実装はチュートリアルプロジェクトで利用できます。
 
-- `tutorial/processes/tutorial/features/Feature17.p.json` — temperature の異なる2つのエージェント
-- `tutorial/dataclasses/tutorial/Feature17Data.d.json` — データクラス
+- `tutorial/process/tutorial/features/Feature17.p.json` — temperature の異なる2つのエージェント
+- `tutorial/dataclass/tutorial/Feature17Data.d.json` — データクラス
 
-Designerでプロセスを開き、`Reminder Subject (deterministic)` 要素と `Reminder Subject (creative)` 要素の **⚙️ Advanced** グループを比較してください。
+Designerでプロセスを開き、`Reminder Subject (deterministic)` 要素と `Reminder Subject (creative)` 要素の **🧠️ Model** グループにある *Optional Settings* を比較してください。
 
 ---
 

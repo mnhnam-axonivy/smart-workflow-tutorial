@@ -8,7 +8,7 @@ By default, AI agents make decisions autonomously. **Human in the Loop** pauses 
 >
 > **Example used in this guide:** an invoice approval agent. For invoices exceeding $2,000 the agent pauses and asks the human for a written justification. The agent then confirms approval, and a formal approval task is created with the justification in its description. Invoices below $1,000 are approved automatically without human intervention.
 >
-> The finished process is at `tutorial/processes/tutorial/features/Feature13.p.json`.
+> The finished process is at `tutorial/process/tutorial/features/Feature13.p.json`.
 
 ## Before you start
 
@@ -45,9 +45,11 @@ Add `aiMemoryId: String` to your data class before anything else. This is the fo
 { "name": "aiMemoryId", "comment": "name convention: field holding the memory id of an ongoing AI conversation" }
 ```
 
-The framework writes a conversation ID here on the first agent call. `DecisionMaker` uses this ID to locate and update the suspended conversation when the human task completes.
+The framework writes the ID of the suspended conversation here when the tool pauses the agent, and clears it again when the agent completes. `DecisionMaker` uses this ID to locate and update the suspended conversation when the human task completes.
 
-> Without `aiMemoryId` the agent has no memory store, `DecisionMaker.resolve()` fails silently, and the agent cannot resume correctly.
+> Without `aiMemoryId` the framework cannot store the ID — and it does not report that. `DecisionMaker.resolve()` then fails with an `IllegalStateException` (`Found no pending ChatMemory for id`), and the agent cannot resume.
+>
+> **Do not set `aiMemoryId` yourself.** An agent that starts with a value in this field treats the call as a resumption and ignores its System message and User message. See [Conversation Memory].
 
 ---
 
@@ -63,6 +65,8 @@ error.setAttribute("decision", in.feedback);
 
 This attaches the `HumanFeedback` object (question + placeholder for the answer) to the error so the boundary event can read it.
 
+The error code is **yours to choose** — all Smart Workflow requires is that a `BpmError` propagates out of the tool. The tutorial uses `human:decision`. In an application with several agents, give each agent its own code, named after the agent — for example `invoiceAgent:waiting` and `supplierAgent:waiting`. A dedicated code keeps each boundary event catching only its own agent's question, so two agents never resume each other.
+
 > The `tool` tag on the `CallSubStart` is what makes the framework expose this callable to the agent. Without it, the agent cannot discover or call `askUserFeedback`.
 
 ---
@@ -73,8 +77,8 @@ Add the tool and attach an `ErrorBoundaryEvent`:
 
 | Field | Value |
 | --- | --- |
-| Tools | `["askUserFeedback"]` |
-| System prompt | Instruct the agent to use `askUserFeedback` for invoices above $2,000 — ask a single direct question, do not suggest options |
+| Available tools | `["askUserFeedback"]` |
+| System message | Instruct the agent to use `askUserFeedback` for invoices above $2,000 — ask a single direct question, do not suggest options |
 | Error boundary code | `human:decision` — maps `error.getAttribute("decision")` to `in.decision` |
 
 The boundary output mapping:
@@ -109,6 +113,10 @@ new DecisionMaker(in.aiMemoryId).resolve(result.answer);
 
 This writes the user's free-text answer into the agent's memory so the suspended `askUserFeedback` tool call returns the correct value when the agent resumes.
 
+Smart Workflow never calls `resolve` for you — the boundary event and the return connection only bring the flow back to the agent. Without this line the agent resumes and finds its tool call still unanswered.
+
+> **Note:** Each `resolve` call answers exactly **one** pending tool request. An agent that fires several human-input tool calls in one turn is not supported.
+
 ---
 
 ## Example
@@ -141,16 +149,16 @@ The demo provides two start points to contrast both paths:
 2. Agent detects the amount is below $2,000 — approves automatically without calling `askUserFeedback`
 3. Flow proceeds directly to the approval `TaskSwitchEvent`
 
-No process configuration change is needed for this path — the agent applies the threshold check itself based on the system prompt. The `askUserFeedback` tool is simply never called.
+No process configuration change is needed for this path — the agent applies the threshold check itself based on the system message. The `askUserFeedback` tool is simply never called.
 
 ### Agent configuration
 
 | Field | Value |
 | --- | --- |
-| System prompt | *see prompt below* |
-| Tools | `["askUserFeedback"]` |
-| Result mapping | `in.result` |
-| Query | `<%=in.query%>` |
+| System message | *see prompt below* |
+| Available tools | `["askUserFeedback"]` |
+| Map result to | `in.result` |
+| User message | `<%=in.query%>` |
 
 ```text
 You are an invoice approval assistant for Acme Corp. When an invoice total exceeds $2,000,
@@ -177,9 +185,13 @@ and describe the approval task that will be created with that reason in its desc
 
 ## Common mistakes
 
-- **Missing `aiMemoryId`** — `DecisionMaker.resolve()` cannot locate the agent's memory; the agent resumes with no tool result and may hallucinate or loop.
+- **Missing `aiMemoryId`** — the ID is never stored (the framework ignores the failure), and `DecisionMaker.resolve()` later throws an `IllegalStateException` because it finds no pending conversation.
 - **UserTask not connected back to the same AgenticProcessCall** — the agent never re-enters and the process ends prematurely.
 - **Forgetting the `tool` tag** — without the `tool` tag on the `CallSubStart`, the agent cannot discover or call `askUserFeedback`.
+- **Pre-setting `aiMemoryId`** — the call is treated as a resumption, so the System message and User message are ignored. Leave the field to the framework.
+- **The System message does not tell the agent to ask** — models do not pause on their own. If the instruction is vague, the agent answers instead of asking. This is the most common cause of "it never pauses".
+- **Sharing one error code between agents** — a boundary event then also catches another agent's question. Use one code per agent.
+- **Expecting the boundary event to catch guardrail or circuit breaker errors** — those have their own codes; see [Output Guardrail] and [Circuit Breaker].
 
 ---
 

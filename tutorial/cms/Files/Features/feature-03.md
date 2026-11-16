@@ -36,18 +36,24 @@ You access proprietary, closed-source models via an API. You pay the vendor dire
 
 Smart Workflow ships with built-in support for six providers across all three categories. You switch between them by changing a single variable — no code changes required.
 
-| Provider | Category | Key Models | Vision | PDF | Structured Output |
-| --- | --- | --- | --- | --- | --- |
-| **OpenAI** | Direct | gpt-4o, gpt-4.1, gpt-4.1-mini, gpt-4.1-nano, gpt-5 | ✓ | ✓ | ✓ |
-| **Azure OpenAI** | Platform | Any vision-capable deployment | ✓ | ✓ | ✓ |
-| **Google Gemini** | Direct | gemini-1.5-*, gemini-2.0-*, gemini-2.5-* | ✓ | ✓ | — |
-| **Anthropic / Claude** | Direct | claude-opus-*, claude-sonnet-*, claude-haiku-* | ✓ | ✓ | ✓ (4.5+) |
-| **xAI / Grok** | Direct | grok-4-1-* series | ✓ | — | ✓ |
-| **Ollama** | Self-Hosted | llama3, gemma3, qwen, mistral, llava, … | ✓* | — | ✓ |
+| Provider | Category | Key Models | Vision | PDF | Structured Output | Embedding |
+| --- | --- | --- | --- | --- | --- | --- |
+| **OpenAI** | Direct | gpt-4o, gpt-4.1, gpt-4.1-mini, gpt-4.1-nano, gpt-5 | ✓ | ✓ | ✓ | ✓ |
+| **Azure OpenAI** | Platform | Any vision-capable deployment | ✓ | ✓ | ✓ | — |
+| **Google Gemini** | Direct | gemini-1.5-*, gemini-2.0-*, gemini-2.5-* | ✓ | ✓ | — | — |
+| **Anthropic / Claude** | Direct | claude-opus-*, claude-sonnet-*, claude-haiku-* | ✓ | ✓ | ✓ | — |
+| **xAI / Grok** | Direct | grok-4-1-* series | ✓ | — | ✓ | — |
+| **Ollama** | Self-Hosted | llama3, gemma3, qwen, mistral, llava, … | ✓* | — | ✓ (not with tools) | ✓ |
 
 > **Ollama note:** Vision requires a vision-capable model (e.g. `llava`, `llama3.2-vision`).
 >
-> **Gemini note:** Gemini does not support structured output natively. Use plain text output and parse the response manually if you choose Gemini.
+> **Gemini note:** Gemini does not support structured output. Requesting a typed result does not fail — Smart Workflow logs an error and falls back to a best-effort parse of the reply — so prefer plain text output on Gemini.
+>
+> **Ollama structured output:** A schema and tools cannot go into the same request. When an agent has both, the tools are kept and the schema is dropped silently.
+>
+> **Embedding:** Only needed for [RAG as a Tool], where the embedding model must come from a provider with a tick in this column.
+>
+> **Nothing is checked locally:** This table is knowledge, not an enforced contract. Smart Workflow does not stop an unsupported combination — a PDF sent to xAI, for example. The request fails at the provider, with the provider's own error message.
 >
 > **Vision image formats:** Vision input only accepts PNG, JPG, and JPEG. Other image formats are not supported.
 
@@ -59,7 +65,9 @@ There are two levels at which you can set the AI provider and model — one glob
 
 ### 1 — Global default via variables.yaml
 
-Set the provider once for the entire application in `config/variables.yaml`. Every `AgenticProcessCall` in every process will use this provider unless overridden.
+Set the provider once for the entire application with the `AI.DefaultProvider` variable. Every `AgenticProcessCall` in every process will use this provider unless overridden.
+
+Each provider's own variables are declared by its connector project (`smart-workflow-openai`, `smart-workflow-anthropic`, …), so install the project of the provider you want to use. The examples below show the variables in `variables.yaml` notation; on a running engine you set the same variables in the **Engine Cockpit** under **Variables**.
 
 **Example — OpenAI:**
 
@@ -70,8 +78,8 @@ Variables:
     Providers:
       OpenAI:
         #[password]
-        APIKey: ${decrypt:your-encrypted-key}
-        Model: "gpt-4.1-mini"
+        APIKey: ${decrypt:}
+        DefaultModel: "gpt-4.1-mini"
 ```
 
 **Example — Azure OpenAI:**
@@ -82,11 +90,16 @@ Variables:
     DefaultProvider: "AzureOpenAI"
     Providers:
       AzureOpenAI:
-        #[password]
-        APIKey: ${decrypt:your-encrypted-key}
         Endpoint: "https://YOUR_RESOURCE.openai.azure.com/"
-        DeploymentName: "gpt-4o"
+        DefaultDeployment: "my-gpt-4-1-mini"
+        Deployments:
+          my-gpt-4-1-mini:
+            Model: "gpt-4.1-mini"
+            #[password]
+            APIKey: ${decrypt:}
 ```
+
+Azure OpenAI is the only provider with a nested shape: there is no provider-level API key — every deployment carries its own model and key. Deployment names become variable names, so use kebab-case (lowercase letters, digits and hyphens, not starting with a digit).
 
 **Example — Google Gemini:**
 
@@ -97,8 +110,8 @@ Variables:
     Providers:
       Gemini:
         #[password]
-        APIKey: ${decrypt:your-encrypted-key}
-        Model: "gemini-2.0-flash"
+        APIKey: ${decrypt:}
+        DefaultModel: "gemini-2.5-flash"
 ```
 
 **Example — Anthropic:**
@@ -110,8 +123,8 @@ Variables:
     Providers:
       Anthropic:
         #[password]
-        APIKey: ${decrypt:your-encrypted-key}
-        Model: "claude-sonnet-4-5"
+        APIKey: ${decrypt:}
+        DefaultModel: "claude-sonnet-4-5"
 ```
 
 **Example — xAI / Grok:**
@@ -123,8 +136,8 @@ Variables:
     Providers:
       xAI:
         #[password]
-        APIKey: ${decrypt:your-encrypted-key}
-        Model: "grok-4-1"
+        APIKey: ${decrypt:}
+        DefaultModel: "grok-4-1-fast"
 ```
 
 **Example — Ollama (no API key needed):**
@@ -136,31 +149,43 @@ Variables:
     Providers:
       Ollama:
         BaseUrl: "http://localhost:11434"
-        Model: "llama3.2"
+        DefaultModel: "llama3.2"
+        # A local model on CPU can need minutes for large models or cold starts.
+        TimeoutSeconds: "300"
 ```
 
 #### Setting API keys securely in Engine Cockpit
 
-Axon Ivy treats any variable annotated with `#[password]` as a secret — the value is encrypted at rest and decrypted only at runtime. You should **never type a real API key directly into variables.yaml** in the Designer. Instead, set it in the Engine Cockpit after deployment:
+Axon Ivy treats any variable annotated with `#[password]` as a secret — the value is encrypted at rest and decrypted only at runtime. You should **never type a real API key directly into variables.yaml** — it would stay readable there and end up in source control. Set it in the Engine Cockpit instead:
 
 ![Setting API key in Engine Cockpit](cms:/Files/Images/feature03-api-key-cockpit)
 
-Open **Engine Cockpit → Applications → your application → Variables**, find the key field (e.g. `AI.Providers.OpenAI.APIKey`), and paste your key. The Engine encrypts it immediately. The `${decrypt:…}` placeholder in variables.yaml is only used during local development in the Designer.
+Open **Engine Cockpit → Applications → your application → Variables**, find the key field (e.g. `AI.Providers.OpenAI.APIKey`), and paste your key. The Engine encrypts it immediately. The `${decrypt:}` placeholder is what stays in `variables.yaml`.
+
+> **Note:** Variables are read on **each agent call**. A key you add or rotate, or a default model you change, takes effect on the next call — no restart needed.
 
 #### Variable reference
 
 | Variable | Description | Example |
 | --- | --- | --- |
-| `AI.DefaultProvider` | Global default provider name | `OpenAI` |
+| `AI.DefaultProvider` | Global default provider — `OpenAI`, `AzureOpenAI`, `Gemini`, `xAI`, `Anthropic` or `Ollama` | `OpenAI` |
 | `AI.Providers.OpenAI.APIKey` | OpenAI API key (encrypted) | `${decrypt:…}` |
-| `AI.Providers.OpenAI.Model` | Model to use for OpenAI | `gpt-4.1-mini` |
-| `AI.Providers.Anthropic.Model` | Model to use for Anthropic | `claude-sonnet-4-5` |
+| `AI.Providers.OpenAI.DefaultModel` | OpenAI model used when an agent names none | `gpt-4.1-mini` |
+| `AI.Providers.Anthropic.DefaultModel` | Anthropic model used when an agent names none | `claude-sonnet-4-5` |
 | `AI.Providers.Ollama.BaseUrl` | Ollama server URL | `http://localhost:11434` |
 | `AI.Providers.AzureOpenAI.Endpoint` | Azure endpoint URL | `https://…openai.azure.com` |
+| `AI.Providers.AzureOpenAI.DefaultDeployment` | Azure deployment used when an agent names none | `my-gpt-4-1-mini` |
+| `AI.Providers.AzureOpenAI.Deployments.<name>.Model` | Model behind that deployment | `gpt-4.1-mini` |
+| `AI.Providers.AzureOpenAI.Deployments.<name>.APIKey` | API key of that deployment (encrypted) | `${decrypt:}` |
+
+For every variable and its default, see [Quick Reference] or the upstream [Smart Workflow variables reference](https://github.com/axonivy-market/smart-workflow/blob/master/doc/user/reference/variables.md).
 
 ### 2 — Per-agent override in AgenticProcessCall
 
 Open any **AgenticProcessCall** element and scroll to the **🧠️ Model** group in the configuration editor. Pick a **Provider** from the list and set the **Model** field to override the global default for that element only — all other agents in the process continue using the global setting.
+
+- **Provider** — leave it empty to use `AI.DefaultProvider`. If the project of the selected provider is not installed, the agent call fails with `Unknown model provider <name>`.
+- **Model** — leave it empty to use that provider's `DefaultModel`. This is a script field, so a fixed name must be quoted: `"gpt-4o"`, not `gpt-4o`. Because it is a script, the model can also be decided at runtime, for example `in.selectedModel`.
 
 ![Per-agent AI Provider override in AgenticProcessCall](cms:/Files/Images/feature03-per-agent-override)
 
@@ -186,9 +211,18 @@ Acme Corp's process has three `AgenticProcessCall` elements in sequence. Each st
 
 ---
 
-## Advanced model settings
+## Model settings
 
-**Provider** and **Model** decide *which* model answers. To tune *how* it answers — for example its **Temperature** — use the **⚙️ Advanced** group of the same element. These settings are covered in [Advanced Model Settings].
+**Provider** and **Model** decide *which* model answers. To tune *how* it answers — for example its **Temperature** — use the *Optional Settings* below **Provider** and **Model** in the same **🧠️ Model** group. These settings are covered in [Model Settings].
+
+---
+
+## Common mistakes
+
+- **An unquoted model name** — **Model** is a script field; a bare `gpt-4o` does not compile. Write `"gpt-4o"`.
+- **`Model` instead of `DefaultModel` in the variables** — a provider's default model variable is called `DefaultModel` (Azure OpenAI: `DefaultDeployment`). A variable with any other name is not read by Smart Workflow.
+- **Choosing a provider before checking its capabilities** — Gemini cannot do structured output, xAI and Ollama cannot read PDFs, and only OpenAI and Ollama can embed. Nothing warns you until the provider rejects the request.
+- **Committing a real API key** — keep `${decrypt:}` in `variables.yaml` and set the value in the Engine Cockpit.
 
 ---
 
@@ -196,7 +230,7 @@ Acme Corp's process has three `AgenticProcessCall` elements in sequence. Each st
 
 The working implementation of the three-agent process described in this guide is available in the tutorial project:
 
-`tutorial/processes/tutorial/features/Feature03.p.json`
+`tutorial/process/tutorial/features/Feature03.p.json`
 
 Open it in the Designer to see all three `AgenticProcessCall` elements in sequence — each with its own provider and model configured — and the `Feature03Data` data class that carries the results between steps.
 
@@ -207,4 +241,4 @@ Open it in the Designer to see all three `AgenticProcessCall` elements in sequen
 - [Basic Agent Setup]
 - [Structured Output]
 - [File Extraction]
-- [Advanced Model Settings]
+- [Model Settings]

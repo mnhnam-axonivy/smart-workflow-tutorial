@@ -93,6 +93,12 @@ Dialogs:
       AppendixA02Title: How LLMs Understand Language
       AppendixA03Desc: Set up a local OpenSearch instance with Docker for development and tutorial exercises — no cloud account required
       AppendixA03Title: Running a Local Vector Store
+      AppendixA04Desc: The vocabulary of Smart Workflow — agent, messages, tools, guardrails, memory — and the limits worth knowing before you design around them
+      AppendixA04Title: Key Concepts
+      AppendixA05Desc: Start from the symptom — an agent that does not answer, answers wrongly, or ignores your configuration — and find the cause
+      AppendixA05Title: Troubleshooting
+      AppendixA06Desc: Look-up tables — provider capabilities, every AI variable, and every BPM error code an agent can raise
+      AppendixA06Title: Quick Reference
       AppendixDesc: Reference materials and background concepts
       AppendixTitle: Appendix
       BackButton: ← All Features
@@ -102,7 +108,7 @@ Dialogs:
       BestPracticesTitle: Best Practices
       ExpertDesc: Advanced Integration — push the boundaries
       ExpertTitle: Expert
-      Feature01Desc: Configure the AgenticProcessCall element with a system prompt to create your first AI agent.
+      Feature01Desc: Configure the AgenticProcessCall element with a system message to create your first AI agent.
       Feature01Title: Basic Agent Setup
       Feature02Desc: Choose from 6 supported AI providers and configure them via variables.
       Feature02Title: Model Provider Selection
@@ -124,7 +130,7 @@ Dialogs:
       Feature10Title: Input Guardrail
       Feature11Desc: Anonymise personal data in user messages before the LLM sees it and restore original values in the response — GDPR-friendly.
       Feature11Title: PII Masking Guardrail
-      Feature12Desc: Enable agents to remember previous turns and build coherent multi-turn dialogues using a single data class field.
+      Feature12Desc: Understand what an agent remembers — everything within one call, nothing between calls — and how aiMemoryId carries a suspended conversation across a human task.
       Feature12Title: Conversation Memory
       Feature13Desc: Pause agent execution and route decisions to human tasks — the agent resumes automatically with the user's choice.
       Feature13Title: Human in the Loop
@@ -134,15 +140,15 @@ Dialogs:
       Feature15Title: Circuit Breaker
       Feature16Desc: Browse every recorded agent conversation, track token usage, and get statistics and an AI assessment per case.
       Feature16Title: Governance Dashboard
-      Feature17Desc: Tune how the model answers — starting with temperature — per agent in the Advanced settings.
-      Feature17Title: Advanced Model Settings
-      Feature18Desc: 'End-to-end: upload docs, embed into OpenSearch, chat — guided 4-step wizard.'
-      Feature18Title: RAG Chatbot Pipeline
+      Feature17Desc: Tune how the model answers — starting with temperature — per agent in the Model group.
+      Feature17Title: Model Settings
+      Feature18Desc: Enforce your own policy in Java — block or rewrite messages with a custom guardrail that works like a built-in one.
+      Feature18Title: Custom Guardrail
       Feature19Desc: Plug any LLM into Smart Workflow by implementing the ChatModelProvider SPI.
       Feature19Title: Custom Model Provider
       Feature20Desc: Decompose natural language queries into structured criteria and multiple search variants.
       Feature20Title: Query Expansion
-      HeroSubtitle: 20 features from first agent to full RAG pipeline
+      HeroSubtitle: 18 features from first agent to full RAG pipeline
       HeroTitle: Smart Workflow Feature Guide
       IntermediateDesc: Tools & Safety — make agents useful and safe
       IntermediateTitle: Intermediate
@@ -159,7 +165,9 @@ Dialogs:
       Practice02Title: 'Agent Pattern: Subprocess Design and Tool Co-location'
       Practice03Desc: Group agent files in a dedicated agents/ folder and apply consistent naming across process files, callables, and data classes.
       Practice03Title: 'Agent Organisation: Folder Structure and Naming Conventions'
-      Practice05Desc: Write tool-name-free system prompts and inject live Java values — today's date, user locale, process data — directly into prompts using EL expressions.
+      Practice04Desc: Chain focused agents — read, analyse, decide — and pass typed results between them instead of asking one agent to do everything.
+      Practice04Title: 'Agent Pattern: Agent Pipeline'
+      Practice05Desc: Write tool-name-free system messages and inject live Java values — today's date, user locale, process data — directly into prompts using EL expressions.
       Practice05Title: 'Agent Prompts: Clarity and Dynamic Context'
 Labels:
   Close: Close

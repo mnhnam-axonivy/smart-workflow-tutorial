@@ -23,6 +23,7 @@ This is a tutorial project for **Axon Ivy Smart Workflow** developers. It is int
 ```
 tutorial-repo/
 ├── best-practices/  # Best-practice exercise Axon Ivy project
+├── internal/        # Internal builder for the Feature Guide walkthroughs (not an Axon Ivy project; do not change)
 └── tutorial/        # Tutorial Axon Ivy project
 ```
 
@@ -32,6 +33,14 @@ The Feature Guide is an interactive documentation viewer built into the tutorial
 
 ![Smart Workflow Feature Guide](images/start_guide.png)
 
+Tutorials with an interactive simulation have a **Walkthrough** button next to their title. These are the feature tutorials 01 to 07, 09 to 13, 15 and 17. It opens a simulated Process Designer full screen: a walkthrough plays the process by itself and explains each setting, after which you can select an element, edit its configuration and run the process yourself. It runs offline and the model's answers are simulated, so it needs neither a network connection nor an API key.
+
+### Interactive App Builder (internal)
+
+[`internal/interactive_app_builder`](internal/interactive_app_builder/README.md) is the internal builder for the **Walkthrough** simulations of the Feature Guide. It is a Node.js tool, not an Axon Ivy project, and has nothing to do with Axon Ivy itself: neither the Designer nor the Engine uses it, and you do not need it to follow the tutorials. The scripts it generates are already part of the tutorial project (`tutorial/webContent/resources/js/`). It is in this repository only for transparency, so that you can see how the walkthroughs are made.
+
+> **Please do not change this folder or the scripts it generates.** It is maintained internally, only to build the walkthroughs.
+
 ### Tutorial Processes
 
 Each feature in the `tutorial` project has a dedicated demo process that you can run directly in the Designer. Every process follows the same structure:
@@ -40,7 +49,7 @@ Each feature in the `tutorial` project has a dedicated demo process that you can
 
 ![Mock data](images/mock_data.png)
 
-**Agent element** — The `AgenticProcessCall` element containing the AI configuration for that feature: system prompt, query, provider, tools, and result mapping. Double-click it to inspect or change the configuration.
+**Agent element** — The `AgenticProcessCall` element containing the AI configuration for that feature: system message, user message, provider, tools, guardrails, and result mapping. Double-click it to inspect or change the configuration.
 
 ![Agent configuration](images/agent_configuration.png)
 
@@ -57,11 +66,13 @@ The ZIP has the following structure:
 ```
 tutorial-docs.zip
 ├── en/
-│   ├── feature-01.md
-│   └── … feature-07.md
+│   ├── feature-01.md … feature-18.md
+│   ├── practice-01.md … practice-05.md
+│   └── appendix-01.md … appendix-06.md
 ├── jp/
-│   ├── feature-01.md
-│   └── … feature-07.md
+│   ├── feature-01.md … feature-18.md
+│   ├── practice-01.md … practice-05.md
+│   └── appendix-01.md … appendix-06.md
 └── images/
     └── *.png
 ```
@@ -91,6 +102,7 @@ All `cms:/` image references in the markdown files are automatically rewritten t
 ```
 tutorial-repo/
 ├── best-practices/  # ベストプラクティス演習用 Axon Ivy プロジェクト
+├── internal/        # フィーチャーガイドのウォークスルー用の内部ビルダー（Axon Ivy プロジェクトではありません。変更しないでください）
 └── tutorial/        # Axon Ivy チュートリアルプロジェクト
 ```
 
@@ -100,6 +112,14 @@ tutorial-repo/
 
 ![Smart Workflow Feature Guide](images/start_guide.png)
 
+インタラクティブなシミュレーションを備えたチュートリアルには、タイトルの横に **ウォークスルー** ボタンがあります。対象は機能チュートリアルの 01〜07、09〜13、15、17 です。クリックすると Process Designer のシミュレーションが全画面で開き、ウォークスルーがプロセスを自動で実行しながら各設定を解説します。その後は要素を選択し、設定を編集して、自分でプロセスを実行できます。オフラインで動作し、モデルの回答はシミュレーションのため、ネットワーク接続もAPIキーも不要です。
+
+### インタラクティブアプリビルダー（内部用）
+
+[`internal/interactive_app_builder`](internal/interactive_app_builder/README.md) は、フィーチャーガイドの **ウォークスルー** を生成する内部用のビルダーです。Node.js のツールで、Axon Ivy のプロジェクトではなく、Axon Ivy 自体とは関係ありません。Designer も Engine もこれを使用せず、チュートリアルを進めるためにも必要ありません。生成されたスクリプトは、すでにチュートリアルプロジェクト（`tutorial/webContent/resources/js/`）に含まれています。このフォルダーは、ウォークスルーの作り方を確認できるよう、透明性のためだけにリポジトリに含めています。
+
+> **このフォルダーと、生成されたスクリプトは変更しないでください。** ウォークスルーをビルドするためだけに、内部で管理しています。
+
 ### チュートリアルプロセス
 
 `tutorial` プロジェクトの各フィーチャーには、Designer から直接実行できる専用のデモプロセスがあります。すべてのプロセスは同じ構成に従っています。
@@ -108,7 +128,7 @@ tutorial-repo/
 
 ![Mock data](images/mock_data.png)
 
-**エージェント要素** — そのフィーチャーの AI 設定（システムプロンプト・クエリ・プロバイダー・ツール・結果マッピング）を含む `AgenticProcessCall` 要素です。ダブルクリックして設定の確認や変更ができます。
+**エージェント要素** — そのフィーチャーの AI 設定（システムメッセージ・ユーザーメッセージ・プロバイダー・ツール・ガードレール・結果マッピング）を含む `AgenticProcessCall` 要素です。ダブルクリックして設定の確認や変更ができます。
 
 ![Agent configuration](images/agent_configuration.png)
 
@@ -125,11 +145,13 @@ ZIP の構成は以下の通りです。
 ```text
 tutorial-docs.zip
 ├── en/
-│   ├── feature-01.md
-│   └── … feature-07.md
+│   ├── feature-01.md … feature-18.md
+│   ├── practice-01.md … practice-05.md
+│   └── appendix-01.md … appendix-06.md
 ├── jp/
-│   ├── feature-01.md
-│   └── … feature-07.md
+│   ├── feature-01.md … feature-18.md
+│   ├── practice-01.md … practice-05.md
+│   └── appendix-01.md … appendix-06.md
 └── images/
     └── *.png
 ```

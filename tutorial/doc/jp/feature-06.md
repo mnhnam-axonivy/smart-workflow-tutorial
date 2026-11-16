@@ -10,7 +10,7 @@
 >
 > Acme CorpはJPY建ての請求書を受け取ります。エージェントが請求書を読み取り、合計金額と通貨を抽出し、Javaツール（`convertToUSD`）を呼び出して固定為替レートでUSD換算額を計算し、請求書の詳細と換算額を組み合わせた1文の要約を返します。
 >
-> 完成したプロセスは `tutorial/processes/tutorial/features/Feature06.p.json` にあります。Designerで開いて読み進めてください。
+> 完成したプロセスは `tutorial/process/tutorial/features/Feature06.p.json` にあります。Designerで開いて読み進めてください。
 
 ---
 
@@ -39,12 +39,12 @@ Javaツールは `SmartWorkflowTool` インターフェースを実装したク�
 
 | メソッド | 用途 |
 |---|---|
-| `name()` | エージェントが `Tools` リストで使用するツール名 |
+| `name()` | **Available tools** に表示されるツール名。省略可能 — デフォルトは単純クラス名 |
 | `description()` | ツールの用途と呼び出しタイミングをLLMに伝える |
 | `parameters()` | エージェントが提供する必要のある型付き入力を宣言する |
 | `execute()` | 引数を受け取って結果を返す |
 
-フレームワークはJava SPIを通じてJavaツールを検出します: `META-INF/services/` に `SmartWorkflowToolsProvider` を登録すると、フレームワークが起動時にロードします。
+フレームワークはJava SPIを通じてJavaツールを検出します: `META-INF/services/` に `SmartWorkflowToolsProvider` を登録すると、フレームワークがエージェント呼び出しのたびに解決します。
 
 ---
 
@@ -107,7 +107,7 @@ public class FxRateConverterTool implements SmartWorkflowTool {
 }
 ```
 
-**`name()`** はエージェントが使用する識別子です。エージェントの `Tools` リストの文字列と完全に一致する必要があります。
+**`name()`** はエージェントが使用する識別子で、**Available tools** に表示される名前です。省略可能で、省略した場合は単純クラス名（`FxRateConverterTool`）が使用されます。この例のように、エージェントに見せる名前を変えたい場合にオーバーライドします。
 
 **`description()`** はLLMにそのまま送信されます。ツールが何をするのか・いつ使うのか・結果にどのような形式を期待するかを指示として記述してください。明確であるほど、エージェントがツールを正確に呼び出す信頼性が高まります。
 
@@ -131,7 +131,7 @@ public class TutorialToolProvider implements SmartWorkflowToolsProvider {
 }
 ```
 
-1つのプロバイダーで複数のツールを公開できます。フレームワークは起動時に `getTools()` を呼び出し、返されたすべてのツールをグローバルに登録します。
+1つのプロバイダーで複数のツールを公開できます。プロバイダーはエージェント呼び出しのたびに解決されるため、新しく登録したツールは再起動なしで表示されます。
 
 ---
 
@@ -144,6 +144,8 @@ tutorial.tool.TutorialToolProvider
 ```
 
 このファイルがない場合、フレームワークはプロバイダーを読み込まず、クラスがクラスパスにあってもすべてのエージェントからツールが見えなくなります。
+
+> **注意:** このファイルで読み取られるのは**1行目だけ**です。そのため、1つのAxon Ivyプロジェクトが登録できるツールプロバイダーは1つです。1つのプロバイダーがいくつでもツールを返せるため、制約になることはほとんどありません。新しいツールは2行目を追加するのではなく、`getTools()` に追加してください。
 
 ---
 
@@ -193,7 +195,7 @@ Bank: Sumitomo Mitsui Banking Corporation
 Account Number: 1234567890
 ```
 
-### システムプロンプト
+### システムメッセージ
 
 ```text
 You are an invoice analyst for Acme Corp.
@@ -203,7 +205,7 @@ Given an invoice text:
 3. Return a single sentence summary containing: the invoice number, supplier name, original total amount with currency, and the USD equivalent returned by convertToUSD.
 ```
 
-**クエリ:** `<%=in.invoiceText%>`
+**ユーザーメッセージ:** `<%=in.invoiceText%>`
 
 **Available tools:** `convertToUSD`
 
@@ -251,7 +253,7 @@ which is equivalent to approximately 70.75 USD at a rate of 0.0067.
 
 動作実装はチュートリアルプロジェクトで利用できます。
 
-- `tutorial/processes/tutorial/features/Feature06.p.json` — エージェントプロセス
+- `tutorial/process/tutorial/features/Feature06.p.json` — エージェントプロセス
 - `tutorial/src/tutorial/tool/FxRateConverterTool.java` — Javaツールの実装
 - `tutorial/src/tutorial/tool/TutorialToolProvider.java` — SPIプロバイダー
 - `tutorial/src/META-INF/services/com.axonivy.utils.smart.workflow.tools.provider.SmartWorkflowToolsProvider` — SPI登録ファイル

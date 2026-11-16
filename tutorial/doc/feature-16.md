@@ -16,7 +16,7 @@ The **Governance Dashboard** (*AI Governance Center*) is a ready-made web UI on 
 | --- | --- | --- |
 | **History list** | Every recorded Case → Task → Agent, with tokens, messages and model, filterable | No |
 | **Token usage analytics** | KPIs and charts of token usage, models and response times over the last 7 days | No |
-| **Conversation detail** | The full conversation of each agent in one Case: system prompt, input, response, tool calls, metadata | No |
+| **Conversation detail** | The full conversation of each agent in one Case: system message, input, response, tool calls, metadata | No |
 | **Analysis report — Statistic** | Per-Case metrics, an A–F grade per agent, and detected anomalies | No |
 | **Analysis report — AI Recommendation** | An AI-written assessment: summary, risks, tool usage, reliability, efficiency, recommendations | **Yes** — on demand |
 
@@ -121,7 +121,7 @@ The conversation page shows one Case:
 
 | Tab | Content |
 | --- | --- |
-| **System Prompt** | The system message the agent was configured with |
+| **System message** | The system message the agent was configured with |
 | **Input** | The user message(s) sent to the model |
 | **Response** | What the model answered |
 | **Tool Calls (n)** | Each tool call with its input parameters and result |

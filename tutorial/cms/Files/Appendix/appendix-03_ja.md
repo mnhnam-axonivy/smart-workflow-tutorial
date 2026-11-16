@@ -188,7 +188,7 @@ docker logs smart-workflow-opensearch
 
 ## デモドキュメント
 
-`external-resources/demo-documents/` フォルダには、インジェスト用のサンプルファイルが含まれています：
+リポジトリのルートにある `doc/` フォルダには、インジェスト用のサンプルファイルが含まれています：
 
 | ファイル | 説明 |
 | --- | --- |

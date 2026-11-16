@@ -4,7 +4,7 @@
 
 ---
 
-> **ベストプラクティスの例:** `best-practices/processes/exercise/purchasing/agents/` の `agents/` フォルダには4つのプロセスファイルが含まれています。各ファイルは明確な役割を持ち — ファイル名・呼び出し可能プロセス名・データクラス名・`visual.description` のすべてが同じ規則に従っています。
+> **ベストプラクティスの例:** `best-practices/process/exercise/purchasing/agents/` の `agents/` フォルダには4つのプロセスファイルが含まれています。各ファイルは明確な役割を持ち — ファイル名・呼び出し可能プロセス名・データクラス名・`visual.description` のすべてが同じ規則に従っています。
 
 ## 使用する場面
 
@@ -48,7 +48,7 @@ processes/
 | パラメータは`Object`ではなく型付き | `java.io.InputStream`、`String`、`Class` |
 | プロセス説明フィールドに呼び出し可能プロセスの目的を記述する | `CallSubStart` に `visual.description` を設定する |
 
-`CallSubStart` の `visual.description` はIDEのツールチップとして表示され、AIがシステムプロンプトのステップに対してツールを照合する際に使用するテキストです — 1文の説明でツール選択の精度が大幅に向上します:
+`CallSubStart` の `visual.description` はIDEのツールチップとして表示され、AIがシステムメッセージのステップに対してツールを照合する際に使用するテキストです — 1文の説明でツール選択の精度が大幅に向上します:
 
 ```json
 {

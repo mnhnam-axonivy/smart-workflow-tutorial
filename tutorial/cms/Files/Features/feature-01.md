@@ -8,7 +8,7 @@ To set this up, open your process in the Designer, drag **AgenticProcessCall** f
 
 ---
 
-> **Prerequisite:** Before any agent can run you need a provider and API key configured in `variables.yaml`. If you haven't done that yet, jump to the [Global configuration — variables.yaml](#global-configuration--variablesyaml) section first, then come back here.
+> **Prerequisite:** Before any agent can run you need a provider and its API key configured. If you haven't done that yet, jump to the [Global configuration — variables.yaml](#global-configuration--variablesyaml) section first, then come back here.
 
 > **Example used in this guide: Acme Corp invoice processing**
 >
@@ -16,15 +16,15 @@ To set this up, open your process in the Designer, drag **AgenticProcessCall** f
 >
 > ![Example process](cms:/Files/Images/feature01-00)
 >
-> The finished process is at `tutorial/processes/tutorial/features/Feature01.p.json` — open it in the Designer to follow along as you read.
+> The finished process is at `tutorial/process/tutorial/features/Feature01.p.json` — open it in the Designer to follow along as you read.
 
 ---
 
 ## Element configuration
 
-### System Prompt
+### System message
 
-The system prompt is the agent's job description. It tells the LLM who it is, what it must do, and what format it must produce.
+The system message is the agent's job description. It tells the LLM who it is, what it must do, and what format it must produce.
 
 **Example for the invoice process:**
 
@@ -35,15 +35,17 @@ the invoice number, supplier name, total amount, and due date.
 Do not add any other commentary.
 ```
 
-**Why it matters:** The LLM has no knowledge of your business context. Without a clear system prompt it will guess what to do and return inconsistent results. The more specific you are — what to include, what to omit, what format to use — the more reliable the output.
+**Why it matters:** The LLM has no knowledge of your business context. Without a clear system message it will guess what to do and return inconsistent results. The more specific you are — what to include, what to omit, what format to use — the more reliable the output.
 
-**How it works:** The system prompt is sent to the LLM as the `system` role message before your data. It shapes every response the model produces in this agent call.
+**How it works:** The system message is sent to the LLM as the `system` role message before your data. It shapes every response the model produces in this agent call.
+
+Like the User message, the System message accepts `<%=...%>` expressions, so values that should not be hard-coded — a company policy, an approval limit — can come from process data. See [Agent Prompts: Clarity and Dynamic Context].
 
 ---
 
-### Query (User Message)
+### User message
 
-The query is the actual input the agent reasons over — the data it will work on at runtime. It supports IvyScript expressions using `<%=...%>` syntax.
+The User message is the actual input the agent reasons over — the data it will work on at runtime. It supports IvyScript expressions using `<%=...%>` syntax.
 
 **Example:** Bind this to the process data field that holds the invoice text:
 
@@ -53,7 +55,9 @@ The query is the actual input the agent reasons over — the data it will work o
 
 This expression is evaluated at runtime — `in.invoiceText` is the `invoiceText` field of the process data class `Feature01Data`.
 
-**How it works:** The resolved value becomes the `user` role message in the LLM conversation. The agent reads it, applies the system prompt instructions, and produces a response. For document processing, pass the document's text content here. For conversational agents, pass the user's question.
+**How it works:** The resolved value becomes the `user` role message in the LLM conversation. The agent reads it, applies the system message instructions, and produces a response. For document processing, pass the document's text content here. For conversational agents, pass the user's question.
+
+> **Note:** If the User message resolves to nothing — an empty field, or an expression that fails — Smart Workflow skips the agent call and the process simply continues. Look for `Agent call was skipped, since there was no user query` in the log.
 
 ---
 
@@ -75,7 +79,7 @@ This writes the agent's response into the `summary` field of `Feature01Data` —
 
 > To return a **typed Java object** instead of a plain String (e.g. to extract multiple fields into individual typed variables), see [Structured Output].
 >
-> The editor also shows the **🛠️ Tools**, **🛡️ Guardrails**, **🧠️ Model** and **⚙️ Advanced** groups — leave them empty for this basic setup. Tools are covered in [Callable Process Tools], guardrails in [Output Guardrail], provider and model in [Model Provider Selection], and settings such as temperature in [Advanced Model Settings].
+> The editor also shows the **🛠️ Tools**, **🛡️ Guardrails** and **🧠️ Model** groups — leave them empty for this basic setup. Tools are covered in [Callable Process Tools], guardrails in [Output Guardrail], provider and model in [Model Provider Selection], and settings such as temperature in [Model Settings].
 
 ---
 
@@ -83,33 +87,43 @@ This writes the agent's response into the `summary` field of `Feature01Data` —
 
 ### What is variables.yaml?
 
-Every Axon Ivy application has a `variables.yaml` file — the standard place to declare configuration values that can differ between environments (development, test, production) without changing code. Think of it as your application's settings file: it lives in the project, it is version-controlled, and Axon Ivy reads it at startup.
+Every Axon Ivy application has a `variables.yaml` file — the standard place to declare configuration values that can differ between environments (development, test, production) without changing code. Think of it as your application's settings file: it lives in the project and is version-controlled. On a running engine you can change the same variables in the **Engine Cockpit** under **Variables**, without touching the file.
 
 Values declared here are available anywhere in IvyScript as `Ivy.var().variable("AI.DefaultProvider")`, but Smart Workflow reads them automatically so you never need to call that yourself.
 
 ### How Smart Workflow uses it
 
-The Smart Workflow library reads the `AI` block from `variables.yaml` at startup to know:
+Smart Workflow reads the variables of the `AI` block to know:
 
 - **Which provider to use by default** — so every `AgenticProcessCall` in the application uses the same LLM unless you explicitly override it on a specific element
 - **How to authenticate** — each provider block holds the API key (and any extra settings like endpoint or deployment name) needed to make requests
 
 This means you configure the AI connection once, centrally, and all agents in all processes share it automatically.
 
+> **Note:** The variables are read on **each agent call**, not cached at startup. A changed provider, model or key takes effect on the next call — no restart needed.
+
 ### Minimum required configuration
 
-Before any agent can run, you need at least a provider and its API key:
+Before any agent can run, two variables need a value:
+
+| Variable | Value |
+| --- | --- |
+| `AI.DefaultProvider` | `OpenAI` |
+| `AI.Providers.OpenAI.APIKey` | your API key |
+
+The variables themselves are already declared by the provider project you installed (for example `smart-workflow-openai`) — you only set their values.
+
+Set the **API key** in the **Engine Cockpit** under **Variables**. The Cockpit encrypts the key as you save it, so it is never stored in plain text — see [Model Provider Selection] for a screenshot.
+
+`DefaultProvider` can be set in the same place, or in your project's `variables.yaml`:
 
 ```yaml
 Variables:
   AI:
     DefaultProvider: "OpenAI"
-    Providers:
-      OpenAI:
-        APIKey: "sk-..."
 ```
 
-`DefaultProvider` tells Smart Workflow which provider block to use. Set it to the name that matches the block you filled in.
+`DefaultProvider` tells Smart Workflow which provider to use. It must name a provider whose project is installed.
 
 ### Supported providers
 
@@ -119,7 +133,23 @@ For a full breakdown of each provider's options, switching providers at runtime,
 
 In the Designer, open your project and find `config/variables.yaml`. For the tutorial project that is `smart-workflow-tutorial/config/variables.yaml`.
 
-> **Note:** Never commit real API keys to source control. Use Axon Ivy's environment variable substitution (`${MY_SECRET_ENV_VAR}`) or override values per environment in the Engine administration UI.
+> **Note:** Never type a real API key into `variables.yaml` — it would stay readable there and end up in source control. Keep the `${decrypt:}` placeholder in the file and set the value in the Engine Cockpit.
+
+---
+
+## Common mistakes
+
+A few things are easy to get wrong the first time. If the agent does not answer as expected, check this list:
+
+| Symptom | Cause |
+| --- | --- |
+| No call was made at all | The User message resolved to nothing. Look for `Agent call was skipped, since there was no user query` in the log. |
+| `in.summary` is empty but the log shows a call | **Map result to** failed, usually a type mismatch. Look for `Failed to map result to` in the log. |
+| The reply contains `<%=in.invoiceText%>` literally | The expression could not be resolved — check the field name on the data class. |
+| `Unknown model provider <name>` | `AI.DefaultProvider` does not match an installed provider project. |
+| An authentication error from the provider | The API key is wrong, or was never set in the Engine Cockpit. |
+
+For more symptoms and what to check, see [Troubleshooting].
 
 ---
 
@@ -129,3 +159,5 @@ In the Designer, open your project and find `config/variables.yaml`. For the tut
 - [Structured Output]
 - [File Extraction]
 - [Callable Process Tools]
+- [Key Concepts]
+- [Troubleshooting]

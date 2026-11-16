@@ -10,7 +10,7 @@ Unlike the guardrails in [Input Guardrail] and [Output Guardrail], `PiiMaskingGu
 >
 > **Example used in this guide:** a single process sends a message containing 7 PII types to a customer support agent — all values are anonymised before the LLM call and restored in the output.
 >
-> The finished process is at `tutorial/processes/tutorial/features/Feature11.p.json`.
+> The finished process is at `tutorial/process/tutorial/features/Feature11.p.json`.
 
 ---
 
@@ -30,17 +30,17 @@ GDPR, CCPA, and other privacy regulations restrict sending personal data to thir
 
 PII types detected:
 
-| Type | Example |
-| --- | --- |
-| Email | `john.doe@example.com` |
-| Phone | `+1-555-123-4567` |
-| Credit / debit card | `4532015112830366` |
-| SSN | `123-45-6789` |
-| Date of birth | `15/06/1990` |
-| IP address | `192.168.1.42` |
-| MAC address | `00:1A:2B:3C:4D:5E` |
+| Type | Example | Limits |
+| --- | --- | --- |
+| Email | `john.doe@example.com` | |
+| Phone | `+1-555-123-4567` | International numbers only — needs a `+` or `00` prefix; `555-123-4567` is not detected |
+| Credit / debit card | `4532015112830366` | 13–19 digits that pass a Luhn check — any Luhn-valid number matches, so an invoice or serial number can be masked by mistake |
+| SSN | `123-45-6789` | US format with a `-` or space separator; `123456789` is not detected |
+| Date of birth | `15/06/1990` | Day-first `DD/MM/YYYY` in `19xx`/`20xx` only; `06/15/1990` is not detected |
+| IP address | `192.168.1.42` | IPv4 only — no IPv6 |
+| MAC address | `00:1A:2B:3C:4D:5E` | `:` or `-` separated |
 
-> Credit card numbers are validated with the **Luhn algorithm** — random digit strings that fail the checksum are not masked.
+> Detection is based on regular expressions: the guardrail masks what matches these patterns — nothing more. Credit card numbers are validated with the **Luhn algorithm** — random digit strings that fail the checksum are not masked.
 
 ---
 
@@ -63,17 +63,20 @@ In the `AgenticProcessCall` configuration, set both **Input Guardrails** and **O
 | Input Guardrails | `["PiiMaskingGuardrail"]` |
 | Output Guardrails | `["PiiMaskingGuardrail"]` |
 
-> Setting it in input only will result in `<TYPE_hash>` placeholders appearing in the final user response. Always register it in both.
+> **Important:** Selecting it on only one side is worse than not using it at all.
+>
+> - **Input only** — the placeholders are never translated back, so raw `<TYPE_hash>` values reach the caller.
+> - **Output only** — the guardrail treats the model's reply as an input and **masks the response** instead of restoring it.
 
 ---
 
-## Step 2 — Set a system prompt
+## Step 2 — Set a system message
 
 This step is optional, but without it output restoration may silently fail.
 
 The output guardrail restores PII by scanning the model's response for the exact `<TYPE_hash>` tokens it inserted. If the LLM paraphrases a token (e.g. writes "the email address" instead of `<EMAIL_a1b2c3d4e5f6>`), the token is not found and the original value is **not restored** — no error is thrown, the placeholder simply stays missing.
 
-Adding a system prompt reduces this risk:
+Adding a system message reduces this risk:
 
 ```text
 Values formatted as <TYPE_hash> are anonymized placeholders — the original sensitive data was removed before reaching you. Treat each placeholder as an opaque token and echo it back as-is.
@@ -101,7 +104,7 @@ in.query = "Please echo back all fields: MAC 00:1A:2B:3C:4D:5E, email john.doe@e
 
 | Field | Value |
 | --- | --- |
-| System prompt | `Values formatted as <TYPE_hash> are anonymized placeholders...` |
+| System message | `Values formatted as <TYPE_hash> are anonymized placeholders...` |
 | Input Guardrails | `["PiiMaskingGuardrail"]` |
 | Output Guardrails | `["PiiMaskingGuardrail"]` |
 
@@ -153,8 +156,10 @@ Variables:
 ## Common mistakes
 
 - **Registering in input only** — placeholders appear in the response instead of real values. Always add to both input and output.
-- **LLM altering placeholders** — some models may rephrase `<EMAIL_a1b2c3d4e5f6>` as "the email address", breaking restoration. Add the system prompt hint and test with your chosen model.
+- **Registering in output only** — the guardrail masks the model's reply instead of restoring it.
+- **LLM altering placeholders** — some models may rephrase `<EMAIL_a1b2c3d4e5f6>` as "the email address", breaking restoration. Add the system message hint and test with your chosen model.
 - **Treating this as a complete privacy solution** — PII masking reduces risk but is not a full privacy guarantee. Metadata, session IDs, and contextual cues may still identify individuals. Combine with data minimisation and privacy-by-design principles.
+- **Expecting masking outside an agent** — masking only applies to messages that pass through an `AgenticProcessCall`. Text that reaches a model on any other code path is not masked.
 
 ---
 

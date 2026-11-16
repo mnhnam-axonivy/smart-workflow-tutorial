@@ -8,7 +8,7 @@
 >
 > **このガイドの例：** 請求書承認エージェント。$2,000を超える請求書に対してエージェントが一時停止し、人間に書面による理由を求めます。エージェントは承認を確認し、その理由を説明に含む正式な承認タスクが作成されます。$1,000未満の請求書は人間の介入なしに自動承認されます。
 >
-> 完成したプロセスは `tutorial/processes/tutorial/features/Feature13.p.json` にあります。
+> 完成したプロセスは `tutorial/process/tutorial/features/Feature13.p.json` にあります。
 
 ## 始める前に
 
@@ -45,9 +45,11 @@
 { "name": "aiMemoryId", "comment": "name convention: field holding the memory id of an ongoing AI conversation" }
 ```
 
-フレームワークは最初のエージェント呼び出し時にここに会話IDを書き込みます。`DecisionMaker`はこのIDを使用して、人間タスク完了時にサスペンドされた会話を見つけて更新します。
+フレームワークは、ツールがエージェントを一時停止したときにサスペンドされた会話のIDをここに書き込み、エージェントの完了時に再びクリアします。`DecisionMaker`はこのIDを使用して、人間タスク完了時にサスペンドされた会話を見つけて更新します。
 
-> `aiMemoryId`がないと、エージェントはメモリストアを持てず、`DecisionMaker.resolve()`はサイレントに失敗し、エージェントは正しく再開できません。
+> `aiMemoryId`がないと、フレームワークはIDを保存できません（しかもエラーは報告されません）。その後、`DecisionMaker.resolve()`は`IllegalStateException`（`Found no pending ChatMemory for id`）で失敗し、エージェントは再開できません。
+>
+> **`aiMemoryId`を自分で設定しないでください。** このフィールドに値がある状態で開始したエージェントは、その呼び出しを再開として扱い、システムメッセージとユーザーメッセージを無視します。[会話メモリ]を参照してください。
 
 ---
 
@@ -63,6 +65,8 @@ error.setAttribute("decision", in.feedback);
 
 これにより、`HumanFeedback`オブジェクト（質問と回答のプレースホルダー）がエラーにアタッチされ、境界イベントが読み取れるようになります。
 
+エラーコードは**自由に決められます**。Smart Workflowが要求するのは、`BpmError`がツールの外に伝播することだけです。チュートリアルでは`human:decision`を使用しています。複数のエージェントがあるアプリケーションでは、`invoiceAgent:waiting`や`supplierAgent:waiting`のように、エージェントごとにエージェント名に基づいた専用のコードを付けてください。専用のコードにすることで、各境界イベントが自分のエージェントの質問だけをキャッチし、2つのエージェントが互いを再開してしまうことがなくなります。
+
 > `CallSubStart`の`tool`タグにより、フレームワークがこの呼び出し可能をエージェントに公開します。これがないと、エージェントは`askUserFeedback`を発見したり呼び出したりできません。
 
 ---
@@ -74,7 +78,7 @@ error.setAttribute("decision", in.feedback);
 | フィールド | 値 |
 | --- | --- |
 | ツール | `["askUserFeedback"]` |
-| システムプロンプト | $2,000を超える請求書に対して`askUserFeedback`を使用するよう指示 — 1つの直接的な質問をし、オプションは提示しない |
+| システムメッセージ | $2,000を超える請求書に対して`askUserFeedback`を使用するよう指示 — 1つの直接的な質問をし、オプションは提示しない |
 | エラー境界コード | `human:decision` — `error.getAttribute("decision")`を`in.decision`にマップ |
 
 境界出力マッピング：
@@ -109,6 +113,10 @@ new DecisionMaker(in.aiMemoryId).resolve(result.answer);
 
 これにより、ユーザーのフリーテキスト回答がエージェントのメモリに書き込まれ、エージェントが再開したときにサスペンドされた`askUserFeedback`ツール呼び出しが正しい値を返します。
 
+Smart Workflowが`resolve`を自動的に呼び出すことはありません。境界イベントと戻りの接続は、フローをエージェントに戻すだけです。この行がないと、エージェントは再開しても、ツール呼び出しが未回答のままになります。
+
+> **注意:** 1回の`resolve`呼び出しが回答するのは、保留中のツールリクエスト**1つだけ**です。1ターンで複数の人間入力ツールを呼び出すエージェントはサポートされていません。
+
 ---
 
 ## 例
@@ -141,16 +149,16 @@ new DecisionMaker(in.aiMemoryId).resolve(result.answer);
 2. エージェントが金額が$2,000未満であることを検出 — `askUserFeedback`を呼び出さずに自動承認する
 3. フローが直接承認の`TaskSwitchEvent`に進む
 
-このパスにプロセス設定の変更は不要です — エージェントはシステムプロンプトに基づいて自分自身で閾値チェックを適用します。`askUserFeedback`ツールは単純に呼び出されません。
+このパスにプロセス設定の変更は不要です — エージェントはシステムメッセージに基づいて自分自身で閾値チェックを適用します。`askUserFeedback`ツールは単純に呼び出されません。
 
 ### エージェントの設定
 
 | フィールド | 値 |
 | --- | --- |
-| システムプロンプト | *下記のプロンプトを参照* |
+| システムメッセージ | *下記のプロンプトを参照* |
 | ツール | `["askUserFeedback"]` |
 | 結果マッピング | `in.result` |
-| クエリ | `<%=in.query%>` |
+| ユーザーメッセージ | `<%=in.query%>` |
 
 ```text
 You are an invoice approval assistant for Acme Corp. When an invoice total exceeds $2,000,
@@ -177,9 +185,13 @@ and describe the approval task that will be created with that reason in its desc
 
 ## よくある間違い
 
-- **`aiMemoryId`がない** — `DecisionMaker.resolve()`がエージェントのメモリを見つけられず、エージェントはツール結果なしで再開し、幻覚を起こすかループする可能性がある。
+- **`aiMemoryId`がない** — IDは保存されず（フレームワークはその失敗を無視します）、その後`DecisionMaker.resolve()`は保留中の会話を見つけられないため`IllegalStateException`をスローします。
 - **UserTaskが同じAgenticProcessCallに戻る接続がない** — エージェントが再エントリーできず、プロセスが途中で終了する。
 - **`tool`タグを忘れる** — `CallSubStart`に`tool`タグがないと、エージェントは`askUserFeedback`を発見したり呼び出したりできない。
+- **`aiMemoryId`を事前に設定する** — その呼び出しは再開として扱われ、システムメッセージとユーザーメッセージは無視されます。フィールドの管理はフレームワークに任せてください。
+- **システムメッセージで質問するよう指示していない** — モデルは自発的には一時停止しません。指示があいまいだと、エージェントは質問する代わりに自分で回答します。「一時停止しない」原因として最も多いものです。
+- **複数のエージェントで1つのエラーコードを共有する** — 境界イベントが他のエージェントの質問までキャッチしてしまいます。エージェントごとに1つのコードを使用してください。
+- **境界イベントがガードレールやサーキットブレーカーのエラーをキャッチすると期待する** — それらには専用のコードがあります。[出力ガードレール]と[サーキットブレーカー]を参照してください。
 
 ---
 

@@ -93,6 +93,12 @@ Dialogs:
       AppendixA02Title: LLMは言語をどのように理解するか
       AppendixA03Desc: 開発・チュートリアル演習用にDockerでローカルのOpenSearchインスタンスをセットアップする — クラウドアカウント不要
       AppendixA03Title: ローカルベクターストアの起動
+      AppendixA04Desc: Smart Workflowの用語（エージェント、メッセージ、ツール、ガードレール、メモリ）と、設計前に知っておくべき制限
+      AppendixA04Title: 主要コンセプト
+      AppendixA05Desc: 症状から原因を調べる — エージェントが回答しない、期待どおりに回答しない、設定が反映されない場合の確認ポイント
+      AppendixA05Title: トラブルシューティング
+      AppendixA06Desc: 早見表 — プロバイダーの機能、すべてのAI変数、エージェントが発生させるすべてのBPMエラーコード
+      AppendixA06Title: クイックリファレンス
       AppendixDesc: 参考資料と背景概念
       AppendixTitle: 付録
       BackButton: ← 一覧に戻る
@@ -102,7 +108,7 @@ Dialogs:
       BestPracticesTitle: ベストプラクティス
       ExpertDesc: 高度な統合 — 限界に挑戦
       ExpertTitle: エキスパート
-      Feature01Desc: システムプロンプトを使ってAgenticProcessCall要素を設定し、初めてのAIエージェントを作成します。
+      Feature01Desc: システムメッセージを使ってAgenticProcessCall要素を設定し、初めてのAIエージェントを作成します。
       Feature01Title: エージェントの基本設定
       Feature02Desc: 6つのサポートされるAIプロバイダーから選択し、変数で設定します。
       Feature02Title: モデルプロバイダーの選択
@@ -124,7 +130,7 @@ Dialogs:
       Feature10Title: 入力ガードレール
       Feature11Desc: ユーザーメッセージの個人情報をLLMに届く前に匿名化し、レスポンスで元の値を復元します。GDPRに対応。
       Feature11Title: PIIマスキングガードレール
-      Feature12Desc: データクラスのフィールド1つで、エージェントが過去のターンを記憶し一貫したマルチターン対話を構築できるようにします。
+      Feature12Desc: エージェントが何を記憶するか — 1回の呼び出し内はすべて、呼び出し間は何も — と、aiMemoryIdがサスペンドされた会話を人間タスクをまたいで引き継ぐ仕組みを説明します。
       Feature12Title: 会話メモリ
       Feature13Desc: エージェントの実行を一時停止し、決定を人間タスクにルーティング — ユーザーの選択後、エージェントが自動的に再開します。
       Feature13Title: ヒューマンインザループ
@@ -134,15 +140,15 @@ Dialogs:
       Feature15Title: サーキットブレーカー
       Feature16Desc: 記録されたすべてのエージェント会話を閲覧し、トークン使用量を追跡し、ケースごとに統計とAIによる評価を取得します。
       Feature16Title: ガバナンスダッシュボード
-      Feature17Desc: モデルの回答の仕方を、temperature をはじめとする Advanced 設定でエージェントごとに調整します。
-      Feature17Title: 高度なモデル設定
-      Feature18Desc: 'エンドツーエンド: ドキュメントのアップロード・埋め込み・チャット — 4ステップガイド付き。'
-      Feature18Title: RAGチャットボットパイプライン
+      Feature17Desc: モデルの回答の仕方を、temperature をはじめとする Model グループの設定でエージェントごとに調整します。
+      Feature17Title: モデル設定
+      Feature18Desc: 独自のポリシーをJavaで適用 — 組み込みと同じように使えるカスタムガードレールで、メッセージをブロックまたは書き換えます。
+      Feature18Title: カスタムガードレール
       Feature19Desc: ChatModelProvider SPIを実装してあらゆるLLMをSmart Workflowに統合します。
       Feature19Title: カスタムモデルプロバイダー
       Feature20Desc: 自然言語クエリを構造化された条件と複数の検索バリアントに分解します。
       Feature20Title: クエリ拡張
-      HeroSubtitle: 20の機能 — 初めてのエージェントからRAGパイプラインまで
+      HeroSubtitle: 18の機能 — 初めてのエージェントからRAGパイプラインまで
       HeroTitle: Smart Workflow 機能ガイド
       IntermediateDesc: ツールと安全性 — エージェントを実用的で安全に
       IntermediateTitle: 中級
@@ -159,7 +165,9 @@ Dialogs:
       Practice02Title: エージェントパターン：サブプロセス設計とツールの同一配置
       Practice03Desc: エージェントファイルを専用のagents/フォルダに整理し、プロセスファイル・呼び出し可能プロセス・データクラスに一貫した命名規則を適用します。
       Practice03Title: エージェント整理：フォルダ構造と命名規則
-      Practice05Desc: ツールメソッド名を含まないシステムプロンプトを書き、EL式で今日の日付・ユーザーロケール・プロセスデータをリアルタイムにプロンプトへ注入します。
+      Practice04Desc: 読み取り・分析・判断といった役割ごとのエージェントをつなぎ、1つのエージェントにすべてを任せる代わりに型付きの結果を受け渡します。
+      Practice04Title: エージェントパターン：エージェントパイプライン
+      Practice05Desc: ツールメソッド名を含まないシステムメッセージを書き、EL式で今日の日付・ユーザーロケール・プロセスデータをリアルタイムにプロンプトへ注入します。
       Practice05Title: エージェントプロンプト：明瞭さと動的コンテキスト
 Labels:
   Close: 閉じる

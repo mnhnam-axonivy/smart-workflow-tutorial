@@ -1,6 +1,6 @@
 # Callable Process Tools
 
-By default an agent can only reason over the information you give it in the Query. **Callable Process Tools** extend this: the agent can call back into your Axon Ivy process during execution to fetch real-time data, apply business rules, or trigger side effects — and then use the result in its response.
+By default an agent can only reason over the information you give it in the User message. **Callable Process Tools** extend this: the agent can call back into your Axon Ivy process during execution to fetch real-time data, apply business rules, or trigger side effects — and then use the result in its response.
 
 > **This builds on [Basic Agent Setup].** The agent configuration is the same — the only addition is the **Available tools** field, which selects the callable sub-processes the agent is allowed to invoke.
 >
@@ -10,7 +10,7 @@ By default an agent can only reason over the information you give it in the Quer
 >
 > ![Example process](cms:/Files/Images/feature05-00)
 >
-> The finished process is at `tutorial/processes/tutorial/features/Feature05.p.json` and the tools at `tutorial/processes/tutorial/tools/Feature05Tools.p.json` — open both in the Designer to follow along.
+> The finished process is at `tutorial/process/tutorial/features/Feature05.p.json` and the tools at `tutorial/process/tutorial/tools/Feature05Tools.p.json` — open both in the Designer to follow along.
 
 ---
 
@@ -44,7 +44,7 @@ A tool is a [callable sub-process](https://developer.axonivy.com/doc/14.0/en/des
 
 ![Callable process tool](cms:/Files/Images/feature05-01)
 
-The agent decides **when** to call a tool based on its description and your System Prompt instructions. You decide **what** the tool does — the implementation is pure Axon Ivy.
+The agent decides **when** to call a tool based on its description and your System message instructions. You decide **what** the tool does — the implementation is pure Axon Ivy.
 
 ---
 
@@ -60,9 +60,9 @@ The agent decides **when** to call a tool based on its description and your Syst
 
 ### Tools
 
-In the **🛠️ Tools** group, select the tools the agent is allowed to invoke in the **Available tools** multi-select. The list offers every callable sub-process tagged as a tool and every registered Java tool in the application.
+In the **🛠️ Tools** group, select the tools the agent is allowed to invoke in the **Available tools** multi-select. The list offers every callable sub-process tagged as a tool and every registered Java tool in the application. Discovery covers the current project and all projects it requires, so a tool defined in a shared base project is available to agents in every project that depends on it.
 
-> **Important:** An empty **Available tools** field means the agent has **no tools at all** — tools are discovered globally but granted per agent.
+> **Important:** An empty **Available tools** field means the agent has **no tools at all** — tools are discovered globally but granted per agent. Keep the list tight: every tool you grant costs tokens in every request and gives the model one more way to choose wrong.
 
 **Example:** select `lookupApprovalPolicy`, `calculateEffectiveTaxRate` and `chooseApprover`. The process file stores the selection as a list of signature names:
 
@@ -70,7 +70,7 @@ In the **🛠️ Tools** group, select the tools the agent is allowed to invoke 
 ["lookupApprovalPolicy", "calculateEffectiveTaxRate", "chooseApprover"]
 ```
 
-**How it works:** At runtime, Smart Workflow registers each listed tool with the LLM as an available function. The agent's System Prompt tells it when and how to use them. When the LLM decides to call a tool, Smart Workflow invokes the matching callable sub-process, passes the parameters, and feeds the result back into the LLM conversation. The agent then continues reasoning with the new information.
+**How it works:** At runtime, Smart Workflow registers each listed tool with the LLM as an available function. The agent's System message tells it when and how to use them. When the LLM decides to call a tool, Smart Workflow invokes the matching callable sub-process, passes the parameters, and feeds the result back into the LLM conversation. The agent then continues reasoning with the new information.
 
 > The **🧠️ Model** group works the same way as in [Basic Agent Setup] — leave it empty to use the global default. See [Model Provider Selection] for details.
 
@@ -112,17 +112,18 @@ result.policy ← in.policy
 
 ### Descriptions sent to the LLM
 
-Smart Workflow sends three kinds of description text to the model for every registered tool:
+Only two things from the tool process reach the model:
 
 | What | Where you set it | What the LLM uses it for |
 | --- | --- | --- |
-| **Tool description** | **Description** field on the `CallSubStart` element | Understands what the tool does and when to call it |
-| **Input parameter descriptions** | `desc` on each input parameter | Knows what value to pass and in what format |
-| **Result parameter descriptions** | `desc` on each result parameter | Knows what the return value represents |
+| **Tool description** | **Description** field on the `CallSubStart` element | Understands what the tool does, when to call it, and what it gives back |
+| **Input parameters** | Name, type and `desc` of each input parameter | Knows what value to pass and in what format |
 
-Together these form the tool's complete contract with the model. The clearer they are, the more reliably the agent will call the right tool with the right input — even without an exhaustive System Prompt.
+Together these form the tool's complete contract with the model. The clearer they are, the more reliably the agent will call the right tool with the right input — even without an exhaustive System message.
 
-**Examples from this guide:**
+> **Important:** Descriptions on **result** parameters are **not** sent to the model. They are useful documentation for the next developer, but the agent only learns what a tool returns by receiving the result, which is handed back as raw JSON. If the model needs to know in advance what comes back — for example which values are possible — say so in the **tool description**, as the examples below do.
+
+**Examples from this guide** (the *Result* descriptions are developer documentation only — they are not sent to the model):
 
 `lookupApprovalPolicy`:
 
@@ -142,7 +143,7 @@ Together these form the tool's complete contract with the model. The clearer the
 - **Input `amount`:** *"Invoice total amount as a plain number string"*
 - **Result `approver`:** *"Username of the responsible approver (e.g. alice.chen, bob.smith, or carol.jones)"*
 
-> Even when your System Prompt explicitly names each tool, good descriptions act as a safety net. The model reads them to know exactly what to pass and what to expect back, so it can invoke tools correctly without guessing.
+> Even when your System message explicitly names each tool, good descriptions act as a safety net. The model reads them to know exactly what to pass and what to expect back, so it can invoke tools correctly without guessing.
 
 ### Implementation
 
@@ -195,7 +196,7 @@ In a real process, these Scripts could be replaced by database queries, REST cal
 
 ## Example — Acme Corp invoice approval
 
-### System Prompt
+### System message
 
 ```text
 You are an invoice approval assistant for Acme Corp.
@@ -207,7 +208,7 @@ Given invoice text:
 5. Return a structured InvoiceDecision with all three fields populated.
 ```
 
-**Query:** `<%=in.invoiceText%>`
+**User message:** `<%=in.invoiceText%>`
 
 **Available tools:** `lookupApprovalPolicy`, `calculateEffectiveTaxRate`, `chooseApprover`
 
@@ -233,8 +234,11 @@ The process gateway checks `in.invoiceDecision.isAutoApprove == false` and route
 
 - **Tool not found** — The stored tool name must exactly match the `signature` of the `CallSubStart` element. Selecting the tool from **Available tools** guarantees this, but if you rename a signature afterwards the stored name no longer matches — the tool registration fails silently and the agent acts as if no tools are available. Re-select the tool after renaming it.
 - **Missing `tool` tag** — Without `tags: ["tool"]` on the `CallSubStart`, Smart Workflow does not register the callable sub as a tool. The agent will not be able to invoke it.
-- **Agent ignores a tool** — If the System Prompt does not clearly instruct the agent to call a tool (when, with what input), the LLM may skip it and guess instead. Be explicit: name each tool and describe the input it expects.
+- **Agent ignores a tool** — If the System message does not clearly instruct the agent to call a tool (when, with what input), the LLM may skip it and guess instead. Be explicit: name each tool and describe the input it expects.
 - **Type mismatch** — Tool parameters support any Java type, but the LLM must be able to construct a valid value for that type from the conversation context. If you declare a complex object type, make sure its fields have clear `desc` values so the LLM knows how to populate them. When in doubt, `String` is the safest choice for scalar values.
+- **Relying on result parameter descriptions** — they never reach the model. Only the `CallSubStart` description and the input parameters do.
+- **An input parameter without a description** — the description is the whole contract. An `id` with nothing said about it is a guess.
+- **Granting every tool you have** — each one costs tokens in every request and gives the model another way to choose wrong.
 
 ---
 
@@ -242,8 +246,8 @@ The process gateway checks `in.invoiceDecision.isAutoApprove == false` and route
 
 The working implementation is available in the tutorial project:
 
-- `tutorial/processes/tutorial/features/Feature05.p.json` — the agent process with the Alternative gateway
-- `tutorial/processes/tutorial/tools/Feature05Tools.p.json` — all three tools in one callable sub
+- `tutorial/process/tutorial/features/Feature05.p.json` — the agent process with the Alternative gateway
+- `tutorial/process/tutorial/tools/Feature05Tools.p.json` — all three tools in one callable sub
 
 Open both in the Designer. In `Feature05.p.json`, inspect the `Invoice Approval Agent` element — note the **Available tools** field with all three signatures selected. In `Feature05Tools.p.json`, inspect each `CallSubStart` — note the `tool` tag, the individual input/result parameter mappings, and the **Description** field that is sent to the LLM.
 

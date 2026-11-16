@@ -22,7 +22,13 @@
     'Human in the Loop': '13',
     'Circuit Breaker': '15',
     'Governance Dashboard': '16',
-    'Advanced Model Settings': '17',
+    'Model Settings': '17',
+    'Custom Guardrail': '18',
+    'Practice 04 — Agent Pattern: Agent Pipeline': 'p04',
+    'Agent Pattern: Agent Pipeline': 'p04',
+    'Key Concepts': 'a04',
+    'Troubleshooting': 'a05',
+    'Quick Reference': 'a06',
     'Practice 01 — Agent Pattern: AI Task': 'p01',
     'Practice 02 — Agent Pattern: Subprocess Design and Tool Co-location': 'p02',
     'Practice 03 — Agent Organisation: Folder Structure and Naming Conventions': 'p03',
@@ -56,7 +62,12 @@
     'ヒューマンインザループ': '13',
     'サーキットブレーカー': '15',
     'ガバナンスダッシュボード': '16',
-    '高度なモデル設定': '17',
+    'モデル設定': '17',
+    'カスタムガードレール': '18',
+    'プラクティス 04 — エージェントパターン: エージェントパイプライン': 'p04',
+    '主要コンセプト': 'a04',
+    'トラブルシューティング': 'a05',
+    'クイックリファレンス': 'a06',
     'プラクティス 01 — エージェントパターン: AIタスク': 'p01',
     'プラクティス 02 — エージェントパターン: サブプロセス設計とツールの同一配置': 'p02',
     'プラクティス 03 — エージェント構成: フォルダ構造と命名規則': 'p03',
@@ -72,8 +83,8 @@
 
   // ── UI strings ──────────────────────────────────────────────────────────────
   var UI_STRINGS = {
-    en: { back: '← All Features', onThisPage: 'On this page' },
-    jp: { back: '← 一覧に戻る',   onThisPage: '目次' }
+    en: { back: '← All Features', onThisPage: 'On this page', walkthrough: 'Walkthrough', close: 'Close' },
+    jp: { back: '← 一覧に戻る',   onThisPage: '目次',          walkthrough: 'ウォークスルー', close: '閉じる' }
   };
 
   // JP translations for server-rendered index page elements.
@@ -81,7 +92,7 @@
   var JP_UI = {
     hero: {
       title: 'Smart Workflow 機能ガイド',
-      subtitle: '20の機能 — 初めてのエージェントからRAGパイプラインまで'
+      subtitle: '18の機能 — 初めてのエージェントからRAGパイプラインまで'
     },
     nav: {
       begin:    '初級',
@@ -101,7 +112,7 @@
     },
     // Keyed by the ID passed to showFeature()
     features: {
-      '01': { title: 'エージェントの基本設定',         desc: 'システムプロンプトを使ってAgenticProcessCall要素を設定し、初めてのAIエージェントを作成します。' },
+      '01': { title: 'エージェントの基本設定',         desc: 'システムメッセージを使ってAgenticProcessCall要素を設定し、初めてのAIエージェントを作成します。' },
       '02': { title: '構造化出力',                     desc: 'エージェントがフリーテキストの代わりに型付きJavaオブジェクトとして応答するよう指示します。' },
       '03': { title: 'モデルプロバイダーの選択',        desc: '6つのサポートされるAIプロバイダーから選択し、変数で設定します。' },
       '04': { title: 'ファイル抽出',                   desc: '画像やPDFを添付し、モデルが視覚的に読み取って構造化データを抽出します。' },
@@ -112,16 +123,21 @@
       '09': { title: '出力ガードレール',                desc: 'AIレスポンスがユーザーに届く前に検証 — 組み込みの出力ガードレールで有害または機密コンテンツをブロック。' },
       '10': { title: '入力ガードレール',                desc: 'ユーザーメッセージがモデルに届く前に検証 — 組み込みの入力ガードレールでプロンプトインジェクションや悪意ある入力をブロック。' },
       '11': { title: 'PIIマスキングガードレール',       desc: 'ユーザーメッセージの個人情報をLLMに届く前に匿名化し、レスポンスで元の値を復元。' },
-      '12': { title: '会話メモリ',                      desc: 'データクラスのフィールド1つでエージェントが過去のターンを記憶し、一貫したマルチターン対話を構築。' },
+      '12': { title: '会話メモリ',                      desc: 'エージェントが何を記憶するか — 1回の呼び出し内はすべて、呼び出し間は何も — と、aiMemoryIdがサスペンドされた会話を人間タスクをまたいで引き継ぐ仕組み。' },
       '13': { title: 'ヒューマンインザループ',           desc: 'エージェントの実行を一時停止し、決定を人間タスクにルーティング — ユーザーの選択後、エージェントが自動的に再開。' },
       '14': { title: 'ツールとしてのRAG',               desc: 'OpenSearchベクターストアを接続し、エージェントがビジネス文書をセマンティック検索できるようにします。' },
       '15': { title: 'サーキットブレーカー',             desc: '1つのスイッチでアプリケーション内のすべてのAIエージェント呼び出しを停止し、プロセスをAIを使わないルートにフォールバックさせます。' },
       '16': { title: 'ガバナンスダッシュボード',         desc: '記録されたすべてのエージェント会話を閲覧し、トークン使用量を追跡し、ケースごとに統計とAIによる評価を取得します。' },
-      '17': { title: '高度なモデル設定',                 desc: 'モデルの回答の仕方を、temperature をはじめとする Advanced 設定でエージェントごとに調整します。' },
+      '17': { title: 'モデル設定',                       desc: 'モデルの回答の仕方を、temperature をはじめとする Model グループの設定でエージェントごとに調整します。' },
+      '18': { title: 'カスタムガードレール',             desc: '独自のポリシーをJavaで適用 — 組み込みと同じように使えるカスタムガードレールで、メッセージをブロックまたは書き換えます。' },
+      'p04': { title: 'エージェントパターン：エージェントパイプライン', desc: '読み取り・分析・判断といった役割ごとのエージェントをつなぎ、1つのエージェントにすべてを任せる代わりに型付きの結果を受け渡します。' },
+      'a04': { title: '主要コンセプト', desc: 'Smart Workflowの用語（エージェント、メッセージ、ツール、ガードレール、メモリ）と、設計前に知っておくべき制限。' },
+      'a05': { title: 'トラブルシューティング', desc: '症状から原因を調べる — エージェントが回答しない、期待どおりに回答しない、設定が反映されない場合の確認ポイント。' },
+      'a06': { title: 'クイックリファレンス', desc: '早見表 — プロバイダーの機能、すべてのAI変数、エージェントが発生させるすべてのBPMエラーコード。' },
       'p01': { title: 'エージェントパターン：AIタスク', desc: 'ルーティンの人間承認をAI決定で置き換え、型付き結果をプロセスデータに直接書き込みます。' },
       'p02': { title: 'エージェントパターン：サブプロセス設計とツールの同一配置', desc: '呼び出し可能なサブプロセスに抽出するタイミングと、ツールをオーケストレータと同一ファイルに配置するタイミングを判断します。' },
       'p03': { title: 'エージェント整理：フォルダ構造と命名規則', desc: 'エージェントファイルを専用のagents/フォルダに整理し、プロセスファイル・呼び出し可能プロセス・データクラスに一貫した命名規則を適用します。' },
-      'p05': { title: 'エージェントプロンプト：明瞭さと動的コンテキスト', desc: 'ツールメソッド名を含まないシステムプロンプトを書き、EL式で今日の日付・ユーザーロケール・プロセスデータをリアルタイムにプロンプトへ注入します。' },
+      'p05': { title: 'エージェントプロンプト：明瞭さと動的コンテキスト', desc: 'ツールメソッド名を含まないシステムメッセージを書き、EL式で今日の日付・ユーザーロケール・プロセスデータをリアルタイムにプロンプトへ注入します。' },
       'a01': { title: 'RAGとは？', desc: '検索拡張生成（RAG）の仕組みを解説 — モデルの再学習なしに、自社ドキュメントをAIエージェントへリアルタイムで提供する技術。' },
       'a02': { title: 'LLMは言語をどのように理解するか', desc: 'モデルの内部を覗く — テキストが数値、埋め込み、そして回答へと変換される仕組み。' },
       'a03': { title: 'ローカルベクターストアの起動', desc: '開発・チュートリアル演習用にDockerでローカルのOpenSearchインスタンスをセットアップする。' },
@@ -132,7 +148,7 @@
   var EN_UI = {
     hero: {
       title:    'Smart Workflow Feature Guide',
-      subtitle: '20 features from first agent to full RAG pipeline'
+      subtitle: '18 features from first agent to full RAG pipeline'
     },
     nav: {
       begin:    'Beginner',
@@ -151,7 +167,7 @@
       appendix: { title: 'Appendix',       desc: 'Reference materials and background concepts' }
     },
     features: {
-      '01':  { title: 'Basic Agent Setup',                                       desc: 'Configure the AgenticProcessCall element with a system prompt to create your first AI agent.' },
+      '01':  { title: 'Basic Agent Setup',                                       desc: 'Configure the AgenticProcessCall element with a system message to create your first AI agent.' },
       '02':  { title: 'Structured Output',                                       desc: 'Instruct the agent to respond as a typed Java object instead of free text.' },
       '03':  { title: 'Model Provider Selection',                                desc: 'Choose from 6 supported AI providers and configure them via variables.' },
       '04':  { title: 'File Extraction',                                         desc: 'Attach images or PDFs and let the model visually read and extract structured data.' },
@@ -162,16 +178,21 @@
       '09':  { title: 'Output Guardrail',                                        desc: 'Validate AI responses before they reach the user — block harmful or sensitive content using a built-in output guardrail.' },
       '10':  { title: 'Input Guardrail',                                         desc: 'Validate user messages before they reach the model — block prompt injection and other malicious inputs with a built-in input guardrail.' },
       '11':  { title: 'PII Masking Guardrail',                                   desc: 'Anonymise personal data in user messages before the LLM sees it and restore original values in the response — GDPR-friendly.' },
-      '12':  { title: 'Conversation Memory',                                     desc: 'Enable agents to remember previous turns and build coherent multi-turn dialogues using a single data class field.' },
+      '12':  { title: 'Conversation Memory',                                     desc: 'Understand what an agent remembers — everything within one call, nothing between calls — and how aiMemoryId carries a suspended conversation across a human task.' },
       '13':  { title: 'Human in the Loop',                                       desc: 'Pause agent execution and route decisions to human tasks — the agent resumes automatically with the user\'s choice.' },
       '14':  { title: 'RAG as a Tool',                                           desc: 'Connect an OpenSearch vector store to let agents semantically search business documents.' },
       '15':  { title: 'Circuit Breaker',                                         desc: 'Stop every AI agent call in the application with one switch — and let processes fall back to a non-AI path.' },
       '16':  { title: 'Governance Dashboard',                                    desc: 'Browse every recorded agent conversation, track token usage, and get statistics and an AI assessment per case.' },
-      '17':  { title: 'Advanced Model Settings',                                 desc: 'Tune how the model answers — starting with temperature — per agent in the Advanced settings.' },
+      '17':  { title: 'Model Settings',                                          desc: 'Tune how the model answers — starting with temperature — per agent in the Model group.' },
+      '18':  { title: 'Custom Guardrail',                                        desc: 'Enforce your own policy in Java — block or rewrite messages with a custom guardrail that works like a built-in one.' },
+      'p04': { title: 'Agent Pattern: Agent Pipeline',                           desc: 'Chain focused agents — read, analyse, decide — and pass typed results between them instead of asking one agent to do everything.' },
+      'a04': { title: 'Key Concepts',                                            desc: 'The vocabulary of Smart Workflow — agent, messages, tools, guardrails, memory — and the limits worth knowing before you design around them' },
+      'a05': { title: 'Troubleshooting',                                         desc: 'Start from the symptom — an agent that does not answer, answers wrongly, or ignores your configuration — and find the cause' },
+      'a06': { title: 'Quick Reference',                                         desc: 'Look-up tables — provider capabilities, every AI variable, and every BPM error code an agent can raise' },
       'p01': { title: 'Agent Pattern: AI Task',                                  desc: 'Replace routine human approvals with an AI decision that writes a typed result directly into the process data.' },
       'p02': { title: 'Agent Pattern: Subprocess Design and Tool Co-location',   desc: 'Decide when to extract a callable subprocess and when to keep tools co-located with their orchestrator.' },
       'p03': { title: 'Agent Organisation: Folder Structure and Naming Conventions', desc: 'Group agent files in a dedicated agents/ folder and apply consistent naming across process files, callables, and data classes.' },
-      'p05': { title: 'Agent Prompts: Clarity and Dynamic Context',              desc: 'Write tool-name-free system prompts and inject live Java values — today\'s date, user locale, process data — directly into prompts using EL expressions.' },
+      'p05': { title: 'Agent Prompts: Clarity and Dynamic Context',              desc: 'Write tool-name-free system messages and inject live Java values — today\'s date, user locale, process data — directly into prompts using EL expressions.' },
       'a01': { title: 'What is RAG',                                             desc: 'A conceptual overview of Retrieval-Augmented Generation — how it works and when to use it' },
       'a02': { title: 'How LLMs Understand Language',                            desc: 'A look inside the model — how text becomes numbers, embeddings, and a generated response' },
       'a03': { title: 'Running a Local Vector Store',                            desc: 'Set up a local OpenSearch instance with Docker for development and tutorial exercises — no cloud account required' }
@@ -218,6 +239,79 @@
       if (titleEl) titleEl.textContent = feat.title;
       if (descEl)  descEl.textContent  = feat.desc;
     });
+  }
+
+  // ── Walkthrough ──────────────────────────────────────────────────────────────
+  // js/interactive-runtime.min.js provides window.swInteractive, and each js/feature-XX.js
+  // registers the simulation of its page (both are generated by internal/interactive_app_builder).
+  // A page with a registered simulation gets a "Walkthrough" button next to its title; the
+  // simulation then plays in a full-screen dialog and is released again when the dialog closes.
+  var walkthrough = null; // { dialog, handle, previousFocus, onKey, overflow } while the dialog is open
+
+  function interactiveAppId(pageId) {
+    if (/^p\d+$/.test(pageId)) return 'practice-' + pageId.slice(1);
+    if (/^a\d+$/.test(pageId)) return 'appendix-' + pageId.slice(1);
+    return 'feature-' + pageId;
+  }
+
+  function hasWalkthrough(pageId) {
+    return Boolean(window.swInteractive && window.swInteractive.has(interactiveAppId(pageId)));
+  }
+
+  function openWalkthrough(pageId) {
+    if (walkthrough || !hasWalkthrough(pageId)) return;
+    var strings = UI_STRINGS[currentLang] || UI_STRINGS.en;
+    var heading = document.querySelector('#feature-article h1');
+    var dialog = document.createElement('div');
+    dialog.className = 'sw-walkthrough';
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
+    dialog.setAttribute('aria-label', strings.walkthrough);
+    var bar = document.createElement('div');
+    bar.className = 'sw-walkthrough-bar';
+    var title = document.createElement('span');
+    title.className = 'sw-walkthrough-title';
+    title.textContent = (heading ? heading.textContent + ' — ' : '') + strings.walkthrough;
+    var close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'sw-walkthrough-close';
+    close.setAttribute('aria-label', strings.close);
+    close.title = strings.close + ' (Esc)';
+    close.textContent = '\u2715';
+    close.onclick = closeWalkthrough;
+    bar.appendChild(title);
+    bar.appendChild(close);
+    var stage = document.createElement('div');
+    stage.className = 'sw-walkthrough-stage';
+    dialog.appendChild(bar);
+    dialog.appendChild(stage);
+    document.body.appendChild(dialog);
+
+    var onKey = function(e) {
+      if (e.key === 'Escape' && !e.defaultPrevented) closeWalkthrough();
+    };
+    document.addEventListener('keydown', onKey);
+    walkthrough = { dialog: dialog, handle: null, previousFocus: document.activeElement, onKey: onKey, overflow: document.documentElement.style.overflow };
+    document.documentElement.style.overflow = 'hidden';
+    try {
+      walkthrough.handle = window.swInteractive.mount(stage, interactiveAppId(pageId), { lang: currentLang, autoplay: true });
+    } catch (e) {
+      if (window.console) console.error('The walkthrough could not be started.', e);
+      closeWalkthrough();
+      return;
+    }
+    close.focus();
+  }
+
+  function closeWalkthrough() {
+    if (!walkthrough) return;
+    var w = walkthrough;
+    walkthrough = null;
+    document.removeEventListener('keydown', w.onKey);
+    if (w.handle) w.handle.dispose(); // frees its WebGL context
+    w.dialog.remove();
+    document.documentElement.style.overflow = w.overflow;
+    if (w.previousFocus && w.previousFocus.focus) w.previousFocus.focus();
   }
 
   // ── FeatureRenderer ────────────────────────────────────────────────────────
@@ -285,6 +379,26 @@
       }
 
       this._buildToc();
+      this._addWalkthroughButton(id);
+    }
+
+    // Puts the "Walkthrough" button next to the page title when the page has a simulation.
+    _addWalkthroughButton(id) {
+      var heading = document.querySelector('#feature-article h1');
+      if (!heading || !hasWalkthrough(id)) return;
+      var strings = UI_STRINGS[currentLang] || UI_STRINGS.en;
+      var head = document.createElement('div');
+      head.className = 'sw-title-row';
+      heading.parentNode.insertBefore(head, heading);
+      head.appendChild(heading);
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'sw-walkthrough-btn';
+      button.innerHTML = '<span class="sw-walkthrough-play" aria-hidden="true">\u25B6</span>';
+      button.appendChild(document.createTextNode(strings.walkthrough));
+      button.setAttribute('aria-haspopup', 'dialog');
+      button.onclick = function() { openWalkthrough(id); };
+      head.appendChild(button);
     }
 
     _buildCmsImageMap() {
@@ -414,5 +528,7 @@
   window.showFeature = showFeature;
   window.showGrid    = showGrid;
   window.setLang     = setLang;
+  window.openWalkthrough  = openWalkthrough;
+  window.closeWalkthrough = closeWalkthrough;
 
 })();

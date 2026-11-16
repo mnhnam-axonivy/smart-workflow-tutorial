@@ -1,0 +1,176 @@
+/**
+ * Feature 05 — texts of the walkthrough and of the explanations shown next to an answer,
+ * in English and Japanese. Keys used by the runtime: tour.intro.*, tour.chapter.<id> (the
+ * tutorial's section headings, word for word), tour.<note>.title/.text, about.rules, ref.*
+ * (names of the tutorials a setting belongs to).
+ */
+
+export const strings = {
+  en: {
+    'lang': 'en',
+    'tour.intro.title': 'How an agent uses tools',
+    'tour.intro.text': 'Watch the Feature05 process run: the agent calls three callable sub-processes before it decides who has to approve the invoice. Afterwards you can click any element to look at its configuration again.',
+    'tour.intro.duration': 'about 3 min',
+    'tour.chapter.tools': 'Tools',
+    'tour.chapter.toolProcess': 'Creating a tool process',
+    'tour.chapter.result': 'Result',
+    'tour.chapter.mistakes': 'Common mistakes',
+
+    'tour.available.title': 'Available tools',
+    'tour.available.text': 'The callable sub-processes this agent may use. Tools are found across the application but granted per agent: an empty field means no tools at all.',
+    'tour.prompt.title': 'The system message says when',
+    'tour.prompt.text': 'It names each tool, what to pass to it and what to do with the result. The model decides from this text, and from the tool descriptions, when to call one.',
+    'tour.offered.title': 'The tools go with the request',
+    'tour.offered.text': 'Smart Workflow registers each selected tool with the model as a function: its name, its description and its parameters.',
+    'tour.asks.title': 'The model asks for a tool',
+    'tour.asks.text': 'A model cannot run anything itself. Instead of answering, it replies with a request: call this tool with this value.',
+    'tour.answers.title': 'Smart Workflow runs it',
+    'tour.answers.text': 'It calls the sub-process with that value and sends the result back. The model carries on with the new fact.',
+    'tour.again.title': 'One tool after the other',
+    'tour.again.text': '`lookupApprovalPolicy` and `chooseApprover` follow in the same way, each with the total amount.',
+    'tour.decision.title': 'Then it answers',
+    'tour.decision.text': 'With the three results the model returns the `InvoiceDecision`: tax rate, auto-approval and approver.',
+
+    'tour.file.title': 'One file, three tools',
+    'tour.file.text': '`Feature05Tools.p.json` is a callable sub-process. Each start element in it is one tool, with its own steps up to its end.',
+    'tour.tag.title': 'The tool tag',
+    'tour.tag.text': 'The tag `tool` on the start element is what makes Smart Workflow offer this sub-process to agents. Without it no agent can call it.',
+    'tour.description.title': 'Description',
+    'tour.description.text': 'This text is sent to the model. From it the model learns what the tool does and when to call it.',
+    'tour.signature.title': 'Signature',
+    'tour.signature.text': 'The name of the tool. “Available tools” on the agent stores exactly this name.',
+    'tour.input.title': 'Input parameter',
+    'tour.input.text': 'Name, type and description go to the model too. The description tells it what value to pass, and in what format.',
+    'tour.output.title': 'Result',
+    'tour.output.text': 'What the tool returns, again with a description, so the model knows what the value means.',
+    'tour.implementation.title': 'Implementation',
+    'tour.implementation.text': 'Between start and end is plain Axon Ivy. Here one Script holds the VAT rule; it could just as well be a database query or a REST call.',
+    'tour.called.title': 'The agent calls in',
+    'tour.called.text': 'The model passed `{value}`. The input mapping copies it from `param.currency` into the process data of the tool.',
+    'tour.rule.title': 'The rule runs',
+    'tour.rule.text': 'The Script looks up the rate for that currency and writes it to `in.taxRate`.',
+    'tour.returned.title': 'Back to the model',
+    'tour.returned.text': 'The result mapping hands `in.taxRate` back. The agent sends it to the model as JSON.',
+
+    'tour.object.title': 'A typed decision',
+    'tour.object.text': '`in.invoiceDecision` is an `InvoiceDecision` object. Each field comes from one tool, and the process reads them directly.',
+    'tour.gateway.title': 'The process decides',
+    'tour.gateway.text': 'The gateway checks `in.invoiceDecision.isAutoApprove == false`. It is true here, so the invoice goes to Manager Review. No text has to be parsed.',
+    'tour.review.title': 'Manager Review',
+    'tour.review.text': 'The task waits in the task list of `{user}`: the approver that `chooseApprover` returned.',
+
+    'tour.rename.title': 'Tool not found',
+    'tour.rename.text': 'An agent finds its tools by their signature. Here a signature is renamed after the agent was configured.',
+    'tour.renamed.title': 'The names no longer match',
+    'tour.renamed.text': 'The tool is now `calculateTaxRate`. “Available tools” on the agent still says `calculateEffectiveTaxRate`.',
+    'tour.dropped.title': 'Dropped without a word',
+    'tour.dropped.text': 'No error, no warning: only two tools reach the model. A missing `tool` tag has the same effect.',
+    'tour.guessed.title': 'The model guesses',
+    'tour.guessed.text': 'It cannot look up the tax rate, so it takes the 10% printed on the invoice. The tool would have returned 8%.',
+    'tour.unprompted.title': 'Agent ignores a tool',
+    'tour.unprompted.text': 'The system message no longer mentions `chooseApprover`. The tool is still selected.',
+    'tour.invented.title': 'Nothing told it to call',
+    'tour.invented.text': 'The model never asked for `chooseApprover` and made up an approver instead. Name each tool in the system message, and say what to pass.',
+
+    'about.rules': 'The stand-in model asks for a tool only when it came with the request and the system message names it: one tool per turn, in the order the system message names them.|Each tool really runs. Its Script in Feature05Tools.p.json is executed with the value the model passed, so changing the Script changes the result.|A field whose tool was not called is a guess: the tax rate printed on the invoice, isAutoApprove true, and an invented approver. A real model may guess differently, or say that it cannot answer.|Only the three tools of Feature05Tools.p.json exist here. Any other name in “Available tools” matches nothing.|The gateway takes the first condition that is true. “Manager Review” waits until you press Continue.',
+
+    'ref.guardrails': 'Output Guardrail',
+    'ref.temperature': 'Model Settings',
+
+    'insight.tools-called': 'Tools called, in this order: {list}.',
+    'insight.no-tools': 'No tool was called.',
+    'insight.from-tool': '{field} comes from the result of {tool}.',
+    'insight.guessed-not-offered': '{field} is a guess: no tool that could supply it came with the request.',
+    'insight.guessed-not-asked': '{field} is a guess: the system message does not name the tool that supplies it.',
+    'insight.tool-unused': 'Came with the request but is not named in the system message, so never called: {list}.',
+    'insight.no-invoice': 'The user message contains no invoice amount, so there is nothing to look up.',
+    'insight.plain': 'No result type → the answer is plain text.'
+  },
+
+  ja: {
+    'lang': 'ja',
+    'tour.intro.title': 'エージェントがツールを使う仕組み',
+    'tour.intro.text': 'Feature05 プロセスの実行を見ていきます。エージェントは、請求書の承認者を決める前に3つの呼び出し可能サブプロセスを呼び出します。終わったら、要素をクリックして設定をもう一度確認できます。',
+    'tour.intro.duration': '約3分',
+    'tour.chapter.tools': 'Tools',
+    'tour.chapter.toolProcess': 'ツールプロセスの作成',
+    'tour.chapter.result': '結果',
+    'tour.chapter.mistakes': 'よくあるミス',
+
+    'tour.available.title': 'Available tools（利用可能なツール）',
+    'tour.available.text': 'このエージェントが使える呼び出し可能サブプロセスです。ツールはアプリケーション全体から検出されますが、許可はエージェントごとに行います。空のままだと、ツールは一切使えません。',
+    'tour.prompt.title': 'いつ呼ぶかはシステムメッセージで決まる',
+    'tour.prompt.text': '各ツールの名前、渡す値、結果の使い方が書かれています。モデルはこの文章とツールの説明文をもとに、いつツールを呼ぶかを判断します。',
+    'tour.offered.title': 'ツールはリクエストと一緒に送られる',
+    'tour.offered.text': 'Smart Workflow は、選択された各ツールを関数としてモデルに登録します。名前、説明文、パラメータが送られます。',
+    'tour.asks.title': 'モデルがツールを要求する',
+    'tour.asks.text': 'モデル自身は何も実行できません。回答の代わりに「このツールをこの値で呼び出してほしい」という要求を返します。',
+    'tour.answers.title': 'Smart Workflow が実行する',
+    'tour.answers.text': 'その値でサブプロセスを呼び出し、結果をモデルに返します。モデルは新しい情報をもとに処理を続けます。',
+    'tour.again.title': 'ツールは1つずつ呼ばれる',
+    'tour.again.text': '`lookupApprovalPolicy` と `chooseApprover` も同じ流れで、どちらも合計金額を渡して呼び出されます。',
+    'tour.decision.title': '最後に回答する',
+    'tour.decision.text': '3つの結果がそろうと、モデルは `InvoiceDecision`（税率、自動承認の可否、承認者）を返します。',
+
+    'tour.file.title': '1つのファイルに3つのツール',
+    'tour.file.text': '`Feature05Tools.p.json` は呼び出し可能サブプロセスです。開始要素1つがツール1つにあたり、それぞれ終了要素までの処理を持ちます。',
+    'tour.tag.title': 'tool タグ',
+    'tour.tag.text': '開始要素に `tool` タグが付いていると、Smart Workflow はこのサブプロセスをエージェントのツールとして扱います。タグがなければ、どのエージェントも呼び出せません。',
+    'tour.description.title': 'Description（説明）',
+    'tour.description.text': 'このテキストはモデルに送信されます。モデルはここから、ツールの役割と呼び出すタイミングを読み取ります。',
+    'tour.signature.title': 'シグネチャ',
+    'tour.signature.text': 'ツールの名前です。エージェントの「Available tools」には、この名前がそのまま保存されます。',
+    'tour.input.title': '入力パラメータ',
+    'tour.input.text': '名前、型、説明もモデルに送られます。説明によって、どんな値をどの形式で渡すべきかがモデルに伝わります。',
+    'tour.output.title': '結果',
+    'tour.output.text': 'ツールが返す値です。ここにも説明があり、値の意味がモデルに伝わります。',
+    'tour.implementation.title': '実装',
+    'tour.implementation.text': '開始と終了の間は通常の Axon Ivy です。ここでは1つの Script に税率のルールが書かれています。データベース検索や REST 呼び出しに置き換えることもできます。',
+    'tour.called.title': 'エージェントからの呼び出し',
+    'tour.called.text': 'モデルは `{value}` を渡しました。入力マッピングが、それを `param.currency` からツールのプロセスデータにコピーします。',
+    'tour.rule.title': 'ルールの実行',
+    'tour.rule.text': 'Script がその通貨の税率を調べ、`in.taxRate` に書き込みます。',
+    'tour.returned.title': 'モデルに戻る',
+    'tour.returned.text': '結果マッピングが `in.taxRate` を返します。エージェントはそれを JSON としてモデルに送ります。',
+
+    'tour.object.title': '型付きの判定結果',
+    'tour.object.text': '`in.invoiceDecision` は `InvoiceDecision` オブジェクトです。各フィールドは1つのツールの結果で、プロセスからそのまま読み取れます。',
+    'tour.gateway.title': 'プロセスが分岐を決める',
+    'tour.gateway.text': 'ゲートウェイは `in.invoiceDecision.isAutoApprove == false` を評価します。ここでは true なので、請求書は Manager Review に進みます。文字列の解析は不要です。',
+    'tour.review.title': 'Manager Review',
+    'tour.review.text': 'タスクは `{user}` のタスクリストで待機します。`chooseApprover` が返した承認者です。',
+
+    'tour.rename.title': 'ツールが見つからない',
+    'tour.rename.text': 'エージェントはシグネチャでツールを探します。ここでは、エージェントを設定した後でシグネチャを変更します。',
+    'tour.renamed.title': '名前が一致しなくなった',
+    'tour.renamed.text': 'ツールの名前は `calculateTaxRate` になりました。エージェントの「Available tools」は `calculateEffectiveTaxRate` のままです。',
+    'tour.dropped.title': '何の通知もなく外される',
+    'tour.dropped.text': 'エラーも警告も出ません。モデルに届くツールは2つだけです。`tool` タグがない場合も同じ結果になります。',
+    'tour.guessed.title': 'モデルが推測する',
+    'tour.guessed.text': '税率を問い合わせられないため、請求書に書かれた 10% を使いました。ツールなら 8% を返していました。',
+    'tour.unprompted.title': 'エージェントがツールを無視する',
+    'tour.unprompted.text': 'システムメッセージから `chooseApprover` の記述がなくなりました。ツールは選択されたままです。',
+    'tour.invented.title': '呼び出す指示がなかった',
+    'tour.invented.text': 'モデルは `chooseApprover` を一度も要求せず、承認者を自分で作り上げました。システムメッセージには各ツールの名前と渡す値を明記しましょう。',
+
+    'about.rules': 'モデルの代役がツールを要求するのは、そのツールがリクエストに含まれ、かつシステムメッセージに名前がある場合だけです。1ターンに1つずつ、システムメッセージに書かれた順に要求します。|各ツールは実際に実行されます。Feature05Tools.p.json の Script が、モデルから渡された値で動くため、Script を変更すると結果も変わります。|ツールが呼ばれなかったフィールドは推測になります。税率は請求書に書かれた値、isAutoApprove は true、承認者は作られた名前です。実際のモデルは別の推測をしたり、回答できないと答えたりすることがあります。|このシミュレーションにあるのは Feature05Tools.p.json の3つのツールだけです。「Available tools」のほかの名前は、どのツールにも一致しません。|ゲートウェイは最初に true になった条件のパスに進みます。「Manager Review」は「続行」を押すまで待機します。',
+
+    'ref.guardrails': '出力ガードレール',
+    'ref.temperature': 'モデル設定',
+
+    'insight.tools-called': '呼び出されたツール（順番どおり）: {list}。',
+    'insight.no-tools': 'ツールは呼び出されませんでした。',
+    'insight.from-tool': '{field} は {tool} の結果です。',
+    'insight.guessed-not-offered': '{field} は推測です。この値を返せるツールがリクエストに含まれていませんでした。',
+    'insight.guessed-not-asked': '{field} は推測です。この値を返すツールの名前がシステムメッセージにありません。',
+    'insight.tool-unused': 'リクエストには含まれていましたが、システムメッセージに名前がないため呼び出されませんでした: {list}。',
+    'insight.no-invoice': 'ユーザーメッセージに請求金額がないため、調べる対象がありません。',
+    'insight.plain': '結果の型なし → プレーンテキストで回答。'
+  }
+};
+
+/** Turns one insight from agent.js into a sentence, or null when there is nothing to say. */
+export function describeInsight(insight, t) {
+  const list = (insight.names || []).join(t('lang') === 'ja' ? '、' : ', ');
+  return t('insight.' + insight.id, { list, field: insight.field, tool: insight.tool });
+}
