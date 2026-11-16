@@ -10,7 +10,7 @@ export const strings = {
     'lang': 'en',
     'tour.intro.title': 'How an agent reads a file',
     'tour.intro.text': 'Watch the Feature04 process run: the agent receives the sample invoice as a file and returns an InvoiceData object. Afterwards you can click any element to look at its configuration again.',
-    'tour.intro.duration': 'about 2 min',
+    'tour.intro.duration': 'about 2 min, 3 with the voice',
     'tour.chapter.query': 'User message — passing a file',
     'tour.chapter.mistakes': 'Common mistakes',
 
@@ -53,7 +53,7 @@ export const strings = {
     'lang': 'ja',
     'tour.intro.title': 'エージェントがファイルを読み取る仕組み',
     'tour.intro.text': 'Feature04 プロセスの実行を見ていきます。エージェントはサンプル請求書をファイルとして受け取り、InvoiceData オブジェクトを返します。終わったら、要素をクリックして設定をもう一度確認できます。',
-    'tour.intro.duration': '約2分',
+    'tour.intro.duration': '約2分（音声ありで約3分）',
     'tour.chapter.query': 'ユーザーメッセージ — ファイルの渡し方',
     'tour.chapter.mistakes': 'よくあるミス',
 

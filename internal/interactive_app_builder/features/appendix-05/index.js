@@ -16,7 +16,7 @@ import toolsDataClass from '../../../../tutorial/dataclass/tutorial/Feature13Too
 import { respond } from '../feature-13/agent.js';
 import { strings, describeInsight } from './text.js';
 import { tour } from './tour.js';
-import { VARIABLES, SIMULATES } from './settings.js';
+import { VARIABLES, SIMULATES, CMS } from './settings.js';
 
 export default {
   id: 'appendix-05',
@@ -26,6 +26,9 @@ export default {
   dataClass,
   classes: [humanFeedback],
   toolProcess: { file: 'Feature13Tools.p.json', process: toolsProcess, dataClass: toolsDataClass },
+  // Files the walkthrough adds to the User message: the invoice PDF of the tutorial's CMS, and a
+  // Word file that exists only in this simulation (a type Smart Workflow cannot attach).
+  cms: CMS,
   variables: VARIABLES,
   variablesPath: 'config/variables.yaml',
   brain: { respond },

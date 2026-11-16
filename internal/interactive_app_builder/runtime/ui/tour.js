@@ -6,6 +6,12 @@
  *
  * A feature defines the lesson as chapters:
  *   tour: { chapters: [{ id, play: async d => { … } }] }
+ * A chapter can also be split into parts, e.g. the causes of a problem:
+ *   { id, label: 'cause', play: intro, parts: [{ id, play: async d => { … } }] }
+ * `play` (optional) runs first, then each part: the process is put back as the tutorial ships
+ * it, a screen shows "<chapter> · tour.screen.<label> (Cause 2 of 6) · tour.<part id>.title",
+ * and the part plays. The player shows the parts as 1.1, 1.2, …; each can be started on its
+ * own, and the intro card counts them with tour.count.<label> ("6 causes").
  * with the texts `tour.intro.*`, `tour.chapter.<id>` and `tour.<note>.title` / `.text` in its
  * strings. Every chapter opens with a title screen showing only its name, which should be the
  * heading of the tutorial section it belongs to, so learners can find it in the text. `d` is the director handed to `play`:
@@ -32,6 +38,10 @@
  *                                                  change, then they are typed one by one
  *   d.answer(text)                                 type an answer into the open user dialog
  *                                                  and submit it (in a 'dialog:<id>' hook)
+ *   d.screen(key, { label, ...params })            a black screen inside a chapter, e.g. before
+ *                                                  each cause of a problem: the chapter's name,
+ *                                                  then tour.screen.<label> (e.g. "Cause {n} of
+ *                                                  {total}"), then tour.<key>.title in large type
  *   d.wait(ms)
  *
  * Targets of notes and spotlights:
@@ -58,9 +68,16 @@
  * of a user task is open; it is submitted when the hook returns) and 'agent:<phase>' (request,
  * thinking, tool-call, tool-done, tool-result, response, mapped, unmapped, skipped, failed, end).
  * Elements of the tools file have the ids of that file with the prefix "tools-".
+ *
+ * The walkthrough also speaks (see voice.js): each chapter title, each screen, and each note
+ * (its title, then its text sentence by sentence, with the sentence being said marked in the
+ * note; quotes are not read). A note then stays until the voice has finished, and at least as
+ * long as without it. The player has a button to turn the voice off and on. `voice: false` in
+ * the definition leaves the voice out of a lesson.
  */
 import { h, append, clear } from '../util.js';
 import { icon } from './icons.js';
+import { Voice, sentences, speakable } from './voice.js';
 import { elementById, agentConfig } from '../model/process.js';
 import { elementBounds } from '../stage/layout.js';
 
@@ -96,6 +113,8 @@ const quoteText = quote => (Array.isArray(quote) ? quote.map(l => l.text).join('
 
 /** The chapter title screen only needs a glance. */
 const titleTime = text => clamp(1100 + String(text).length * 25, 1500, 2600);
+/** A screen inside a chapter has a little more to read: what comes next, and where it belongs. */
+const screenTime = text => clamp(1500 + String(text).length * 30, 2400, 4200);
 
 /** Time per typed step: a few characters go slowly enough to follow, a long text takes about as long in total. */
 const typingTime = steps => clamp(Math.round(1400 / steps), 40, 200);
@@ -124,9 +143,17 @@ export class Tour {
     this.notes = 0; // notes shown in the current chapter
     this.current = null; // the note on screen
     this.title = null; // id of the chapter whose title screen is showing
+    this.screen = null; // { key, params } of the screen inside a chapter that is showing
+    this.part = -1; // index of the part of the current chapter that is playing, -1 before its first
     this.target = null;
     this.cardKind = null;
     this.tracking = 0;
+    // the voice, when the lesson has one: `say` gives what is showing as parts to say (in the
+    // current language), `speech` is that being said, `sayEls` the sentences of the note on screen
+    this.voice = this.chapters.length && !(definition && definition.voice === false) ? new Voice(app.options.speech, () => this.renderPlayer()) : null;
+    this.say = null;
+    this.speech = null;
+    this.sayEls = [];
 
     this.block = h('div.tour-block', { onclick: () => this.togglePause() });
     this.spotEl = h('div.tour-spot', { hidden: true });
@@ -167,7 +194,8 @@ export class Tour {
       h('div.tour-kicker', null, t('tour.kicker')),
       h('h3', null, t('tour.intro.title')),
       h('p', null, t('tour.intro.text')),
-      h('ol.tour-card-list', null, this.chapters.map(c => h('li', null, t('tour.chapter.' + c.id)))),
+      h('ol.tour-card-list', null, this.chapters.map(c => h('li', null, t('tour.chapter.' + c.id),
+        c.parts && c.label ? h('span.tour-card-count', null, ' · ' + t('tour.count.' + c.label, { n: c.parts.length })) : null))),
       h('div.tour-card-actions', null,
         h('button.tour-play', { type: 'button', onclick: () => this.start(0) }, icon('play', 14), h('span', null, t('tour.play')), h('span.tour-play-time', null, t('tour.intro.duration'))),
         h('button.link-btn', { type: 'button', onclick: () => this.skip() }, t('tour.skip')))]);
@@ -186,30 +214,51 @@ export class Tour {
 
   // ── transport ──────────────────────────────────────────────────────────────
 
-  /** Plays from the given chapter to the end. Whatever was playing is stopped first. */
-  async start(index = 0) {
+  /**
+   * Plays from the given chapter to the end, or from one of its parts. Whatever was playing
+   * is stopped first.
+   */
+  async start(index = 0, part = -1) {
     await this.#halt();
     const gen = this.gen;
     this.state = 'playing';
     this.#closeCard();
     this.setPaused(false);
     this.app.setMode('tour');
-    this.playing = this.#play(gen, clamp(index, 0, this.chapters.length - 1));
+    const chapter = clamp(index, 0, this.chapters.length - 1);
+    const parts = this.chapters[chapter].parts || [];
+    this.playing = this.#play(gen, chapter, part >= 0 && parts.length ? clamp(part, 0, parts.length - 1) : -1);
     const toggle = this.app.playerEl.querySelector('.tour-toggle');
     if (toggle) toggle.focus({ preventScroll: true });
   }
 
-  async #play(gen, from) {
+  async #play(gen, from, fromPart = -1) {
     const d = this.#director(gen);
     try {
       for (let i = from; i < this.chapters.length; i++) {
+        const chapter = this.chapters[i];
+        const jump = i === from && fromPart >= 0; // started at one of its parts: no title, no intro
         this.index = i;
+        this.part = -1;
         this.notes = 0;
         this.#prepare();
         this.renderPlayer();
-        await this.#titleScreen(gen, this.chapters[i]);
-        await d.wait(120);
-        await this.chapters[i].play(d);
+        if (!jump) {
+          await this.#titleScreen(gen, chapter);
+          await d.wait(120);
+          if (chapter.play) await chapter.play(d);
+        }
+        const parts = chapter.parts || [];
+        for (let p = jump ? fromPart : 0; p < parts.length; p++) {
+          this.part = p;
+          this.notes = 0;
+          this.#prepare(); // every part starts from the process as the tutorial ships it
+          this.renderPlayer();
+          await this.#screen(gen, parts[p].id, { label: chapter.label, n: p + 1, total: parts.length });
+          await d.wait(120);
+          await parts[p].play(d);
+          await d.wait(300);
+        }
         await d.wait(400);
       }
     } catch (e) {
@@ -226,8 +275,10 @@ export class Tour {
     this.#fillTitle();
     this.titleEl.hidden = false;
     this.titleEl.classList.remove('leave');
+    this.#speak(() => [speakable(this.app.t('tour.chapter.' + chapter.id))]);
     try {
-      await this.#sleep(gen, titleTime(t('tour.chapter.' + chapter.id)), { skippable: true });
+      await this.#sleep(gen, titleTime(t('tour.chapter.' + chapter.id)), { skippable: true, hold: true });
+      this.#silence();
       this.titleEl.classList.add('leave');
       await this.#sleep(gen, 220);
     } finally {
@@ -242,6 +293,51 @@ export class Tour {
     if (index < 0) return;
     clear(this.titleEl).append(h('div.tour-title-box', null,
       h('h3', null, t('tour.chapter.' + this.title))));
+  }
+
+  /** The texts of a screen inside the chapter: where it belongs, its label, its name. */
+  #screenTexts() {
+    const t = this.app.t;
+    const { key, params } = this.screen;
+    const chapter = this.chapters[this.index];
+    return {
+      context: chapter ? t('tour.chapter.' + chapter.id) : '',
+      label: params.label ? t('tour.screen.' + params.label, params) : '',
+      name: t('tour.' + key + '.title', params)
+    };
+  }
+
+  #fillScreen() {
+    const { context, label, name } = this.#screenTexts();
+    clear(this.titleEl).append(h('div.tour-title-box.tour-screen', null,
+      context ? h('div.tour-screen-context', null, context) : null,
+      label ? h('div.tour-screen-label', null, label) : null,
+      h('h3', null, name)));
+  }
+
+  /** A black screen inside a chapter, before the next part of it, e.g. the next cause of a problem. */
+  async #screen(gen, key, params = {}) {
+    if (gen !== this.gen) throw CANCELLED;
+    this.#hide();
+    this.screen = { key, params };
+    this.#fillScreen();
+    this.titleEl.hidden = false;
+    this.titleEl.classList.remove('leave');
+    this.#speak(() => {
+      const texts = this.#screenTexts();
+      return [texts.label, texts.name].filter(Boolean).map(speakable);
+    });
+    try {
+      const { label, name } = this.#screenTexts();
+      await this.#sleep(gen, screenTime(label + ' ' + name), { skippable: true, hold: true });
+      this.#silence();
+      this.titleEl.classList.add('leave');
+      await this.#sleep(gen, 220);
+    } finally {
+      this.screen = null;
+      this.titleEl.hidden = true;
+      this.titleEl.classList.remove('leave');
+    }
   }
 
   /** Every chapter starts from the process as the tutorial ships it. */
@@ -263,6 +359,7 @@ export class Tour {
   async #halt() {
     this.gen++;
     if (this.abort) this.abort();
+    this.#silence();
     this.#effects().forEach(fx => { fx.paused = false; }); // a paused animation would never finish, and neither would what waits for it
     this.app.stop();
     this.app.cancelEffects();
@@ -295,6 +392,10 @@ export class Tour {
     this.#effects().forEach(fx => { fx.paused = paused; });
     if (!paused) this.app.viewStage().invalidate();
     this.noteEl.classList.toggle('paused', paused);
+    if (this.speech) {
+      if (paused) this.speech.pause();
+      else this.speech.resume(); // says the sentence it stopped in again
+    }
     this.renderPlayer();
   }
 
@@ -309,10 +410,46 @@ export class Tour {
     if (this.paused) this.setPaused(false);
   }
 
-  /** Replays the chapter; from its very beginning, goes to the previous one. */
+  /**
+   * Replays the chapter, or the part that is playing; from its very beginning, goes to the
+   * previous one (the part before, or the chapter's start before its first part).
+   */
   back() {
     if (this.state !== 'playing') return;
-    this.start(this.notes <= 1 && this.index > 0 ? this.index - 1 : this.index);
+    const atStart = this.notes <= 1;
+    if (this.part >= 0) {
+      if (!atStart) this.start(this.index, this.part);
+      else if (this.part > 0) this.start(this.index, this.part - 1);
+      else this.start(this.index);
+      return;
+    }
+    this.start(atStart && this.index > 0 ? this.index - 1 : this.index);
+  }
+
+  /** Turns the voice off, or on again: then it says what is showing from its beginning. */
+  toggleVoice() {
+    if (!this.voice) return;
+    this.voice.on = !this.voice.on;
+    if (this.voice.on && this.say) this.#speak(this.say);
+    else if (!this.voice.on) {
+      this.speech = null;
+      this.#mark(-1);
+    }
+    this.renderPlayer();
+    const button = this.app.playerEl.querySelector('.tour-voice');
+    if (button) button.focus({ preventScroll: true });
+  }
+
+  /** The player's voice button: on, off, or unavailable when the browser has no voice for the language. */
+  #voiceButton() {
+    const t = this.app.t;
+    const can = this.voice.canSpeak(this.app.lang);
+    const on = can && this.voice.on;
+    const label = !can ? t('tour.voice.none') : t(on ? 'tour.voice.off' : 'tour.voice.on');
+    return h('button.icon-btn.tour-voice' + (on ? '.on' : '') + (can ? '' : '.inert'), {
+      type: 'button', title: label, 'aria-label': label, 'aria-pressed': can ? String(on) : null, disabled: !can,
+      onclick: () => this.toggleVoice()
+    }, icon(on ? 'sound' : 'mute', 15));
   }
 
   renderPlayer() {
@@ -324,17 +461,51 @@ export class Tour {
     const button = (name, label, handler, extra = '') => h('button.icon-btn' + extra, { type: 'button', title: label, 'aria-label': label, onclick: handler }, icon(name, 15));
     el.append(
       button(this.paused ? 'play' : 'pause', t(this.paused ? 'tour.resume' : 'tour.pause'), () => this.togglePause(), '.tour-toggle'),
-      button('chevronLeft', t('tour.back'), () => this.back()),
+      button('chevronLeft', t(this.part >= 0 ? 'tour.backPart' : 'tour.back'), () => this.back()),
       button('chevronRight', t('tour.next'), () => this.next()),
-      h('div.tour-chapters', { role: 'list' }, this.chapters.map((c, i) => {
+      this.voice ? this.#voiceButton() : null,
+      h('div.tour-chapters', {
+        role: 'list',
+        // a mouse wheel scrolls the list sideways when it does not fit
+        onwheel: e => {
+          const list = e.currentTarget;
+          if (list.scrollWidth <= list.clientWidth || Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+          list.scrollLeft += e.deltaY;
+          e.preventDefault();
+        }
+      }, this.chapters.map((c, i) => {
         const title = t('tour.chapter.' + c.id);
-        return h('button.tour-chapter' + (i === this.index ? '.current' : i < this.index ? '.done' : ''), {
+        const current = i === this.index;
+        const chapterButton = h('button.tour-chapter' + (current ? '.current' : i < this.index ? '.done' : '') + (current && c.parts ? '.has-parts' : ''), {
           type: 'button', role: 'listitem', title, 'aria-label': t('tour.chapter', { n: i + 1, total }) + ': ' + title,
-          'aria-current': i === this.index ? 'step' : null, onclick: () => this.start(i)
+          'aria-current': current && this.part < 0 ? 'step' : null, onclick: () => this.start(i)
         }, h('span.tour-chapter-n', null, String(i + 1)), h('span.tour-chapter-title', null, title));
+        if (!current || !c.parts || !c.parts.length) return chapterButton;
+        // the parts of the chapter that is playing: 1.1, 1.2, …; the current one shows its name
+        return h('div.tour-chapter-group', { role: 'listitem' }, chapterButton,
+          h('div.tour-parts', { role: 'list', 'aria-label': title }, c.parts.map((part, p) => {
+            const label = (c.label ? t('tour.screen.' + c.label, { n: p + 1, total: c.parts.length }) + ': ' : '') + t('tour.' + part.id + '.title');
+            const state = p === this.part ? '.current' : p < this.part ? '.done' : '';
+            return h('button.tour-part' + state, {
+              type: 'button', role: 'listitem', title: label, 'aria-label': label,
+              'aria-current': p === this.part ? 'step' : null, onclick: () => this.start(i, p)
+            }, h('span.tour-part-n', null, (i + 1) + '.' + (p + 1)),
+            p === this.part ? h('span.tour-part-title', null, t('tour.' + part.id + '.title')) : null);
+          })));
       })),
       h('span.spacer'),
       h('button.tour-exit', { type: 'button', onclick: () => this.skip() }, h('span', null, t('tour.exit')), icon('close', 12)));
+    // when the chapters do not fit, the list scrolls: keep what is playing in the middle of it
+    const list = el.querySelector('.tour-chapters');
+    const active = el.querySelector('.tour-part.current') || el.querySelector('.tour-chapter.current');
+    if (list && active) {
+      requestAnimationFrame(() => {
+        const a = active.getBoundingClientRect();
+        const l = list.getBoundingClientRect();
+        if (l.width) list.scrollLeft += a.left + a.width / 2 - (l.left + l.width / 2);
+        list.classList.toggle('scrolls', list.scrollWidth > list.clientWidth + 1); // fades its edges
+      });
+    }
   }
 
   /** Rebuilds everything that carries text (language switch). */
@@ -343,7 +514,48 @@ export class Tour {
     if (this.cardKind === 'intro') this.showIntro();
     else if (this.cardKind === 'end') this.#showEnd();
     if (this.title) this.#fillTitle();
+    if (this.screen) this.#fillScreen();
     if (this.current) this.#fill(this.current);
+    if (this.say) this.#speak(this.say); // from the beginning, in the new language
+  }
+
+  // ── the voice ──────────────────────────────────────────────────────────────
+
+  /**
+   * Has the voice say what is showing, when it is on. `say()` gives the parts to say in the
+   * current language; for a note, part 0 is its title and part k its k-th sentence, which is
+   * marked while it is said.
+   */
+  #speak(say) {
+    this.say = say;
+    this.speech = null;
+    this.#mark(-1);
+    if (!this.voice) return;
+    this.speech = this.voice.on ? this.voice.say(say(), this.app.lang, part => this.#mark(part - 1)) : null;
+    if (this.speech && this.paused) this.speech.pause();
+  }
+
+  /** Stops the voice: what it was saying is gone. */
+  #silence() {
+    this.say = null;
+    this.speech = null;
+    if (this.voice) this.voice.stop();
+    this.#mark(-1);
+  }
+
+  /** Marks sentence k of the note as being said, those before as said; -1 (or past the end) clears. */
+  #mark(k) {
+    const live = k >= 0 && k < this.sayEls.length;
+    this.sayEls.forEach((el, i) => {
+      el.classList.toggle('said', live && i < k);
+      el.classList.toggle('saying', live && i === k);
+    });
+  }
+
+  /** The voice is still speaking, or has just finished (a short breath before moving on). */
+  #held() {
+    const s = this.speech;
+    return Boolean(s) && (!s.done || (s.endedAt > 0 && Date.now() - s.endedAt < 450));
   }
 
   // ── the director handed to a chapter ───────────────────────────────────────
@@ -362,6 +574,7 @@ export class Tour {
       app,
       wait: ms => this.#sleep(gen, ms),
       note: (key, options) => this.#note(gen, key, options),
+      screen: (key, params) => this.#screen(gen, key, params),
       focus: target => { alive(); this.#show(null, parseTarget(target)); },
       clear: () => { alive(); this.#hide(); },
       run: options => this.#run(gen, options),
@@ -556,13 +769,18 @@ export class Tour {
     const manual = wait == null && this.app.reducedMotion;
     this.noteEl.classList.toggle('manual', manual);
     const ms = wait != null ? wait : readingTime(t('tour.' + key + '.title') + ' ' + t('tour.' + key + '.text', params || {})) + Math.min(1200, quoteText(quote).length * 5) + extra;
-    await this.#sleep(gen, ms, { skippable: true, progress: true, manual });
+    // the voice reads the title, then the text; the quote is left to the eyes
+    this.#speak(() => [this.app.t('tour.' + key + '.title', params || {}), ...sentences(this.app.t('tour.' + key + '.text', params || {}))].map(speakable));
+    await this.#sleep(gen, ms, { skippable: true, progress: true, manual, hold: true });
+    this.#silence();
     this.#hide();
   }
 
   #fill(note) {
     const t = this.app.t;
     this.bar = h('i');
+    // the text sentence by sentence, so the voice can mark the one it is saying
+    this.sayEls = sentences(t('tour.' + note.key + '.text', note.params || {})).map(part => h('span.tour-say', null, rich(part)));
     let quote = null;
     if (Array.isArray(note.quote)) {
       quote = h('div.tour-note-quote', null, note.quote.map(line => h('div' + (line.wrong ? '.wrong' : ''), null,
@@ -570,7 +788,7 @@ export class Tour {
     } else if (note.quote) quote = h('div.tour-note-quote', null, excerpt(note.quote));
     append(clear(this.noteEl), [
       h('div.tour-note-title', null, t('tour.' + note.key + '.title', note.params || {})),
-      h('div.tour-note-text', null, rich(t('tour.' + note.key + '.text', note.params || {}))),
+      h('div.tour-note-text', null, this.sayEls),
       quote,
       h('button.tour-note-next', { type: 'button', onclick: () => this.next() }, t('tour.next'), icon('chevronRight', 12)),
       h('div.tour-note-bar', null, this.bar)]);
@@ -599,6 +817,7 @@ export class Tour {
     cancelAnimationFrame(this.tracking);
     this.tracking = 0;
     this.current = null;
+    this.sayEls = [];
     this.target = null;
     this.noteEl.hidden = true;
     this.spotEl.hidden = true;
@@ -840,9 +1059,10 @@ export class Tour {
 
   /**
    * Waits `ms` of playing time: paused time does not count. `skippable` waits end when
-   * "Next" is pressed; `manual` ones only then (reduced motion: nothing moves by itself).
+   * "Next" is pressed; `manual` ones only then (reduced motion: nothing moves by itself);
+   * `hold` ones also wait for the voice to finish what it is saying.
    */
-  #sleep(gen, ms, { skippable = false, progress = false, manual = false } = {}) {
+  #sleep(gen, ms, { skippable = false, progress = false, manual = false, hold = false } = {}) {
     if (gen !== this.gen) return Promise.reject(CANCELLED);
     if (skippable) this.advance = false;
     return new Promise((resolve, reject) => {
@@ -858,8 +1078,10 @@ export class Tour {
         const dt = Math.min(80, now - last);
         last = now;
         if (!this.paused) elapsed += dt * this.pace;
-        if (progress && this.bar) this.bar.style.width = (manual ? 0 : Math.min(1, elapsed / ms) * 100) + '%';
-        if ((skippable && this.advance) || (!manual && elapsed >= ms)) {
+        // with the voice, the bar follows whichever takes longer: the reading time or the voice
+        const share = Math.min(1, elapsed / ms, hold && this.speech ? this.speech.progress() : 1);
+        if (progress && this.bar) this.bar.style.width = (manual ? 0 : share * 100) + '%';
+        if ((skippable && this.advance) || (!manual && elapsed >= ms && !(hold && this.#held()))) {
           if (skippable) this.advance = false;
           this.abort = null;
           resolve();
@@ -874,6 +1096,8 @@ export class Tour {
   dispose() {
     this.gen++;
     if (this.abort) this.abort();
+    this.#silence();
+    if (this.voice) this.voice.dispose();
     this.playing.catch(() => {});
     cancelAnimationFrame(this.tracking);
     this.app.playerEl.removeEventListener('keydown', this.onKey);

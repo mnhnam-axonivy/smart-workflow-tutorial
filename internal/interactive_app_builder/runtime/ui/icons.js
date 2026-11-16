@@ -38,6 +38,9 @@ const PATHS = {
   step: '<path d="M3.6 3.3l6 4.7-6 4.7z" fill="currentColor"/><path d="M12 3.4v9.2"/>',
   reset: '<path d="M3.3 8a4.7 4.7 0 109-1.9"/><path d="M12.9 2.6v3.6H9.3"/>',
   fast: '<path d="M2.8 3.6L7.6 8l-4.8 4.4zM8.4 3.6L13.2 8l-4.8 4.4z" fill="currentColor"/>',
+  // the walkthrough's voice
+  sound: '<path d="M2.4 6.1h2.4l3.4-2.8v9.4L4.8 9.9H2.4z"/><path d="M10.4 5.9a3 3 0 010 4.2M12.2 4.1a5.6 5.6 0 010 7.8"/>',
+  mute: '<path d="M2.4 6.1h2.4l3.4-2.8v9.4L4.8 9.9H2.4z"/><path d="M10.6 6.4l3.2 3.2M13.8 6.4l-3.2 3.2"/>',
   // canvas controls
   plus: '<path d="M8 3.2v9.6M3.2 8h9.6"/>',
   minus: '<path d="M3.2 8h9.6"/>',

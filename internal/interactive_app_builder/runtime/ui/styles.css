@@ -637,6 +637,7 @@ code { font-family: var(--mono); font-size: 0.95em; }
 }
 .file-mime { color: var(--muted); }
 .file-chip.missing { border-color: #8a6a3a; background: rgba(232, 194, 104, 0.1); color: var(--warn); font-family: var(--ui); }
+.file-chip.binary { border-color: #8a4a4a; background: rgba(255, 120, 120, 0.12); color: #ff9a9a; }
 .msg-foot { margin-top: 4px; font-size: 12px; }
 .msg-foot span { display: inline-flex; align-items: center; gap: 5px; }
 .msg-foot .ok { color: #9be0a5; }
@@ -754,6 +755,7 @@ code { font-family: var(--mono); font-size: 0.95em; }
 .player { grid-row: 4; display: none; }
 .app[data-mode="tour"] .player {
   position: relative;
+  min-width: 0; /* the bar fits the window; the list of chapters scrolls inside it */
   z-index: 21; /* above the layer that dims the rest */
   display: flex;
   align-items: center;
@@ -767,6 +769,10 @@ code { font-family: var(--mono); font-size: 0.95em; }
 .player .icon-btn:hover { background: rgba(141, 184, 255, 0.16); color: #fff; }
 .player .tour-toggle { width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff; }
 .player .tour-toggle:hover { background: #4478ff; }
+/* The voice: on is lit, off is dimmed; unavailable (no voice for the language) is greyed out. */
+.player .tour-voice { color: #8193b3; }
+.player .tour-voice.on { color: #c6d6f3; }
+.player .tour-voice.inert, .player .tour-voice.inert:hover { background: none; color: #56637a; cursor: not-allowed; }
 .tour-chapters { display: flex; align-items: center; gap: 5px; min-width: 0; margin-left: 8px; }
 .tour-chapter {
   display: inline-flex;
@@ -787,6 +793,33 @@ code { font-family: var(--mono); font-size: 0.95em; }
 .tour-chapter.current { min-width: 0; border-color: var(--guide-accent); background: rgba(141, 184, 255, 0.14); color: #fff; }
 .tour-chapter.current .tour-chapter-title { display: inline; }
 .tour-chapter.current .tour-chapter-n { font-weight: 700; }
+/* The chapter that is playing, with its parts (1.1, 1.2, …) right after it, as one group. */
+.tour-chapters { flex: 0 1 auto; overflow-x: auto; scrollbar-width: none; }
+.tour-chapters::-webkit-scrollbar { display: none; }
+.tour-chapters.scrolls {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 18px), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 18px), transparent);
+}
+.tour-chapter-group { display: inline-flex; align-items: center; flex: none; gap: 4px; padding: 2px 4px 2px 2px; border-radius: 14px; background: rgba(141, 184, 255, 0.07); }
+.tour-chapter-group .tour-chapter.current { flex: 0 1 auto; }
+.tour-chapter.has-parts .tour-chapter-title { max-width: 220px; }
+.tour-parts { display: inline-flex; align-items: center; gap: 3px; padding-left: 4px; border-left: 1px solid #3d5a94; }
+.tour-part {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 20px;
+  padding: 0 6px;
+  border: 1px solid #34507f;
+  border-radius: 10px;
+  color: #93a8cc;
+  font: 600 10.5px/1 var(--mono);
+  white-space: nowrap;
+}
+.tour-part:hover { border-color: var(--guide-accent); color: #fff; }
+.tour-part.done { border-color: transparent; background: rgba(141, 184, 255, 0.22); color: #d5e2f8; }
+.tour-part.current { border-color: var(--guide-accent); background: var(--guide-accent); color: #0b1424; }
+.tour-part-title { max-width: 260px; overflow: hidden; text-overflow: ellipsis; font: 600 11px/1 var(--ui); }
 .tour-exit {
   display: inline-flex;
   align-items: center;
@@ -851,6 +884,10 @@ code { font-family: var(--mono); font-size: 0.95em; }
 .tour-note[data-side="left"]::before { right: -7px; top: var(--arrow); transform: translateY(-50%) rotate(135deg); }
 .tour-note[data-side="right"]::before { left: -7px; top: var(--arrow); transform: translateY(-50%) rotate(-45deg); }
 .tour-note-title { margin: 0 0 3px; color: #fff; font-size: 15px; font-weight: 700; line-height: 1.35; }
+/* While the voice reads a note: the sentence being said is lit like a subtitle, those said are dimmed. */
+.tour-say { border-radius: 3px; transition: color 0.2s, background-color 0.2s; }
+.tour-say.said { color: #a3b3d0; }
+.tour-say.saying { color: #fff; background: rgba(141, 184, 255, 0.2); box-shadow: 0 0 0 2px rgba(141, 184, 255, 0.2); -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .tour-note-text code, .tour-card code {
   padding: 1px 4px;
   border-radius: 3px;
@@ -906,6 +943,10 @@ code { font-family: var(--mono); font-size: 0.95em; }
 .tour-title-box { max-width: 520px; text-align: center; }
 .tour-title h3 { margin: 6px 0 10px; color: #fff; font-size: 26px; font-weight: 700; line-height: 1.25; }
 .tour-title p { margin: 0; color: #b9cbec; font-size: 15px; line-height: 1.55; }
+/* A screen inside a chapter (d.screen): the chapter, a label such as "Cause 2 of 6", the name. */
+.tour-screen-context { color: #7f8ea8; font-size: 13px; line-height: 1.4; }
+.tour-screen-label { margin-top: 14px; color: var(--guide-accent); font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.tour-screen h3 { margin-top: 8px; }
 
 .tour-cover {
   position: absolute;
@@ -946,10 +987,15 @@ code { font-family: var(--mono); font-size: 0.95em; }
 }
 .tour-play:hover { background: #4478ff; }
 .tour-play-time { font-size: 12px; font-weight: 400; opacity: 0.8; }
+.tour-card-count { color: var(--muted); font-size: 0.92em; }
 .badge.replay { border-color: #4b6fb5; }
 
 .app.small .tour-exit > span:not(.i) { display: none; }
 .app.small .tour-chapter.current .tour-chapter-title { display: none; }
+.app.small .tour-part-title { display: none; }
+/* Narrow: the chapter's causes and the screen before each say enough; its title makes room. */
+.app[data-layout="narrow"] .tour-chapter.has-parts .tour-chapter-title { display: none; }
+.app[data-layout="narrow"] .tour-part-title { max-width: 170px; }
 
 @media (prefers-reduced-motion: reduce) {
   .app *, .app *::before, .app *::after { animation: none !important; transition: none !important; }
