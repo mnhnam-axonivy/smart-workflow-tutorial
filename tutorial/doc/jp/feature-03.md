@@ -36,18 +36,24 @@ APIを通じて独自のクローズドソースモデルにアクセスしま�
 
 Smart Workflowには3つのカテゴリにわたる6つのプロバイダーの組み込みサポートが含まれています。変数を1つ変更するだけで切り替えられます — コード変更は不要です。
 
-| プロバイダー | カテゴリ | 主なモデル | ビジョン | PDF | 構造化出力 |
-| --- | --- | --- | --- | --- | --- |
-| **OpenAI** | ダイレクト | gpt-4o, gpt-4.1, gpt-4.1-mini, gpt-4.1-nano, gpt-5 | ✓ | ✓ | ✓ |
-| **Azure OpenAI** | プラットフォーム | ビジョン対応デプロイメント全般 | ✓ | ✓ | ✓ |
-| **Google Gemini** | ダイレクト | gemini-1.5-*, gemini-2.0-*, gemini-2.5-* | ✓ | ✓ | — |
-| **Anthropic / Claude** | ダイレクト | claude-opus-*, claude-sonnet-*, claude-haiku-* | ✓ | ✓ | ✓ (4.5+) |
-| **xAI / Grok** | ダイレクト | grok-4-1-* シリーズ | ✓ | — | ✓ |
-| **Ollama** | セルフホスト | llama3, gemma3, qwen, mistral, llava, … | ✓* | — | ✓ |
+| プロバイダー | カテゴリ | 主なモデル | ビジョン | PDF | 構造化出力 | 埋め込み |
+| --- | --- | --- | --- | --- | --- | --- |
+| **OpenAI** | ダイレクト | gpt-4o, gpt-4.1, gpt-4.1-mini, gpt-4.1-nano, gpt-5 | ✓ | ✓ | ✓ | ✓ |
+| **Azure OpenAI** | プラットフォーム | ビジョン対応デプロイメント全般 | ✓ | ✓ | ✓ | — |
+| **Google Gemini** | ダイレクト | gemini-1.5-*, gemini-2.0-*, gemini-2.5-* | ✓ | ✓ | — | — |
+| **Anthropic / Claude** | ダイレクト | claude-opus-*, claude-sonnet-*, claude-haiku-* | ✓ | ✓ | ✓ | — |
+| **xAI / Grok** | ダイレクト | grok-4-1-* シリーズ | ✓ | — | ✓ | — |
+| **Ollama** | セルフホスト | llama3, gemma3, qwen, mistral, llava, … | ✓* | — | ✓（ツール併用時は不可） | ✓ |
 
 > **Ollamaの注意事項:** ビジョンにはビジョン対応モデル（例: `llava`・`llama3.2-vision`）が必要です。
 >
-> **Geminiの注意事項:** GeminiはネイティブでJSONスキーマ制約出力をサポートしていません。Geminiを選択する場合は、プレーンテキスト出力を使用してレスポンスを手動でパースしてください。
+> **Geminiの注意事項:** Geminiは構造化出力をサポートしていません。型付きの結果を要求しても失敗はせず、Smart Workflowはエラーをログに記録して応答のベストエフォートなパースにフォールバックします。Geminiではプレーンテキスト出力を使用してください。
+>
+> **Ollamaの構造化出力:** スキーマとツールは同じリクエストに含められません。エージェントが両方を持つ場合、ツールが残り、スキーマは通知なしで外されます。
+>
+> **埋め込み:** [ツールとしてのRAG] でのみ必要です。埋め込みモデルは、この列にチェックのあるプロバイダーのものでなければなりません。
+>
+> **ローカルでは何もチェックされません:** この表は知識であり、強制される契約ではありません。Smart Workflowは、サポートされない組み合わせ（例: xAIへのPDF送信）を止めません。リクエストはプロバイダー側で失敗し、プロバイダー自身のエラーメッセージが返されます。
 >
 > **ビジョンの画像形式:** ビジョン入力はPNG・JPG・JPEGのみをサポートします。他の画像形式はサポートされていません。
 
@@ -59,7 +65,9 @@ AIプロバイダーとモデルは2つのレベルで設定できます — 1�
 
 ### 1 — variables.yamlによるグローバルデフォルト
 
-`config/variables.yaml` でアプリケーション全体のプロバイダーを1度設定します。特定の要素で上書きしない限り、すべてのプロセスのすべての `AgenticProcessCall` がこのプロバイダーを使用します。
+`AI.DefaultProvider` 変数でアプリケーション全体のプロバイダーを1度設定します。特定の要素で上書きしない限り、すべてのプロセスのすべての `AgenticProcessCall` がこのプロバイダーを使用します。
+
+各プロバイダー固有の変数は、そのコネクタープロジェクト（`smart-workflow-openai`、`smart-workflow-anthropic` など）で宣言されているため、使用するプロバイダーのプロジェクトをインストールしてください。以下の例は変数を `variables.yaml` の記法で示しています。稼働中のエンジンでは、**Engine Cockpit** の **Variables** で同じ変数を設定します。
 
 **例 — OpenAI:**
 
@@ -70,8 +78,8 @@ Variables:
     Providers:
       OpenAI:
         #[password]
-        APIKey: ${decrypt:your-encrypted-key}
-        Model: "gpt-4.1-mini"
+        APIKey: ${decrypt:}
+        DefaultModel: "gpt-4.1-mini"
 ```
 
 **例 — Azure OpenAI:**
@@ -82,11 +90,16 @@ Variables:
     DefaultProvider: "AzureOpenAI"
     Providers:
       AzureOpenAI:
-        #[password]
-        APIKey: ${decrypt:your-encrypted-key}
         Endpoint: "https://YOUR_RESOURCE.openai.azure.com/"
-        DeploymentName: "gpt-4o"
+        DefaultDeployment: "my-gpt-4-1-mini"
+        Deployments:
+          my-gpt-4-1-mini:
+            Model: "gpt-4.1-mini"
+            #[password]
+            APIKey: ${decrypt:}
 ```
+
+Azure OpenAIは唯一、入れ子構造を持つプロバイダーです。プロバイダーレベルのAPIキーはなく、デプロイメントごとにモデルとキーを持ちます。デプロイメント名は変数名になるため、ケバブケース（小文字・数字・ハイフン、数字で始めない）を使用してください。
 
 **例 — Google Gemini:**
 
@@ -97,8 +110,8 @@ Variables:
     Providers:
       Gemini:
         #[password]
-        APIKey: ${decrypt:your-encrypted-key}
-        Model: "gemini-2.0-flash"
+        APIKey: ${decrypt:}
+        DefaultModel: "gemini-2.5-flash"
 ```
 
 **例 — Anthropic:**
@@ -110,8 +123,8 @@ Variables:
     Providers:
       Anthropic:
         #[password]
-        APIKey: ${decrypt:your-encrypted-key}
-        Model: "claude-sonnet-4-5"
+        APIKey: ${decrypt:}
+        DefaultModel: "claude-sonnet-4-5"
 ```
 
 **例 — xAI / Grok:**
@@ -123,8 +136,8 @@ Variables:
     Providers:
       xAI:
         #[password]
-        APIKey: ${decrypt:your-encrypted-key}
-        Model: "grok-4-1"
+        APIKey: ${decrypt:}
+        DefaultModel: "grok-4-1-fast"
 ```
 
 **例 — Ollama（APIキー不要）:**
@@ -136,31 +149,43 @@ Variables:
     Providers:
       Ollama:
         BaseUrl: "http://localhost:11434"
-        Model: "llama3.2"
+        DefaultModel: "llama3.2"
+        # A local model on CPU can need minutes for large models or cold starts.
+        TimeoutSeconds: "300"
 ```
 
 #### Engine CockpitでAPIキーを安全に設定する
 
-Axon Ivyは `#[password]` アノテーションが付いた変数をシークレットとして扱います — 値は保存時に暗号化され、実行時のみ復号されます。Designerの `variables.yaml` に実際のAPIキーを直接入力しないでください。代わりに、デプロイ後にEngine Cockpitで設定します。
+Axon Ivyは `#[password]` アノテーションが付いた変数をシークレットとして扱います — 値は保存時に暗号化され、実行時のみ復号されます。`variables.yaml` に実際のAPIキーを直接入力しないでください。平文のまま残り、ソース管理に入ってしまいます。代わりにEngine Cockpitで設定します。
 
 ![Setting API key in Engine Cockpit](cms:/Files/Images/feature03-api-key-cockpit)
 
-**Engine Cockpit → アプリケーション → 対象アプリケーション → 変数** を開き、キーフィールド（例: `AI.Providers.OpenAI.APIKey`）を見つけてキーを貼り付けます。Engineは即座に暗号化します。`variables.yaml` の `${decrypt:…}` プレースホルダーはDesignerでのローカル開発時のみ使用されます。
+**Engine Cockpit → アプリケーション → 対象アプリケーション → 変数** を開き、キーフィールド（例: `AI.Providers.OpenAI.APIKey`）を見つけてキーを貼り付けます。Engineは即座に暗号化します。`variables.yaml` には `${decrypt:}` プレースホルダーをそのまま残します。
+
+> **注意:** 変数は**エージェント呼び出しのたびに**読み取られます。キーの追加やローテーション、デフォルトモデルの変更は次の呼び出しから有効になり、再起動は不要です。
 
 #### 変数リファレンス
 
 | 変数 | 説明 | 例 |
 | --- | --- | --- |
-| `AI.DefaultProvider` | グローバルデフォルトのプロバイダー名 | `OpenAI` |
+| `AI.DefaultProvider` | グローバルデフォルトのプロバイダー — `OpenAI`・`AzureOpenAI`・`Gemini`・`xAI`・`Anthropic`・`Ollama` のいずれか | `OpenAI` |
 | `AI.Providers.OpenAI.APIKey` | OpenAI APIキー（暗号化済み） | `${decrypt:…}` |
-| `AI.Providers.OpenAI.Model` | OpenAIで使用するモデル | `gpt-4.1-mini` |
-| `AI.Providers.Anthropic.Model` | Anthropicで使用するモデル | `claude-sonnet-4-5` |
+| `AI.Providers.OpenAI.DefaultModel` | エージェントがモデルを指定しない場合に使用するOpenAIモデル | `gpt-4.1-mini` |
+| `AI.Providers.Anthropic.DefaultModel` | エージェントがモデルを指定しない場合に使用するAnthropicモデル | `claude-sonnet-4-5` |
 | `AI.Providers.Ollama.BaseUrl` | OllamaサーバーのURL | `http://localhost:11434` |
 | `AI.Providers.AzureOpenAI.Endpoint` | AzureエンドポイントURL | `https://…openai.azure.com` |
+| `AI.Providers.AzureOpenAI.DefaultDeployment` | エージェントがモデルを指定しない場合に使用するAzureデプロイメント | `my-gpt-4-1-mini` |
+| `AI.Providers.AzureOpenAI.Deployments.<name>.Model` | そのデプロイメントのモデル | `gpt-4.1-mini` |
+| `AI.Providers.AzureOpenAI.Deployments.<name>.APIKey` | そのデプロイメントのAPIキー（暗号化済み） | `${decrypt:}` |
+
+すべての変数とそのデフォルト値については、[クイックリファレンス] または上流の [Smart Workflow 変数リファレンス](https://github.com/axonivy-market/smart-workflow/blob/master/doc/user/reference/variables.md) を参照してください。
 
 ### 2 — AgenticProcessCallでのエージェントごとの上書き
 
 任意の **AgenticProcessCall** 要素を開き、設定エディタの **🧠️ Model** グループまでスクロールします。一覧から **Provider** を選択し **Model** フィールドを設定すると、その要素だけグローバルデフォルトを上書きできます — プロセス内の他のエージェントはグローバル設定を引き続き使用します。
+
+- **Provider** — 空のままにすると `AI.DefaultProvider` が使用されます。選択したプロバイダーのプロジェクトがインストールされていない場合、エージェント呼び出しは `Unknown model provider <name>` で失敗します。
+- **Model** — 空のままにすると、そのプロバイダーの `DefaultModel` が使用されます。スクリプトフィールドのため、固定の名前は引用符で囲む必要があります（`gpt-4o` ではなく `"gpt-4o"`）。スクリプトなので、`in.selectedModel` のように実行時にモデルを決めることもできます。
 
 ![Per-agent AI Provider override in AgenticProcessCall](cms:/Files/Images/feature03-per-agent-override)
 
@@ -186,9 +211,18 @@ Acme Corpのプロセスには3つの `AgenticProcessCall` 要素が順番に並
 
 ---
 
-## 高度なモデル設定
+## モデル設定
 
-**Provider** と **Model** は *どの* モデルが回答するかを決めます。モデルが *どのように* 回答するか — 例えば **Temperature** — を調整するには、同じ要素の **⚙️ Advanced** グループを使用します。これらの設定は [高度なモデル設定] で説明します。
+**Provider** と **Model** は *どの* モデルが回答するかを決めます。モデルが *どのように* 回答するか — 例えば **Temperature** — を調整するには、同じ **🧠️ Model** グループの **Provider** と **Model** の下にある *Optional Settings* を使用します。これらの設定は [モデル設定] で説明します。
+
+---
+
+## よくあるミス
+
+- **引用符のないモデル名** — **Model** はスクリプトフィールドです。`gpt-4o` をそのまま書くとコンパイルできません。`"gpt-4o"` と書いてください。
+- **変数で `DefaultModel` ではなく `Model` を使う** — プロバイダーのデフォルトモデルの変数名は `DefaultModel`（Azure OpenAIでは `DefaultDeployment`）です。それ以外の名前の変数はSmart Workflowに読み取られません。
+- **機能を確認せずにプロバイダーを選ぶ** — Geminiは構造化出力に対応せず、xAIとOllamaはPDFを読めず、埋め込みができるのはOpenAIとOllamaだけです。プロバイダーがリクエストを拒否するまで、何も警告されません。
+- **実際のAPIキーをコミットする** — `variables.yaml` には `${decrypt:}` を残し、値はEngine Cockpitで設定してください。
 
 ---
 
@@ -196,7 +230,7 @@ Acme Corpのプロセスには3つの `AgenticProcessCall` 要素が順番に並
 
 このガイドで説明した3エージェントプロセスの動作実装がチュートリアルプロジェクトで利用できます。
 
-`tutorial/processes/tutorial/features/Feature03.p.json`
+`tutorial/process/tutorial/features/Feature03.p.json`
 
 Designerで開いて、3つの `AgenticProcessCall` 要素を確認してください — それぞれ独自のプロバイダーとモデルが設定されています。ステップ間で結果を受け渡す `Feature03Data` データクラスも確認してください。
 
@@ -207,4 +241,4 @@ Designerで開いて、3つの `AgenticProcessCall` 要素を確認してくだ�
 - [エージェントの基本設定]
 - [構造化出力]
 - [ファイル抽出]
-- [高度なモデル設定]
+- [モデル設定]

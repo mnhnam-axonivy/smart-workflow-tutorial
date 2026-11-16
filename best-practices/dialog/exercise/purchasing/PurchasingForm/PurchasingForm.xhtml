@@ -10,15 +10,18 @@
       <h:outputStylesheet library="css" name="explanation.css" />
       <h:outputStylesheet library="css" name="explanation-#{ivyFreyaTheme.mode}.css" />
 
-      <!-- Explanation toggle script -->
+      <!-- Explanation toggle: the labels come from the CMS through data attributes, which JSF
+           escapes, so no CMS text is ever written into the script itself -->
+      <span id="explanation-labels" style="display:none"
+        data-show="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ButtonShowExplanation')}"
+        data-hide="#{ivy.cms.co('/Dialogs/exercise/purchasing/PurchasingForm/ButtonHideExplanation')}"></span>
       <script type="text/javascript">
-        var _expShowLabel = '#{ivy.cms.co("/Dialogs/exercise/purchasing/PurchasingForm/ButtonShowExplanation")}';
-        var _expHideLabel = '#{ivy.cms.co("/Dialogs/exercise/purchasing/PurchasingForm/ButtonHideExplanation")}';
         function toggleExplanation(btn) {
+          var labels = document.getElementById('explanation-labels');
           var panel = document.getElementById('explanation-panel');
           var visible = panel.style.display !== 'none';
           panel.style.display = visible ? 'none' : '';
-          btn.querySelector('.ui-button-text').textContent = visible ? _expShowLabel : _expHideLabel;
+          btn.querySelector('.ui-button-text').textContent = labels.getAttribute(visible ? 'data-show' : 'data-hide');
         }
       </script>
 

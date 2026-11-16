@@ -4,9 +4,9 @@ In Axon Ivy, any callable subprocess can be used as an agent building block. The
 
 ---
 
-> **Example from best-practices:** `PurchasingAgent.p.json` in `best-practices/processes/exercise/purchasing/agents/` uses both invocation modes in the same orchestration flow:
+> **Example from best-practices:** `PurchasingAgent.p.json` in `best-practices/process/exercise/purchasing/agents/` uses both invocation modes in the same orchestration flow:
 >
-> - `translate` is called as a **tool** — tagged `tool` on its `CallSubStart`, the Purchasing Manager Agent calls it autonomously when the system prompt instructs it to translate the extracted text
+> - `translate` is called as a **tool** — tagged `tool` on its `CallSubStart`, the Purchasing Manager Agent calls it autonomously when the system message instructs it to translate the extracted text
 > - `DocumentReader` is called via **SubProcessCall** before the agent starts — the document is always read unconditionally, before the AI has any involvement
 
 ## When to use it
@@ -81,10 +81,47 @@ Is this tool used by more than one agent?
 
 When tools live in the same file, add a **process lane** named `Tools` to visually separate the tool callables from the main orchestration flow. In `.p.json`:
 
+```json
+"layout": {
+  "lanes": [
+    { "name": "Tools", "offset": 160, "size": 512 }
+  ]
+}
+```
+
+Place the orchestrating flow (main agent `CallSubStart` → `SubProcessCall` → `AgenticProcessCall` → `CallSubEnd`) in the default lane at `y` values above the lane offset. Place each tool `CallSubStart` in the Tools lane at `y` values inside the lane range. This mirrors how `PurchasingAgent.p.json` is laid out:
+
+```text
+y ≈ 72   ← orchestrating flow (main lane)
+y ≈ 232  ← calculatePurchasingTax tool  ┐
+y ≈ 352  ← mapToPurchasingObject tool   │ Tools lane
+y ≈ 480  ← calculateStatistics tool     │
+y ≈ 608  ← createSummary tool           ┘
+```
+
+### Updated folder view
+
+After applying the co-location rule, the folder looks like:
+
+```text
+process/
+  exercise/
+    purchasing/
+      Purchasing.p.json          ← main business process
+      agents/
+        PurchasingAgent.p.json   ← orchestrating agent + its specific tools
+        DocumentReader.p.json    ← reusable: extract text (shared)
+        TranslatorAgent.p.json   ← reusable: translate (shared)
+        ObjectMapperAgent.p.json ← reusable: map to object (shared)
+```
+
+`PurchasingAgent.p.json` grows to contain the orchestrator and all purchasing-specific tools. The three shared agents remain in their own files, unchanged.
+
 ---
 
 ## See also
 
 - [Practice 01 — Agent Pattern: AI Task]
 - [Practice 03 — Agent Organisation: Folder Structure and Naming Conventions]
+- [Practice 04 — Agent Pattern: Agent Pipeline]
 - [Practice 05 — Agent Prompts: Clarity and Dynamic Context]

@@ -1,0 +1,208 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/14.0/project/process.json",
+  "id" : "19F18A0C5E7D2B18",
+  "config" : {
+    "data" : "tutorial.Feature18Data"
+  },
+  "elements" : [ {
+      "id" : "f0",
+      "type" : "RequestStart",
+      "name" : "Tutorial Feature 18a: Custom guardrail - blocked",
+      "config" : {
+        "signature" : "start18a",
+        "request" : {
+          "name" : "Tutorial Feature 18a: Custom guardrail - blocked"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f2", "to" : "fA" }
+      ]
+    }, {
+      "id" : "f10",
+      "type" : "RequestStart",
+      "name" : "Tutorial Feature 18b: Custom guardrail - allowed",
+      "config" : {
+        "signature" : "start18b",
+        "request" : {
+          "name" : "Tutorial Feature 18b: Custom guardrail - allowed"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 176 }
+      },
+      "connect" : [
+        { "id" : "f12", "to" : "fA2" }
+      ]
+    }, {
+      "id" : "f20",
+      "type" : "RequestStart",
+      "name" : "Tutorial Feature 18c: Custom guardrail - rewritten",
+      "config" : {
+        "signature" : "start18c",
+        "request" : {
+          "name" : "Tutorial Feature 18c: Custom guardrail - rewritten"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 96, "y" : 288 }
+      },
+      "connect" : [
+        { "id" : "f22", "to" : "fA3" }
+      ]
+    }, {
+      "id" : "fA",
+      "type" : "Script",
+      "name" : "Mock query (confidential)",
+      "config" : {
+        "output" : {
+          "code" : [
+            "in.query = \"What is the current budget status of Project Falcon? Please summarise the main risks.\";"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 344, "y" : 64 },
+        "size" : { "width" : 160, "height" : 44 },
+        "color" : "yellow"
+      },
+      "connect" : [
+        { "id" : "f8", "to" : "f5", "via" : [ { "x" : 496, "y" : 64 }, { "x" : 496, "y" : 176 } ], "color" : "default" }
+      ]
+    }, {
+      "id" : "fA2",
+      "type" : "Script",
+      "name" : "Mock query (ordinary)",
+      "config" : {
+        "output" : {
+          "code" : [
+            "in.query = \"Write a one-sentence reminder for employees to submit their expense reports by Friday.\";"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 344, "y" : 176 },
+        "size" : { "width" : 160, "height" : 44 },
+        "color" : "yellow"
+      },
+      "connect" : [
+        { "id" : "f18", "to" : "f5", "color" : "default" }
+      ]
+    }, {
+      "id" : "fA3",
+      "type" : "Script",
+      "name" : "Mock query (employee ID)",
+      "config" : {
+        "output" : {
+          "code" : [
+            "in.query = \"Draft a one-sentence confirmation that the leave request of employee EMP-004211 has been approved. \" +",
+            "\"Mention the employee reference exactly as given.\";"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 344, "y" : 288 },
+        "size" : { "width" : 160, "height" : 44 },
+        "color" : "yellow"
+      },
+      "connect" : [
+        { "id" : "f28", "to" : "f5", "via" : [ { "x" : 496, "y" : 288 }, { "x" : 496, "y" : 176 } ], "color" : "default" }
+      ]
+    }, {
+      "id" : "f5",
+      "type" : "ProgramInterface",
+      "name" : "Internal Assistant Agent",
+      "config" : {
+        "javaClass" : "com.axonivy.utils.smart.workflow.AgenticProcessCall",
+        "userConfig" : {
+          "system" : "You are an internal assistant for Acme Corp employees. Answer in one or two sentences.\r\nPlaceholders in square brackets, such as [EMPLOYEE-ID], stand for data that was removed before it reached you. Keep them exactly as they are.",
+          "inputGuardrails" : "[\"ConfidentialProjectGuardrail\",\"EmployeeIdRedactionGuardrail\"]",
+          "resultMapping" : "in.result",
+          "query" : "<%=in.query%>"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 624, "y" : 176 },
+        "size" : { "width" : 160, "height" : 62 }
+      },
+      "boundaries" : [ {
+          "id" : "fE",
+          "type" : "ErrorBoundaryEvent",
+          "name" : "Guardrail blocked",
+          "config" : {
+            "errorCode" : "smartworkflow:guardrail:input:violation",
+            "output" : {
+              "map" : {
+                "out" : "in",
+                "out.error" : "error"
+              }
+            }
+          },
+          "visual" : {
+            "at" : { "x" : 680, "y" : 217 },
+            "labelOffset" : { "x" : -60, "y" : 25 },
+            "icon" : "res:/webContent/icons/shield.png"
+          },
+          "connect" : [
+            { "id" : "fE1", "to" : "fC" }
+          ]
+        } ],
+      "connect" : [
+        { "id" : "f6", "to" : "fS", "color" : "default" }
+      ]
+    }, {
+      "id" : "fS",
+      "type" : "Script",
+      "name" : "Show result",
+      "config" : {
+        "output" : {
+          "code" : [
+            "ivy.log.info(\"Agent answer: \" + in.result);"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 856, "y" : 176 },
+        "color" : "yellow"
+      },
+      "connect" : [
+        { "id" : "fS1", "to" : "f1", "color" : "default" }
+      ]
+    }, {
+      "id" : "fC",
+      "type" : "Script",
+      "name" : "Show violation",
+      "config" : {
+        "output" : {
+          "code" : [
+            "in.result = \"Blocked by guardrail: \" + in.error.getMessage();",
+            "ivy.log.error(in.result);",
+            "in.error = null;"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 680, "y" : 304 },
+        "color" : "yellow"
+      },
+      "connect" : [
+        { "id" : "fC1", "to" : "f1", "via" : [ { "x" : 1024, "y" : 304 } ] }
+      ]
+    }, {
+      "id" : "f1",
+      "type" : "TaskEnd",
+      "visual" : {
+        "at" : { "x" : 1024, "y" : 176 }
+      }
+    } ],
+  "layout" : {
+    "colors" : {
+      "red" : "#ff0000",
+      "green" : "#1eff00",
+      "yellow" : "#fbff00",
+      "pink" : "#fb00ff"
+    }
+  }
+}

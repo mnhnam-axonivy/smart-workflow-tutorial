@@ -26,7 +26,7 @@
 - **Ivyデータクラスとの親和性** — `tutorial` パッケージ内の任意のデータクラスがそのまま使える
 - **型の強制** — `totalAmount` は `BigDecimal`、`invoiceDate` は `LocalDate` として返される。形式が誤っていればレスポンスが拒否される
 
-> **Geminiの制限:** Google GeminiはJSONスキーマ制約出力をネイティブにサポートしていません。構造化抽出にはOpenAI・Anthropic・Azure OpenAI・またはxAIを使用してください。Geminiを使用する場合は、プレーンテキスト出力でレスポンスを手動でパースしてください。
+> **プロバイダーの対応状況:** すべてのプロバイダーが出力をスキーマに制約できるわけではありません。**Gemini** は対応していません。型付きの結果を要求しても失敗はしませんが、Smart Workflowはエラーをログに記録し、プロンプトで形式を説明して応答をパースする方式にフォールバックします（ベストエフォート）。**Ollama** は、エージェントがツールも持っている場合、スキーマを通知なしで外します。信頼性の高い構造化抽出にはOpenAI・Azure OpenAI・Anthropic・xAIを使用してください。[モデルプロバイダーの選択] の機能一覧表を参照してください。
 
 ---
 
@@ -46,6 +46,8 @@ tutorial.InvoiceData.class
 
 `.class` サフィックスが必要です。これがなければ型を解決できません。
 
+Ivyデータクラスでも普通のJavaクラスでも使用できます。コレクション単体は結果の型として指定できません。リストを返すには、そのリストをフィールドとして持つクラスを宣言してください。
+
 **重要な理由:** クラスのフィールド名と型がLLMに伝えられます。`invoiceNumber`・`totalAmount`・`invoiceDate` のようにフィールドに明確な名前をつければ、LLMが正確に値を入れてくれます。
 
 **仕組み:** Smart Workflowは宣言されたクラスを読み取り、フィールドと型からJSONスキーマを生成し、そのスキーマをLLMリクエストに追加します。LLMはスキーマに一致するJSONを返し、宣言された型のJavaオブジェクトにデシリアライズされます。
@@ -59,12 +61,12 @@ tutorial.InvoiceData.class
 **例:**
 
 ```java
-out.result
+in.result
 ```
 
 これにより、`InvoiceData` オブジェクトが `Feature02Data` の `result` フィールドに書き込まれます。次のプロセスステップでは型付きフィールドを直接読み取れます。型変換もパースも不要です。
 
-**仕組み:** デシリアライズ後、結果はここに入力したIvyScript式に代入されます。`out.fieldName` の形式で使用します（`fieldName` は、宣言した出力クラスと型が一致するプロセスデータクラスのフィールド名）。
+**仕組み:** デシリアライズ後、結果はここに入力したIvyScript式に代入されます。`in.fieldName` の形式で使用します（`fieldName` は、宣言した出力クラスと型が一致するプロセスデータクラスのフィールド名）。
 
 ---
 
@@ -86,7 +88,7 @@ out.result
 
 フィールド名はLLMに伝えられるため、明確な名前をつけてください。
 
-### システムプロンプト
+### システムメッセージ
 
 ```text
 You are an invoice extraction agent for Acme Corp.
@@ -101,11 +103,13 @@ Return only the structured data. Do not add commentary.
 If a field is missing in the invoice, return null for that field.
 ```
 
-**クエリ:** `<%=in.invoiceText%>`
+> **ヒント:** チュートリアルのプロンプトでは、例を分かりやすくするためにフィールドを列挙していますが、必須ではありません。JSONスキーマがすべてのフィールド名と型をモデルに伝えているからです。実際のエージェントでは、スキーマでは表現できないこと — フィールドの*意味*（税込か税抜か）、複数の候補からの選び方、フィールドを `null` にする条件 — をシステムメッセージに書いてください。
+
+**ユーザーメッセージ:** `<%=in.invoiceText%>`
 
 **期待する結果の型:** `tutorial.InvoiceData.class`
 
-**結果のマッピング先:** `out.result`
+**結果のマッピング先:** `in.result`
 
 ### 結果
 
@@ -133,7 +137,9 @@ Smart WorkflowはJSONスキーマを生成するために宣言された出力�
 
 ## よくあるミス
 
-- **Geminiの使用** — GeminiはJSONスキーマ制約出力をサポートしていません。リクエストが失敗するか、予期しないプレーンテキストが返されます。構造化抽出にはOpenAI・Anthropic・xAIに切り替えてください。
+- **Geminiの使用** — GeminiはJSONスキーマ制約出力をサポートしていません。呼び出しは失敗しませんが、結果は制約のない応答からパースされるため、不完全または空になる可能性があります。構造化抽出にはOpenAI・Azure OpenAI・Anthropic・xAIに切り替えてください。
+- **Ollamaでツールと型付き結果を併用する** — Ollamaはスキーマとツールを同じリクエストで受け取れないため、Smart Workflowはツールを残してスキーマを通知なしで外します。処理を2つのエージェントに分けるか、別のプロバイダーを使用してください。
+- **リストを結果の型として宣言する** — コレクション単体はサポートされていません。リストをクラスでラップし、そのクラスを使用してください。
 - **nullフォールバックのないプリミティブフィールド** — LLMが値を見つけられず、フィールドがプリミティブ型（例: `int`）の場合、デシリアライゼーションが失敗する可能性があります。Null許容型を使用してください: `int` の代わりに `Integer`、`double` の代わりに `BigDecimal`。
 - **`.class` サフィックスの欠落** — `resultType` フィールドには `.class` サフィックスが必要です（例: `tutorial.InvoiceData` ではなく `tutorial.InvoiceData.class`）。これがなければ型を解決できません。
 - **クラスパスにないクラス** — 出力クラスは実行時にアクセス可能である必要があります。Ivyデータクラスはそのまま使用できます。普通のJavaクラスはIARにコンパイルされる `src` フォルダに置く必要があります。
@@ -144,7 +150,7 @@ Smart WorkflowはJSONスキーマを生成するために宣言された出力�
 
 このガイドで説明したすべての動作実装がチュートリアルプロジェクトで利用できます。
 
-`tutorial/processes/tutorial/features/Feature02.p.json`
+`tutorial/process/tutorial/features/Feature02.p.json`
 
 Designerで開いて、`resultType` と `resultMapping` が完全に設定された `Invoice Analysis Agent` 要素と、`result: InvoiceData` フィールドを持つ `Feature02Data` データクラスを確認してください。
 

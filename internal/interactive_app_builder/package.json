@@ -1,0 +1,21 @@
+{
+  "name": "interactive-app-builder",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Builds the offline interactive simulations embedded in the Smart Workflow Feature Guide.",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
+    "preview": "node preview/server.mjs",
+    "test": "node --test \"test/**/*.test.mjs\"",
+    "smoke": "node tools/smoke.mjs"
+  },
+  "dependencies": {
+    "three": "0.187.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "puppeteer-core": "25.17.0"
+  }
+}

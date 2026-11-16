@@ -188,7 +188,7 @@ The script supports both the Docker Compose V2 plugin (`docker compose`) and the
 
 ## Demo documents
 
-The `external-resources/demo-documents/` folder contains sample files ready for ingestion:
+The `doc/` folder in the repository root contains sample files ready for ingestion:
 
 | File | Description |
 | --- | --- |

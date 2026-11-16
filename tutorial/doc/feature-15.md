@@ -10,7 +10,7 @@ The **circuit breaker** is an application-wide kill switch for AI. When it is on
 >
 > The Invoice Summary Agent from [Basic Agent Setup] normally summarises an invoice. When an operator switches the circuit breaker on, the same process no longer calls the model — the Error Boundary Event catches the stop and routes the invoice to manual review.
 >
-> The finished process is at `tutorial/processes/tutorial/features/Feature15.p.json` — open it in the Designer to follow along as you read.
+> The finished process is at `tutorial/process/tutorial/features/Feature15.p.json` — open it in the Designer to follow along as you read.
 
 ---
 
@@ -191,8 +191,8 @@ For the full reference, see the [Smart Workflow circuit breaker guide](https://g
 
 The working implementation is available in the tutorial project:
 
-- `tutorial/processes/tutorial/features/Feature15.p.json` — the agent process with the stop and re-enable starts
-- `tutorial/dataclasses/tutorial/Feature15Data.d.json` — the data class
+- `tutorial/process/tutorial/features/Feature15.p.json` — the agent process with the stop and re-enable starts
+- `tutorial/dataclass/tutorial/Feature15Data.d.json` — the data class
 
 Open the process in the Designer and inspect the `Invoice Summary Agent` element — note the `Agent stopped` Error Boundary Event with error code `smartworkflow:stop`, and the two Script elements that call `CircuitBreakerSignal`.
 

@@ -10,7 +10,7 @@
 >
 > [エージェントの基本設定] の Invoice Summary Agent は通常、請求書を要約します。運用担当者がサーキットブレーカーをオンにすると、同じプロセスはモデルを呼び出さなくなり、Error Boundary Event が停止を捕捉して請求書を手動レビューに回します。
 >
-> 完成したプロセスは `tutorial/processes/tutorial/features/Feature15.p.json` にあります — Designerで開いて読み進めてください。
+> 完成したプロセスは `tutorial/process/tutorial/features/Feature15.p.json` にあります — Designerで開いて読み進めてください。
 
 ---
 
@@ -191,8 +191,8 @@ in.error = null;
 
 動作する実装はチュートリアルプロジェクトで利用できます。
 
-- `tutorial/processes/tutorial/features/Feature15.p.json` — 停止・再有効化の開始イベントを含むエージェントプロセス
-- `tutorial/dataclasses/tutorial/Feature15Data.d.json` — データクラス
+- `tutorial/process/tutorial/features/Feature15.p.json` — 停止・再有効化の開始イベントを含むエージェントプロセス
+- `tutorial/dataclass/tutorial/Feature15Data.d.json` — データクラス
 
 Designerでプロセスを開き、`Invoice Summary Agent` 要素を確認してください — エラーコード `smartworkflow:stop` の `Agent stopped` Error Boundary Event と、`CircuitBreakerSignal` を呼び出す2つのスクリプト要素があります。
 

@@ -33,8 +33,9 @@ public class TutorialPagesBean implements Serializable {
 
   private static final Pattern CMS_IMG_PATTERN = Pattern.compile("\\(cms:(/[^)]+)\\)");
   // Must match the pages rendered in TutorialPages.xhtml
-  private static final List<String> PRACTICE_IDS = List.of("01", "02", "03", "05");
-  private static final List<String> APPENDIX_IDS = List.of("01", "02", "03");
+  private static final int FEATURE_COUNT = 18;
+  private static final List<String> PRACTICE_IDS = List.of("01", "02", "03", "04", "05");
+  private static final List<String> APPENDIX_IDS = List.of("01", "02", "03", "04", "05", "06");
 
   private final Map<String, String> features = new LinkedHashMap<>();
   private final Map<String, String> jpFeatures = new LinkedHashMap<>();
@@ -49,7 +50,7 @@ public class TutorialPagesBean implements Serializable {
   @PostConstruct
   public void init() {
     Set<String> seen = new LinkedHashSet<>();
-    for (int i = 1; i <= 17; i++) {
+    for (int i = 1; i <= FEATURE_COUNT; i++) {
       String id = String.format("%02d", i);
       String en = readCmsMarkdown("/Files/Features/feature-" + id);
       String jp = readCmsMarkdownLocale("/Files/Features/feature-" + id, "ja");

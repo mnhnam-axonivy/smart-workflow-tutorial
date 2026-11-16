@@ -1,14 +1,14 @@
 # Agent Prompts: Clarity and Dynamic Context
 
-The system prompt is the AI's primary instruction — it shapes how the agent reasons, what it focuses on, and how it calls tools. Two mistakes undermine this: referencing tool method names directly in the prompt, and hard-coding contextual values that change at runtime. Smart Workflow provides EL expressions in the `system` and `query` fields that inject live Java values — today's date, the user's locale, or any process data field — directly into the prompt at call time.
+The system message is the AI's primary instruction — it shapes how the agent reasons, what it focuses on, and how it calls tools. Two mistakes undermine this: referencing tool method names directly in the prompt, and hard-coding contextual values that change at runtime. Smart Workflow provides EL expressions in the `system` and `query` fields that inject live Java values — today's date, the user's locale, or any process data field — directly into the prompt at call time.
 
 ---
 
-> **Examples from best-practices:** `PurchasingAgent.p.json` in `best-practices/processes/exercise/purchasing/agents/` demonstrates both principles. The Purchasing Manager Agent system prompt describes *what* to do in plain language, never naming a single tool method. The query uses `<%= in.region.getDisplayLanguage() %>` to inject the locale name dynamically at runtime.
+> **Examples from best-practices:** `PurchasingAgent.p.json` in `best-practices/process/exercise/purchasing/agents/` demonstrates both principles. The Purchasing Manager Agent system message describes *what* to do in plain language, never naming a single tool method. The User message uses `<%= in.region.getDisplayLanguage() %>` to inject the locale name dynamically at runtime.
 
 ## How it works
 
-### System prompt and query
+### System message and User message
 
 Every `AgenticProcessCall` has two text fields that together form the instruction the AI receives:
 
@@ -21,13 +21,13 @@ Both fields support **EL expressions** (`<%= expression %>`). The engine evaluat
 
 ### The `tools` array
 
-The `tools` field lists which `CallSubStart` callables (tagged `tool`) the agent may call. The AI matches the goal to the correct tool using the `visual.description` on each `CallSubStart` — it does not need the method name repeated in the system prompt.
+The `tools` field lists which `CallSubStart` callables (tagged `tool`) the agent may call. The AI matches the goal to the correct tool using the `visual.description` on each `CallSubStart` — it does not need the method name repeated in the system message.
 
 ---
 
-## Anti-pattern: naming tools in the system prompt
+## Anti-pattern: naming tools in the system message
 
-When a developer lists tool method names explicitly in the system prompt, the prompt becomes tightly coupled to the implementation:
+When a developer lists tool method names explicitly in the system message, the prompt becomes tightly coupled to the implementation:
 
 ```text
 You are a Purchasing Manager Agent.
@@ -48,13 +48,15 @@ Follow these steps in order:
 - **Redundant** — the LLM receives the tool name twice: once in the prompt and once in the tool schema. Repetition adds tokens without adding meaning
 - **Maintenance trap** — every prompt must be updated when tools are refactored; nothing in the IDE links the string `"translate"` in the prompt to the `translate` callable
 
+> **When naming a tool is the right call:** This anti-pattern is about ordinary step lists, where the tool descriptions already tell the model which tool fits which step. Some tools are different: the model will happily skip them and answer on its own — a search tool (`webSearch`, `openSearchSearch`), or a tool that pauses for a human. There, an explicit instruction such as *"You MUST always call the openSearchSearch tool before answering"* is what makes the agent reliable, and the feature guides ([Web Search Tool], [RAG as a Tool], [Human in the Loop]) do exactly that.
+
 ---
 
 ## Best practice: describe the action, not the tool name
 
-The `visual.description` on each `CallSubStart` already tells the AI what the tool does. The system prompt only needs to describe the goal and the order of steps — not which function achieves each step.
+The `visual.description` on each `CallSubStart` already tells the AI what the tool does. The system message only needs to describe the goal and the order of steps — not which function achieves each step.
 
-This is the actual Purchasing Manager Agent system prompt from `PurchasingAgent.p.json`:
+This is the actual Purchasing Manager Agent system message from `PurchasingAgent.p.json`:
 
 ```text
 You are a Purchasing Manager Agent.
@@ -74,11 +76,11 @@ Rules:
 - If the extracted text is empty, return null.
 ```
 
-No tool name appears anywhere. The AI reads the `visual.description` on each `CallSubStart` and matches each step to the correct callable autonomously. Renaming a callable only requires updating its `visual.description` — the system prompt remains unchanged.
+No tool name appears anywhere. The AI reads the `visual.description` on each `CallSubStart` and matches each step to the correct callable autonomously. Renaming a callable only requires updating its `visual.description` — the system message remains unchanged.
 
-### Structure the system prompt in three parts
+### Structure the system message in three parts
 
-A well-structured system prompt has three parts:
+A well-structured system message has three parts:
 
 ```text
 [Role]
@@ -127,7 +129,7 @@ Use this when the AI must reason about deadlines, SLA windows, or time-sensitive
 
 ### Process data — the purchasing example
 
-In `PurchasingAgent.p.json`, the `purchasingManagerAgent` callable receives a `java.util.Locale region` parameter. The query injects the resolved language name directly:
+In `PurchasingAgent.p.json`, the `purchasingManagerAgent` callable receives a `java.util.Locale region` parameter. The User message injects the resolved language name directly:
 
 ```json
 {
@@ -135,7 +137,7 @@ In `PurchasingAgent.p.json`, the `purchasingManagerAgent` callable receives a `j
 }
 ```
 
-The `createSummary` tool receives the language as a plain `String` — already resolved by the caller. Its query simply references the field:
+The `createSummary` tool receives the language as a plain `String` — already resolved by the caller. Its User message simply references the field:
 
 ```json
 {
@@ -151,8 +153,8 @@ Both are valid. Use `Locale` when the type system should enforce locale validity
 
 - **Decoupled prompts** — tool method names are not embedded in text; renaming a callable does not break the prompt
 - **Dynamic context** — dates, locales, and user attributes are injected at runtime with no Script element needed
-- **Maintainable** — `visual.description` is the single source of truth for what a tool does; the system prompt stays focused on workflow logic
-- **Token-efficient** — descriptions are written once on the `CallSubStart`; the system prompt stays concise
+- **Maintainable** — `visual.description` is the single source of truth for what a tool does; the system message stays focused on workflow logic
+- **Token-efficient** — descriptions are written once on the `CallSubStart`; the system message stays concise
 
 ---
 
@@ -166,7 +168,7 @@ Both are valid. Use `Locale` when the type system should enforce locale validity
 
 ## Common mistakes
 
-- **Hardcoding tool method names in the system prompt** — if the callable is renamed, the prompt silently refers to a tool that no longer exists. Describe actions; let `visual.description` identify the tool.
+- **Hardcoding tool method names in the system message** — if the callable is renamed, the prompt silently refers to a tool that no longer exists. Describe actions; let `visual.description` identify the tool.
 - **Skipping `visual.description` on `CallSubStart`** — without a description the AI relies only on the method signature for tool selection. A one-sentence description dramatically improves accuracy.
 - **Building prompt strings in a Script element** — unnecessary. `<%= %>` expressions in `system` and `query` achieve the same result with no extra process element.
 - **Relying on prompt order to enforce tool call order** — listing step 1 before step 2 does not guarantee the AI calls tools in that order. Use chained `SubProcessCall` elements before the `AgenticProcessCall` if ordering is critical.

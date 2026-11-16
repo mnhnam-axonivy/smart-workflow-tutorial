@@ -10,9 +10,9 @@ An **Output Guardrail** validates the model's response before it reaches your pr
 >
 > The agent receives a question designed to elicit sensitive data (API key examples). The `SensitiveDataOutputGuardrail` inspects the model's response and blocks it before it reaches the process. The Error Boundary Event catches the violation and logs the reason.
 >
-> ![Example process](cms:/Files/Images/feature07-00)
+> ![Example process](cms:/Files/Images/feature09-00)
 >
-> The finished process is at `tutorial/processes/tutorial/features/Feature09.p.json` — open it in the Designer to follow along as you read.
+> The finished process is at `tutorial/process/tutorial/features/Feature09.p.json` — open it in the Designer to follow along as you read.
 
 ---
 
@@ -30,7 +30,7 @@ An output guardrail is a validation layer that runs after the LLM produces its r
 
 | Guardrail | Description |
 | --- | --- |
-| `SensitiveDataOutputGuardrail` | Blocks responses that contain API keys or private keys. |
+| `SensitiveDataOutputGuardrail` | Blocks responses that leak credentials — both your own configured API keys and anything matching a known key format. |
 
 When the guardrail fires, it throws a BPM error with the code `smartworkflow:guardrail:output:violation`. You catch it with an **Error Boundary Event** attached to the AgenticProcessCall element.
 
@@ -74,6 +74,24 @@ ivy.log.error(in.result);
 
 ---
 
+## Application-wide guardrails
+
+Selecting a guardrail on every agent is not the only way. Two variables name the guardrails for **every agent that selects none** — set them in the **Engine Cockpit** under **Variables**, or in `variables.yaml`:
+
+```yaml
+Variables:
+  AI:
+    Guardrails:
+      DefaultInput: PromptInjectionInputGuardrail
+      DefaultOutput: SensitiveDataOutputGuardrail
+```
+
+To use more than one guardrail, separate the names with a comma. Both variables are empty by default, so no guardrail runs until you fill them in.
+
+> **Important:** Empty guardrail fields on an agent do **not** mean "no guardrails" — the agent then uses these application defaults. This is the opposite of **Available tools**, where empty means no tools at all. What you select on an agent **replaces** the defaults for that agent.
+
+---
+
 ## Example — Sensitive data output guardrail
 
 ### Mock data
@@ -88,7 +106,7 @@ in.query = "What is the format of an OpenAI API key? Please give examples.";
 
 **Output Guardrails:** `["SensitiveDataOutputGuardrail"]`
 
-**Query:** `<%=in.query%>`
+**User message:** `<%=in.query%>`
 
 **Map result to:** `in.result`
 
@@ -104,7 +122,8 @@ ivy.log.error(in.result);
 An example output:
 
 ```text
-Blocked by guardrail: Output guardrail violated: SensitiveDataOutputGuardrail
+Blocked by guardrail: The guardrail com.axonivy.utils.smart.workflow.guardrails.adapter.OutputGuardrailAdapter
+failed with this message: The AI response was blocked because it contains sensitive data such as API keys or private keys
 ```
 
 The model's response never reaches the process — it is intercepted and discarded by the guardrail layer.
@@ -123,6 +142,9 @@ The model's response never reaches the process — it is intercepted and discard
 
 - **No Error Boundary Event** — Without one, a guardrail violation causes an unhandled process error. Always attach a boundary event to the AgenticProcessCall when using guardrails.
 - **Wrong error code** — Output violations use `smartworkflow:guardrail:output:violation`. Input violations use `smartworkflow:guardrail:input:violation`. Use the code that matches the guardrail type.
+- **Assuming blank means unguarded** — blank guardrail fields inherit `AI.Guardrails.DefaultInput` and `DefaultOutput`. Remember this in tests, where a default guardrail can reject your fixture data.
+- **Matching on the error message** — branch on the error **code**. The message is wrapped by Smart Workflow — as the example output shows, it names an internal adapter class — and is not a stable contract.
+- **Expecting an output guardrail to retry** — it does not. The first failure discards the response; there is no second attempt with a re-prompt. An output guardrail that blocks legitimate answers costs you the whole call.
 
 ---
 
@@ -130,8 +152,8 @@ The model's response never reaches the process — it is intercepted and discard
 
 The working implementation is available in the tutorial project:
 
-- `tutorial/processes/tutorial/features/Feature09.p.json` — the agent process
-- `tutorial/dataclasses/tutorial/Feature09Data.d.json` — the data class
+- `tutorial/process/tutorial/features/Feature09.p.json` — the agent process
+- `tutorial/dataclass/tutorial/Feature09Data.d.json` — the data class
 
 Open the process in the Designer and inspect the `Assistant Agent` element — note the `Output Guardrails` field containing `["SensitiveDataOutputGuardrail"]` and the Error Boundary Event attached to it.
 
@@ -143,3 +165,4 @@ Open the process in the Designer and inspect the `Assistant Agent` element — n
 - [Java Tools]
 - [Callable Process Tools]
 - [Web Search Tool]
+- [Custom Guardrail]

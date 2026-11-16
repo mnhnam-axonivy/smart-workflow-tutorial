@@ -145,7 +145,7 @@ span_kind == 'LLM' and ivy.task == '2afa6db6-35d6-4f72-af05-711963888b0b'
 
 ### Invocation parameters
 
-Since Smart Workflow 14.0.0, the model settings an agent was called with are recorded on the LLM span under `llm.invocation_parameters`. When you set a **Temperature** on an agent (see [Advanced Model Settings]), you can confirm here which value the model actually received — useful when output is more, or less, varied than expected.
+Since Smart Workflow 14.0.0, the model settings an agent was called with are recorded on the LLM span under `llm.invocation_parameters`. When you set a **Temperature** on an agent (see [Model Settings]), you can confirm here which value the model actually received — useful when output is more, or less, varied than expected.
 
 ### Hiding message content
 
@@ -207,7 +207,7 @@ For the full reference, see the [Smart Workflow observability guide](https://git
 ## See also
 
 - [Basic Agent Setup]
-- [Advanced Model Settings]
+- [Model Settings]
 - [Output Guardrail]
 - [Circuit Breaker]
 - [Governance Dashboard]

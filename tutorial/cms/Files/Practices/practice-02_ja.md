@@ -4,9 +4,9 @@ Axon Ivyでは、任意の呼び出し可能なサブプロセスをエージェ
 
 ---
 
-> **ベストプラクティスの例:** `best-practices/processes/exercise/purchasing/agents/` の `PurchasingAgent.p.json` は、同一のオーケストレーションフローで両方の呼び出しモードを使用しています:
+> **ベストプラクティスの例:** `best-practices/process/exercise/purchasing/agents/` の `PurchasingAgent.p.json` は、同一のオーケストレーションフローで両方の呼び出しモードを使用しています:
 >
-> - `translate` は**ツール**として呼び出されます — `CallSubStart` に `tool` タグが付与されており、システムプロンプトが抽出テキストの翻訳を指示すると、Purchasing Manager Agentが自律的にこれを呼び出します
+> - `translate` は**ツール**として呼び出されます — `CallSubStart` に `tool` タグが付与されており、システムメッセージが抽出テキストの翻訳を指示すると、Purchasing Manager Agentが自律的にこれを呼び出します
 > - `DocumentReader` は**SubProcessCall**経由でエージェント開始前に呼び出されます — ドキュメントはAIが関与する前に常に無条件で読み込まれます
 
 ## 使用する場面
@@ -25,7 +25,7 @@ Axon Ivyでは、任意の呼び出し可能なサブプロセスをエージェ
 
 ### ツールとして呼び出す — AI主導
 
-> この機能の完全なセットアップガイドは[Callable Process Tools]を参照してください。
+> この機能の完全なセットアップガイドは[呼び出し可能プロセスツール]を参照してください。
 
 **この方法を使用するのは**、現在のコンテキストに基づいてAIがサブプロセスを呼び出すかどうか・いつ呼び出すかを決定すべき場合です。
 
@@ -79,12 +79,49 @@ Axon Ivyでは、任意の呼び出し可能なサブプロセスをエージェ
 
 ### ツールをオーケストレータから視覚的に分離するためにプロセスレーンを使用する
 
-ツールが同一ファイルに存在する場合、**プロセスレーン**`Tools`を追加して、ツールの呼び出し可能プロセスをメインのオーケストレーションフローから視覚的に分離します。
+ツールが同一ファイルに存在する場合、**プロセスレーン**`Tools`を追加して、ツールの呼び出し可能プロセスをメインのオーケストレーションフローから視覚的に分離します。 `.p.json` では次のようになります：
+
+```json
+"layout": {
+  "lanes": [
+    { "name": "Tools", "offset": 160, "size": 512 }
+  ]
+}
+```
+
+オーケストレーションフロー（メインエージェントの `CallSubStart` → `SubProcessCall` → `AgenticProcessCall` → `CallSubEnd`）は、レーンのオフセットより上の `y` 値でデフォルトレーンに配置します。各ツールの `CallSubStart` は、レーンの範囲内の `y` 値で Tools レーンに配置します。`PurchasingAgent.p.json` はこのようにレイアウトされています：
+
+```text
+y ≈ 72   ← オーケストレーションフロー（メインレーン）
+y ≈ 232  ← calculatePurchasingTax ツール  ┐
+y ≈ 352  ← mapToPurchasingObject ツール   │ Tools レーン
+y ≈ 480  ← calculateStatistics ツール     │
+y ≈ 608  ← createSummary ツール           ┘
+```
+
+### 更新後のフォルダ構成
+
+同一配置のルールを適用すると、フォルダは次のようになります：
+
+```text
+process/
+  exercise/
+    purchasing/
+      Purchasing.p.json          ← メインのビジネスプロセス
+      agents/
+        PurchasingAgent.p.json   ← オーケストレーションエージェントとその専用ツール
+        DocumentReader.p.json    ← 再利用可能：テキスト抽出（共有）
+        TranslatorAgent.p.json   ← 再利用可能：翻訳（共有）
+        ObjectMapperAgent.p.json ← 再利用可能：オブジェクトへのマッピング（共有）
+```
+
+`PurchasingAgent.p.json` は、オーケストレーターと購買専用のすべてのツールを含むようになります。3つの共有エージェントは、それぞれのファイルにそのまま残ります。
 
 ---
 
 ## 関連項目
 
 - [プラクティス 01 — エージェントパターン: AIタスク]
-- [プラクティス 03 — エージェント構成: ツールタグとフォルダ構造]
+- [プラクティス 03 — エージェント構成: フォルダ構造と命名規則]
+- [プラクティス 04 — エージェントパターン: エージェントパイプライン]
 - [プラクティス 05 — エージェントプロンプト: 明確さと動的コンテキスト]

@@ -10,7 +10,7 @@ A **Java Tool** is a class that implements `SmartWorkflowTool` and exposes a nam
 >
 > Acme Corp receives invoices in JPY. The agent reads the invoice, extracts the total amount and currency, calls a Java tool (`convertToUSD`) to calculate the USD equivalent using fixed exchange rates, and returns a one-sentence summary combining the invoice details with the converted amount.
 >
-> The finished process is at `tutorial/processes/tutorial/features/Feature06.p.json` — open it in the Designer to follow along as you read.
+> The finished process is at `tutorial/process/tutorial/features/Feature06.p.json` — open it in the Designer to follow along as you read.
 
 ---
 
@@ -39,12 +39,12 @@ A Java Tool is a class that implements the `SmartWorkflowTool` interface. It has
 
 | Method | Purpose |
 |---|---|
-| `name()` | The tool name the agent uses in the `Tools` list |
+| `name()` | The tool name shown in **Available tools**. Optional — defaults to the simple class name |
 | `description()` | Tells the LLM what the tool does and when to call it |
 | `parameters()` | Declares the typed inputs the agent must provide |
 | `execute()` | Receives the arguments and returns the result |
 
-The framework discovers Java Tools via Java SPI: you register a `SmartWorkflowToolsProvider` in `META-INF/services/`, and the framework loads it at startup.
+The framework discovers Java Tools via Java SPI: you register a `SmartWorkflowToolsProvider` in `META-INF/services/`, and the framework resolves it on each agent call.
 
 ---
 
@@ -107,7 +107,7 @@ public class FxRateConverterTool implements SmartWorkflowTool {
 }
 ```
 
-**`name()`** is the identifier the agent uses. It must exactly match the string in the agent's `Tools` list.
+**`name()`** is the identifier the agent uses — the name shown in **Available tools**. It is optional: without it, the simple class name (`FxRateConverterTool`) is used. Override it when the agent-facing name should differ, as here.
 
 **`description()`** is sent verbatim to the LLM. Write it as an instruction: what the tool does, when to use it, and what format to expect in the result. The clearer it is, the more reliably the agent calls the tool correctly.
 
@@ -131,7 +131,7 @@ public class TutorialToolProvider implements SmartWorkflowToolsProvider {
 }
 ```
 
-One provider can expose multiple tools. The framework calls `getTools()` at startup and registers all returned tools globally.
+One provider can expose multiple tools. Providers are resolved on each agent call, so a newly registered tool appears without a restart.
 
 ---
 
@@ -144,6 +144,8 @@ tutorial.tool.TutorialToolProvider
 ```
 
 Without this file the framework will never load your provider and the tool will be invisible to all agents — regardless of whether the class is on the classpath.
+
+> **Note:** Only the **first line** of this file is read, so one Axon Ivy project registers one tools provider. That is rarely a limit — a single provider can return as many tools as you like. Add new tools to `getTools()` instead of adding a second line.
 
 ---
 
@@ -193,7 +195,7 @@ Bank: Sumitomo Mitsui Banking Corporation
 Account Number: 1234567890
 ```
 
-### System Prompt
+### System message
 
 ```text
 You are an invoice analyst for Acme Corp.
@@ -203,7 +205,7 @@ Given an invoice text:
 3. Return a single sentence summary containing: the invoice number, supplier name, original total amount with currency, and the USD equivalent returned by convertToUSD.
 ```
 
-**Query:** `<%=in.invoiceText%>`
+**User message:** `<%=in.invoiceText%>`
 
 **Available tools:** `convertToUSD`
 
@@ -251,7 +253,7 @@ Arrays are not supported — use `List` instead. The framework deserialises JSON
 
 The working implementation is available in the tutorial project:
 
-- `tutorial/processes/tutorial/features/Feature06.p.json` — the agent process
+- `tutorial/process/tutorial/features/Feature06.p.json` — the agent process
 - `tutorial/src/tutorial/tool/FxRateConverterTool.java` — the Java tool implementation
 - `tutorial/src/tutorial/tool/TutorialToolProvider.java` — the SPI provider
 - `tutorial/src/META-INF/services/com.axonivy.utils.smart.workflow.tools.provider.SmartWorkflowToolsProvider` — the SPI registration file

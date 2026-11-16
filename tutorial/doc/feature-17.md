@@ -1,24 +1,24 @@
-# Advanced Model Settings
+# Model Settings
 
-[Model Provider Selection] decides *which* model answers an agent. **Advanced model settings** tune *how* that model answers — how much variety it puts into its wording, for example. They are optional: the defaults work for most agents, and you change them only when an agent needs a different behaviour.
+[Model Provider Selection] decides *which* model answers an agent. **Model settings** tune *how* that model answers — how much variety it puts into its wording, for example. They are optional: the defaults work for most agents, and you change them only when an agent needs a different behaviour.
 
 ---
 
-> **This builds on [Model Provider Selection].** Provider and model stay as they are — advanced settings are extra fields on the same `AgenticProcessCall` element.
+> **This builds on [Model Provider Selection].** Provider and model stay as they are — model settings are extra fields right below them, in the **🧠️ Model** group of the same `AgenticProcessCall` element.
 >
 > **Example used in this guide: payment reminder subject lines**
 >
 > Acme Corp sends payment reminders for overdue invoices. Two agents write a subject line for the same invoice — one tuned for repeatable output, one for varied wording — so you can see what the setting changes.
 >
-> The finished process is at `tutorial/processes/tutorial/features/Feature17.p.json` — open it in the Designer to follow along as you read.
+> The finished process is at `tutorial/process/tutorial/features/Feature17.p.json` — open it in the Designer to follow along as you read.
 
 ---
 
 ## Where to find them
 
-Open the `AgenticProcessCall` element and go to the **⚙️ Advanced** group of the configuration editor. In Smart Workflow 14.0.0 the same fields are also shown under *Optional Settings* in the **🧠️ Model** group — both places edit the same value.
+Open the `AgenticProcessCall` element and go to the **🧠️ Model** group of the configuration editor. Below **Provider** and **Model** you find the *Optional Settings* — this is where **Temperature** is.
 
-Like **Provider** and **Model**, advanced settings apply to this one element only. There is no global default in `variables.yaml`.
+Like **Provider** and **Model**, these settings apply to this one element only. There is no global default in `variables.yaml`.
 
 ---
 
@@ -80,7 +80,7 @@ in.temperature = "1.0";
 
 ### Agent configuration
 
-Both agents share the same system prompt and query:
+Both agents share the same system message and user message:
 
 ```text
 You write email subject lines for Acme Corp's accounts payable team.
@@ -88,7 +88,7 @@ Given an overdue invoice, write one friendly payment reminder subject line.
 Return only the subject line. No quotes, no explanation.
 ```
 
-**Query:** `<%=in.invoiceText%>`
+**User message:** `<%=in.invoiceText%>`
 
 | Agent | Temperature | Map result to |
 | --- | --- | --- |
@@ -121,10 +121,10 @@ The **Show result from AI** Script element logs both subject lines to the **Axon
 
 The working implementation is available in the tutorial project:
 
-- `tutorial/processes/tutorial/features/Feature17.p.json` — the two agents with different temperatures
-- `tutorial/dataclasses/tutorial/Feature17Data.d.json` — the data class
+- `tutorial/process/tutorial/features/Feature17.p.json` — the two agents with different temperatures
+- `tutorial/dataclass/tutorial/Feature17Data.d.json` — the data class
 
-Open the process in the Designer and compare the **⚙️ Advanced** group of the `Reminder Subject (deterministic)` and `Reminder Subject (creative)` elements.
+Open the process in the Designer and compare the *Optional Settings* in the **🧠️ Model** group of the `Reminder Subject (deterministic)` and `Reminder Subject (creative)` elements.
 
 ---
 

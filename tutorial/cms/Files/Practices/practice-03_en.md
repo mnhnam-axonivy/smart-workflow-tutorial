@@ -4,7 +4,7 @@ Where a file lives and what it is named determine how quickly a developer can fi
 
 ---
 
-> **Example from best-practices:** The `agents/` folder in `best-practices/processes/exercise/purchasing/agents/` contains four process files. Each file has a clear role — file name, callable name, data class name, and `visual.description` all follow the same conventions.
+> **Example from best-practices:** The `agents/` folder in `best-practices/process/exercise/purchasing/agents/` contains four process files. Each file has a clear role — file name, callable name, data class name, and `visual.description` all follow the same conventions.
 
 ## When to use it
 
@@ -48,7 +48,7 @@ Consistent naming makes callables easy to identify in the IDE, in error logs, an
 | Parameters are typed, not `Object` | `java.io.InputStream`, `String`, `Class` |
 | Process description field states the callable's purpose | Set `visual.description` on the `CallSubStart` |
 
-The `visual.description` on `CallSubStart` appears as a tooltip in the IDE and is the text the AI uses to match a tool to a step in the system prompt — a one-sentence description dramatically improves tool selection accuracy:
+The `visual.description` on `CallSubStart` appears as a tooltip in the IDE and is the text the AI uses to match a tool to a step in the system message — a one-sentence description dramatically improves tool selection accuracy:
 
 ```json
 {

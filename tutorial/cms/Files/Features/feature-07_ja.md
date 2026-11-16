@@ -12,7 +12,7 @@
 >
 > ![Example process](cms:/Files/Images/feature07-00)
 >
-> 完成したプロセスは `tutorial/processes/tutorial/features/Feature07.p.json` にあります。Designerで開いて読み進めてください。
+> 完成したプロセスは `tutorial/process/tutorial/features/Feature07.p.json` にあります。Designerで開いて読み進めてください。
 
 ---
 
@@ -70,7 +70,7 @@
 
 ## Step 2 — いつ検索するかをエージェントに指示する
 
-システムプロンプトで指示しなければ、エージェントはツールを使用しません。明確なガイダンスを追加してください。
+システムメッセージで指示しなければ、エージェントはツールを使用しません。明確なガイダンスを追加してください。
 
 ```text
 You are a research assistant.
@@ -85,7 +85,7 @@ Summarise the results in a clear, concise paragraph.
 
 ## Step 3 — 検索動作を設定する（オプション）
 
-プロジェクトの `variables.yaml` に以下の変数を追加して検索動作を制御します。
+3つの変数で検索動作を制御します。**Engine Cockpit** の **Variables**、またはプロジェクトの `variables.yaml` で設定します。
 
 ```yaml
 Variables:
@@ -102,6 +102,20 @@ Variables:
 
 これらの変数が設定されていない場合、デフォルトが適用されます: DuckDuckGo・5件の結果・ドメインフィルターなし。
 
+> **注意:** ドメインホワイトリストによってすべての結果が除外された場合、ツールは空の結果リストとともに説明文を返し、そのテキストがモデルに渡されます。「何も見つからなかった」と報告するエージェントは、ウェブに情報がないのではなく、ホワイトリストに引っかかっている可能性があります。
+
+---
+
+## 独自の検索エンジンを組み込む
+
+Smart Workflowに同梱されている検索エンジンはDuckDuckGoだけです。別の場所（社内の検索サービスや有料の検索APIなど）を検索するには、`SmartWebSearchEngine` を実装し、`SmartWebSearchEngineProvider` を通じて公開します（どちらも `com.axonivy.utils.smart.workflow.tools.web` パッケージ）。プロバイダーは、[Javaツール] のツールプロバイダーと同じ方法でSPI登録します。
+
+```text
+src/META-INF/services/com.axonivy.utils.smart.workflow.tools.web.SmartWebSearchEngineProvider
+```
+
+次に、`AI.Tool.WebSearch.Engine` でエンジンを選択します。値はエンジンの `name()`（オーバーライドしない限り単純クラス名）と一致する必要があります。名前の照合では大文字と小文字は区別されません。変数が空の場合は、最初に利用可能なエンジンが使用されます。
+
 ---
 
 ## 例 — Axon Ivy ドキュメント検索
@@ -114,7 +128,7 @@ Variables:
 in.query = "What are the latest features in Axon Ivy 14?";
 ```
 
-### システムプロンプト
+### システムメッセージ
 
 ```text
 You are a research assistant.
@@ -123,7 +137,7 @@ Always cite the source URL for each fact you use.
 Summarise the results in a clear, concise paragraph.
 ```
 
-**クエリ:** `<%=in.query%>`
+**ユーザーメッセージ:** `<%=in.query%>`
 
 **Available tools:** `webSearch`
 
@@ -142,8 +156,8 @@ ivy.log.error(in.searchResult);
 ```text
 Axon Ivy 14 introduces Smart Workflow — an AI agent framework built directly into the
 process engine. Key features include AgenticProcessCall for embedding LLM agents in
-processes, support for six AI providers (OpenAI, Anthropic, Ollama, Mistral, Gemini,
-Azure OpenAI), callable process tools, Java tools, web search, guardrails, and
+processes, support for six AI providers (OpenAI, Azure OpenAI, Gemini, Anthropic,
+xAI, Ollama), callable process tools, Java tools, web search, guardrails, and
 observability via Arize Phoenix. Source: https://developer.axonivy.com/release-notes/14.0
 ```
 
@@ -154,14 +168,14 @@ observability via Arize Phoenix. Source: https://developer.axonivy.com/release-n
 | 変数 | 説明 | デフォルト |
 |---|---|---|
 | `AI.Tool.WebSearch.Engine` | 検索エンジン名。空 = 最初に利用可能なもの。 | `duckduckgo` |
-| `AI.Tool.WebSearch.MaxResults` | クエリごとの最大結果数。 | `5` |
+| `AI.Tool.WebSearch.MaxResults` | クエリごとの最大結果数。空の場合は `5` が使用されます。 | *空* |
 | `AI.Tool.WebSearch.WhitelistDomains` | カンマ区切りの許可ドメイン。空 = すべて許可。 | *空* |
 
 ---
 
 ## よくあるミス
 
-- **エージェントがツールを無視する** — システムプロンプトで `webSearch` を呼び出すよう明示的に指示しない場合、LLMはトレーニングデータから回答してツールをスキップします。明確な指示を追加してください: `"Use the webSearch tool to look up current information."`
+- **エージェントがツールを無視する** — システムメッセージで `webSearch` を呼び出すよう明示的に指示しない場合、LLMはトレーニングデータから回答してツールをスキップします。明確な指示を追加してください: `"Use the webSearch tool to look up current information."`
 - **デプロイ環境でインターネットアクセスがない** — DuckDuckGoにはアウトバウンドHTTPアクセスが必要です。エアギャップやファイアウォールで制限された環境では、プロキシを設定するか、内部検索サービスを指すカスタム `SmartWebSearchEngine` を実装してください。
 - **ホワイトリストが厳しすぎる** — ホワイトリストが設定されているが許可ドメインからの結果が少ない場合、エージェントは結果ゼロを受け取り推測に頼る可能性があります。代表的なクエリでホワイトリストをテストしてください。
 - **エージェントが検索に頼りすぎる** — いつ検索すべきか・いつ直接回答すべきかのガイダンスがなければ、トレーニングデータで十分に回答できる質問でも `webSearch` を呼び出す可能性があります。検索が必要な場合を明確にする指示を追加してください。
@@ -172,9 +186,9 @@ observability via Arize Phoenix. Source: https://developer.axonivy.com/release-n
 
 動作実装はチュートリアルプロジェクトで利用できます。
 
-- `tutorial/processes/tutorial/features/Feature07.p.json` — エージェントプロセス
+- `tutorial/process/tutorial/features/Feature07.p.json` — エージェントプロセス
 
-DesignerでプロセスをOpenし、`Web Search Agent` 要素を確認してください — **Available tools** フィールドで選択された `webSearch` と、常にソースを引用するよう指示するシステムプロンプトがあります。
+DesignerでプロセスをOpenし、`Web Search Agent` 要素を確認してください — **Available tools** フィールドで選択された `webSearch` と、常にソースを引用するよう指示するシステムメッセージがあります。
 
 ---
 

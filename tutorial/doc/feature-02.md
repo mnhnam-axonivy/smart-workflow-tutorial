@@ -26,7 +26,7 @@ The result is a proper Java object with typed fields — no `ObjectMapper`, no n
 - **Works with Ivy data classes** — any data class in the `tutorial` package works out of the box
 - **Enforced types** — `totalAmount` comes back as `BigDecimal`, `invoiceDate` as `LocalDate` — if the LLM returns a wrong format, the response is rejected
 
-> **Gemini limitation:** Google Gemini does not support JSON schema-constrained output natively. For structured extraction, use OpenAI, Anthropic, Azure OpenAI, or xAI. If you must use Gemini, use plain text output and parse it manually.
+> **Provider support:** Not every provider can constrain its output to a schema. **Gemini** cannot — requesting a typed result there does not fail, but Smart Workflow logs an error and falls back to describing the shape in the prompt and parsing the reply, which is best-effort only. **Ollama** drops the schema silently as soon as the agent also has tools. For reliable structured extraction use OpenAI, Azure OpenAI, Anthropic or xAI — see the capability table in [Model Provider Selection].
 
 ---
 
@@ -45,6 +45,8 @@ tutorial.InvoiceData.class
 ```
 
 Note the `.class` suffix — this is required. Without it the type cannot be resolved.
+
+Any Ivy data class or plain Java class works. A bare collection is not a valid result type — to return a list, declare a class that has the list as one of its fields.
 
 **Why it matters:** The field names and types of your class are what get communicated to the LLM. Name your fields clearly — `invoiceNumber`, `totalAmount`, `invoiceDate` — and the LLM will populate them correctly.
 
@@ -86,7 +88,7 @@ Create `InvoiceData` in the `tutorial` package with one field per piece of data 
 
 Name your fields clearly — the names are what gets communicated to the LLM.
 
-### System Prompt
+### System message
 
 ```text
 You are an invoice extraction agent for Acme Corp.
@@ -101,7 +103,9 @@ Return only the structured data. Do not add commentary.
 If a field is missing in the invoice, return null for that field.
 ```
 
-**Query:** `<%=in.invoiceText%>`
+> **Tip:** The tutorial prompt lists the fields to keep the example easy to follow, but it does not have to: the JSON schema already tells the model every field name and type. In your own agents, spend the System message on what the schema cannot express — what a field *means* (gross or net total?), how to choose between several candidates, and when to leave a field `null`.
+
+**User message:** `<%=in.invoiceText%>`
 
 **Expect result of type:** `tutorial.InvoiceData.class`
 
@@ -133,7 +137,9 @@ Flow: `resultType` set in element → JSON schema derived from class → schema 
 
 ## Common mistakes
 
-- **Using Gemini** — Gemini does not support JSON schema-constrained output. The request will fail or return unexpected plain text. Switch to OpenAI, Anthropic, or xAI for structured extraction.
+- **Using Gemini** — Gemini does not support JSON schema-constrained output. The call does not fail, but the result is parsed from an unconstrained reply and may be incomplete or missing. Switch to OpenAI, Azure OpenAI, Anthropic, or xAI for structured extraction.
+- **Combining tools and a typed result on Ollama** — Ollama cannot take a schema and tools in the same request, so Smart Workflow keeps the tools and silently drops the schema. Split the work across two agents, or use another provider.
+- **Declaring a list as the result type** — a bare collection is not supported. Wrap the list in a class and use that class.
 - **Primitive fields with no null fallback** — If the LLM cannot find a value and the field is a primitive (e.g. `int`), deserialisation may fail. Use nullable types: `Integer` instead of `int`, `BigDecimal` instead of `double`.
 - **Missing `.class` suffix** — The `resultType` field requires the `.class` suffix (e.g. `tutorial.InvoiceData.class`, not just `tutorial.InvoiceData`). Without it the type cannot be resolved.
 - **Class not on the classpath** — The output class must be accessible at runtime. Ivy data classes work out of the box; plain Java classes must be in a `src` folder compiled into the IAR.
@@ -144,7 +150,7 @@ Flow: `resultType` set in element → JSON schema derived from class → schema 
 
 The working implementation of everything described in this guide is available in the tutorial project:
 
-`tutorial/processes/tutorial/features/Feature02.p.json`
+`tutorial/process/tutorial/features/Feature02.p.json`
 
 Open it in the Designer to see the `Invoice Analysis Agent` element fully configured with `resultType` and `resultMapping`, and the `Feature02Data` data class with the `result: InvoiceData` field.
 
