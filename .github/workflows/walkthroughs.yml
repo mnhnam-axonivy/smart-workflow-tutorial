@@ -1,0 +1,81 @@
+name: Walkthroughs
+
+# The walkthroughs of the Feature Guide (internal/interactive_app_builder). They are built
+# from the tutorial's own process files, so a change there can make them out of date.
+# Everything runs offline with a simulated model: no AI provider is called.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'internal/interactive_app_builder/**'
+      - 'tutorial/process/**'
+      - 'tutorial/dataclass/**'
+      - 'tutorial/src/**'
+      - 'tutorial/cms/**'
+      - 'tutorial/dialog/**'
+      - 'tutorial/webContent/**'
+      - '.github/workflows/walkthroughs.yml'
+  pull_request:
+    paths:
+      - 'internal/interactive_app_builder/**'
+      - 'tutorial/process/**'
+      - 'tutorial/dataclass/**'
+      - 'tutorial/src/**'
+      - 'tutorial/cms/**'
+      - 'tutorial/dialog/**'
+      - 'tutorial/webContent/**'
+      - '.github/workflows/walkthroughs.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: internal/interactive_app_builder
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: internal/interactive_app_builder/package-lock.json
+      - run: npm ci
+      - name: Unit tests
+        run: npm test
+      - name: Committed scripts match their source
+        run: node build.mjs --check
+
+  smoke:
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: internal/interactive_app_builder/package-lock.json
+      - run: npm ci
+      # Ubuntu 24.04 can stop headless Chrome from starting its sandbox; this allows it.
+      - name: Let Chrome start its sandbox
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - name: Play every walkthrough in Chrome
+        run: npm run smoke
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+      - name: Keep the screenshots when something fails
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: smoke-screenshots
+          path: internal/interactive_app_builder/.preview
+          include-hidden-files: true # .preview starts with a dot, which is skipped otherwise

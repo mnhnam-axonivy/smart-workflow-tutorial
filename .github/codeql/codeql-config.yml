@@ -1,0 +1,18 @@
+name: Smart Workflow tutorial
+
+# security-extended: the default security checks plus more XSS and injection checks
+queries:
+  - uses: security-extended
+
+# Only our own source is analysed. Left out: scripts the walkthrough builder generates (their
+# source in internal/interactive_app_builder is analysed instead), third-party libraries that
+# ship as minified files, and build output.
+paths-ignore:
+  - tutorial/webContent/resources/js/interactive-runtime.min.js
+  - tutorial/webContent/resources/js/feature-*.js
+  - tutorial/webContent/resources/js/appendix-*.js
+  - tutorial/webContent/resources/js/marked.min.js
+  - tutorial/webContent/resources/js/highlight.min.js
+  - '**/node_modules/**'
+  - '**/target/**'
+  - internal/interactive_app_builder/.preview/**

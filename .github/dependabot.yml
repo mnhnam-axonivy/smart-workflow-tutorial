@@ -1,0 +1,18 @@
+version: 2
+updates:
+  # The actions the workflows use: one PR a week with all updates
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']
+
+  # The walkthrough builder: security fixes only. A routine update of esbuild or three changes
+  # the generated scripts, which then have to be rebuilt and committed by hand.
+  - package-ecosystem: npm
+    directory: /internal/interactive_app_builder
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0 # no routine updates; security updates still open a PR

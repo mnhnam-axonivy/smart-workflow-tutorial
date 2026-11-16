@@ -1,0 +1,38 @@
+name: Docs
+
+# The tutorial pages: the copies in tutorial/doc and in the CMS are the same, every page has
+# an English and a Japanese version, and every image a page uses exists.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tutorial/doc/**'
+      - 'tutorial/cms/**'
+      - 'tutorial/src/tutorial/TutorialPagesBean.java'
+      - '.github/scripts/check-docs.mjs'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    paths:
+      - 'tutorial/doc/**'
+      - 'tutorial/cms/**'
+      - 'tutorial/src/tutorial/TutorialPagesBean.java'
+      - '.github/scripts/check-docs.mjs'
+      - '.github/workflows/docs.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Check the pages
+        run: node .github/scripts/check-docs.mjs
