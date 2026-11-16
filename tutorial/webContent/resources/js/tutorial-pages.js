@@ -1,8 +1,31 @@
 (function() {
 
   // ── Language state ──────────────────────────────────────────────────────────
-  var currentLang = localStorage.getItem('sw-lang') || 'en';
+  var currentLang = storedLang() || 'en';
   var currentFeatureId = null;
+
+  // ── Safety helpers ──────────────────────────────────────────────────────────
+  // The page text comes from the CMS markdown and is turned into HTML here, so everything
+  // taken from it is escaped, and only plain web links become links.
+
+  function escapeHtml(text) {
+    return String(text == null ? '' : text).replace(/[&<>"']/g, function(c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  var SAFE_LINK = /^(https?:\/\/|mailto:|#)/i;
+  var PAGE_ID = /^[ap]?\d{2}$/;
+
+  // The id GitHub gives a heading, which "#..." links in the markdown use:
+  // "Global configuration — variables.yaml" -> "global-configuration--variablesyaml"
+  function headingSlug(text) {
+    return String(text).trim().toLowerCase().replace(/[^\p{L}\p{N}\p{M}\s_-]/gu, '').replace(/\s/g, '-');
+  }
+
+  function storedLang() {
+    try { return localStorage.getItem('sw-lang') === 'jp' ? 'jp' : null; } catch (e) { return null; }
+  }
 
   // ── Feature cross-reference maps ────────────────────────────────────────────
   var FEATURE_LINK_MAP = {
@@ -334,23 +357,24 @@
 
       if (window.marked) {
         const renderer = new marked.Renderer();
-        renderer.link = function(hrefOrToken, title, text) {
-          var href, linkTitle, linkText;
-          if (hrefOrToken && typeof hrefOrToken === 'object') {
-            href = hrefOrToken.href;
-            linkTitle = hrefOrToken.title;
-            linkText = hrefOrToken.text;
-          } else {
-            href = hrefOrToken;
-            linkTitle = title;
-            linkText = text;
-          }
-          if (href && href.startsWith('feature:')) {
+        // marked 15 hands over a token; its text is rendered (and escaped) by marked itself
+        renderer.link = function(token) {
+          var text = token.tokens ? this.parser.parseInline(token.tokens) : escapeHtml(token.text);
+          var href = String(token.href || '');
+          if (href.startsWith('feature:')) {
             var featureId = href.slice(8);
-            return '<a href="javascript:void(0)" onclick="showFeature(\'' + featureId + '\')" class="sw-feature-link">' + linkText + '</a>';
+            // opened by the click handler set up at boot, not by inline script
+            return PAGE_ID.test(featureId) ? '<a href="#" class="sw-feature-link" data-feature="' + featureId + '">' + text + '</a>' : text;
           }
-          var t = linkTitle ? ' title="' + linkTitle + '"' : '';
-          return '<a href="' + href + '"' + t + ' target="_blank" rel="noopener">' + linkText + '</a>';
+          if (!SAFE_LINK.test(href)) return text; // e.g. javascript: or data: links stay plain text
+          // a link to a section of this page scrolls there (see the click handler), in the same tab
+          if (href.startsWith('#')) return '<a href="' + escapeHtml(href) + '" class="sw-anchor-link">' + text + '</a>';
+          var t = token.title ? ' title="' + escapeHtml(token.title) + '"' : '';
+          return '<a href="' + escapeHtml(href) + '"' + t + ' target="_blank" rel="noopener">' + text + '</a>';
+        };
+        // HTML written into the markdown is shown as text, never run
+        renderer.html = function(token) {
+          return escapeHtml(token.text);
         };
         marked.setOptions({
           renderer,
@@ -369,7 +393,7 @@
         });
       }
 
-      const html = window.marked ? marked.parse(md) : `<pre>${md}</pre>`;
+      const html = window.marked ? marked.parse(md) : '<pre>' + escapeHtml(md) + '</pre>';
       document.getElementById('feature-article').innerHTML = html;
 
       if (window.hljs) {
@@ -438,31 +462,49 @@
 
       var strings = UI_STRINGS[currentLang] || UI_STRINGS.en;
 
-      var langToggle = '<div class="sw-lang-toggle sw-lang-toggle-sidebar">'
-        + '<button class="sw-lang-btn' + (currentLang === 'en' ? ' active' : '') + '" data-lang="en" onclick="setLang(\'en\')">EN</button>'
-        + '<button class="sw-lang-btn' + (currentLang === 'jp' ? ' active' : '') + '" data-lang="jp" onclick="setLang(\'jp\')">JP</button>'
-        + '</div>';
+      // built from elements, so a heading's text can never become markup
+      var el = function(tag, className, text) {
+        var node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text != null) node.textContent = text;
+        return node;
+      };
+      toc.textContent = '';
 
-      let html = '<a class="sidebar-back" onclick="showGrid()" style="cursor:pointer">' + strings.back + '</a>'
-        + langToggle;
+      var back = el('a', 'sidebar-back', strings.back);
+      back.style.cursor = 'pointer';
+      back.addEventListener('click', showGrid);
+      toc.appendChild(back);
+
+      var langToggle = el('div', 'sw-lang-toggle sw-lang-toggle-sidebar');
+      ['en', 'jp'].forEach(function(lang) {
+        var button = el('button', 'sw-lang-btn' + (currentLang === lang ? ' active' : ''), lang.toUpperCase());
+        button.setAttribute('data-lang', lang);
+        button.addEventListener('click', function() { setLang(lang); });
+        langToggle.appendChild(button);
+      });
+      toc.appendChild(langToggle);
+
       if (headings.length) {
-        html += '<h4>' + strings.onThisPage + '</h4><ul>';
+        toc.appendChild(el('h4', null, strings.onThisPage));
+        var list = el('ul');
         headings.forEach((h, i) => {
           const id = 'toc-section-' + i;
           h.id = id;
-          html += `<li><a href="#${id}">${h.textContent}</a></li>`;
+          var link = el('a', null, h.textContent);
+          link.setAttribute('href', '#' + id);
+          list.appendChild(el('li')).appendChild(link);
         });
-        html += '</ul>';
+        toc.appendChild(list);
       }
-      toc.innerHTML = html;
     }
   }
 
   // ── Language switcher ───────────────────────────────────────────────────────
 
   function setLang(lang) {
-    currentLang = lang;
-    localStorage.setItem('sw-lang', lang);
+    currentLang = lang === 'jp' ? 'jp' : 'en';
+    try { localStorage.setItem('sw-lang', currentLang); } catch (e) { /* storage unavailable: the choice lasts for this page only */ }
     _applyLangToIndex(lang);
     _updateLangButtons();
     if (currentFeatureId && document.getElementById('view-detail').style.display !== 'none') {
@@ -517,8 +559,25 @@
   document.addEventListener('DOMContentLoaded', function() {
     var sessionEl = document.getElementById('sw-session-lang');
     var sessionLang = sessionEl ? (sessionEl.getAttribute('data-lang') || 'en') : 'en';
-    currentLang = localStorage.getItem('sw-lang') === 'jp' ? 'jp' : sessionLang;
+    currentLang = storedLang() || (sessionLang === 'jp' ? 'jp' : 'en');
     initLevelNav();
+    // links between pages ("feature:" links in the markdown) carry the page id in data-feature
+    // links to a section of the page ("#...") scroll to the heading with that GitHub id
+    document.addEventListener('click', function(e) {
+      var link = e.target && e.target.closest ? e.target.closest('a.sw-feature-link[data-feature], a.sw-anchor-link') : null;
+      if (!link) return;
+      e.preventDefault();
+      if (link.classList.contains('sw-anchor-link')) {
+        var wanted;
+        try { wanted = decodeURIComponent(link.getAttribute('href').slice(1)); } catch (err) { return; }
+        var heading = Array.prototype.find.call(document.querySelectorAll('#feature-article h1, #feature-article h2, #feature-article h3, #feature-article h4'),
+          function(h) { return headingSlug(h.textContent) === wanted; });
+        if (heading) heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+      var id = link.getAttribute('data-feature');
+      if (PAGE_ID.test(id)) showFeature(id);
+    });
     window.swRenderer = new FeatureRenderer();
     _applyLangToIndex(currentLang);
     _updateLangButtons();

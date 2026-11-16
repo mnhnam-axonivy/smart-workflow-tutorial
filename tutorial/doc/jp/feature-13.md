@@ -135,7 +135,7 @@ Smart Workflowが`resolve`を自動的に呼び出すことはありません。
 1. モッククエリが送信：`"Invoice #INV-2025-0892 from Apex Solutions Ltd. Total: $12,500 USD. Cloud infrastructure services. Due: 2025-08-01. Please process this invoice for approval."`
 2. エージェントが金額が$2,000を超えることを検出 — 理由を求める直接的な質問とともに`askUserFeedback`を呼び出す
 3. `askUserFeedback`が`human:decision`をスロー — エージェントの実行が一時停止
-4. タスクリストに**「Provide feedback for Invoice Approval Agent」**タスクが表示される
+4. タスクリストに「**Provide feedback for Invoice Approval Agent**」タスクが表示される
 5. ユーザーがタスクを開き、エージェントの質問を読み、フリーテキストで理由を入力する
 6. `DecisionMaker.resolve(answer)`がエージェントのメモリに理由を書き込む
 7. エージェントが再開 — 請求書が承認されたことを確認し、作成される承認タスクを説明する

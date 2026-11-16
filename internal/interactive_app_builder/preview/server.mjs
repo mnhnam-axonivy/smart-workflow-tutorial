@@ -12,7 +12,7 @@
  */
 import http from 'node:http';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { dirname, extname, join, normalize, resolve } from 'node:path';
+import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseYaml } from '../runtime/model/yaml.js';
 
@@ -88,7 +88,9 @@ function guidePage(query) {
   const leftover = body.match(/#\{[^}]*\}|<\/?(?:h|p|ui|f):[\w-]+/);
   if (leftover) console.warn('[preview] not resolved: ' + leftover[0]);
 
-  const options = query.get('renderer') ? '<script>window.swInteractiveOptions = { renderer: ' + JSON.stringify(query.get('renderer')) + ' };</script>' : '';
+  // only the two known values ever reach the page, so the query cannot inject script
+  const renderer = ['webgl', 'canvas'].includes(query.get('renderer')) ? query.get('renderer') : null;
+  const options = renderer ? '<script>window.swInteractiveOptions = { renderer: "' + renderer + '" };</script>' : '';
   return '<!DOCTYPE html>\n<html lang="en"><head><meta charset="utf-8" />' +
     '<meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Smart Workflow Feature Guide (preview)</title>' +
     // rough stand-in for the Freya theme the engine adds around the dialog
@@ -110,13 +112,14 @@ function handle(req, res) {
     let file = null;
     if (url.pathname.startsWith('/resources/')) file = join(resources, normalize(decodeURIComponent(url.pathname.slice('/resources/'.length))));
     else if (url.pathname.startsWith('/cms/')) file = imageFile(normalize(decodeURIComponent(url.pathname.slice('/cms'.length))));
-    if (file && (file.startsWith(resources) || file.startsWith(cms)) && existsSync(file)) {
+    // inside those folders only (with the separator, so a sibling folder with a similar name does not count)
+    if (file && (file.startsWith(resources + sep) || file.startsWith(cms + sep)) && existsSync(file)) {
       return send(res, 200, TYPES[extname(file)] || 'application/octet-stream', readFileSync(file));
     }
-    return send(res, 404, 'text/plain', 'Not found: ' + url.pathname);
+    return send(res, 404, 'text/plain', 'Not found');
   } catch (e) {
-    console.error(e);
-    return send(res, 500, 'text/plain', String(e && e.stack));
+    console.error(e); // the details stay in the console
+    return send(res, 500, 'text/plain', 'Internal error');
   }
 }
 

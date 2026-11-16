@@ -14,7 +14,6 @@ export function h(tag, props, ...children) {
       if (value == null || value === false) return;
       if (key === 'class') el.className += (el.className ? ' ' : '') + value;
       else if (key === 'style') Object.assign(el.style, value);
-      else if (key === 'html') el.innerHTML = value;
       else if (key.startsWith('on') && typeof value === 'function') el.addEventListener(key.slice(2), value);
       else if (key.includes('-') || key === 'role' || key === 'for') el.setAttribute(key, value === true ? '' : value);
       else el[key] = value;
