@@ -109,7 +109,6 @@ async function variables(d) {
 }
 
 export const tour = {
-  voice: true, // the notes are read aloud (runtime/ui/voice.js)
   chapters: [
     { id: 'run', play: oneRun },
     { id: 'system', play: systemMessage },

@@ -10,7 +10,7 @@ export const strings = {
     'lang': 'en',
     'tour.intro.title': 'How an agent gets its model',
     'tour.intro.text': 'Watch the Feature03 process run: three agents, each calling a different provider. Afterwards you can click any element to look at its configuration again.',
-    'tour.intro.duration': 'about 2 min',
+    'tour.intro.duration': 'about 2 min, 3 with the voice',
     'tour.chapter.global': '1 — Global default via variables.yaml',
     'tour.chapter.override': '2 — Per-agent override in AgenticProcessCall',
 
@@ -59,7 +59,7 @@ export const strings = {
     'lang': 'ja',
     'tour.intro.title': 'エージェントが使うモデルの決まり方',
     'tour.intro.text': 'Feature03 プロセスの実行を見ていきます。3つのエージェントが、それぞれ別のプロバイダーを呼び出します。終わったら、要素をクリックして設定をもう一度確認できます。',
-    'tour.intro.duration': '約2分',
+    'tour.intro.duration': '約2分（音声ありで約3分）',
     'tour.chapter.global': '1 — variables.yamlによるグローバルデフォルト',
     'tour.chapter.override': '2 — AgenticProcessCallでのエージェントごとの上書き',
 

@@ -2,9 +2,9 @@
  * The voice of the walkthrough: reads the notes aloud with the browser's own speech synthesis
  * (Web Speech API), one sentence at a time, so the note can mark the sentence being spoken like
  * a subtitle. Nothing is downloaded or sent anywhere by this code: the voices are those of the
- * viewer's browser and system (some browsers use online voices of their vendor). A lesson turns
- * it on with `voice: true` in its definition; the viewer turns it on and off in the player, and
- * that choice is remembered.
+ * viewer's browser and system (some browsers use online voices of their vendor). Every
+ * walkthrough has it (`voice: false` in a lesson's tour leaves it out); the viewer turns it on
+ * and off in the player, and that choice is remembered.
  *
  * Speech engines differ and some are unreliable, so:
  * - an utterance never holds more than one sentence (Chrome cuts long ones off);
@@ -49,20 +49,34 @@ export function sentences(text) {
 }
 
 /**
- * What a voice should say for a piece of text: code is read the way a developer says it
- * (`in.invoiceText` and `<%=in.invoiceText%>` → "in dot invoice Text"), names written together
- * as words (AgenticProcessCall → "Agentic Process Call"), and dashes and arrows become pauses.
+ * What a voice should say for a piece of text, the way a developer says it:
+ * - code: `in.invoiceText` and `<%=in.invoiceText%>` → "in dot invoice Text"; code that is only
+ *   symbols, like `>`, is read as it is;
+ * - names: variables.yaml → "variables dot yaml", .class → "dot class", List<Invoice> → "List of
+ *   Invoice", AgenticProcessCall → "Agentic Process Call", APIKey → "API Key";
+ * - "e.g." → "for example", a URL without its http://, dashes and arrows become pauses.
  */
 export function speakable(text) {
   return String(text)
-    .replace(/`([^`]*)`/g, (_, code) => code
-      .replace(/<%=?|%>/g, ' ')
-      .replace(/[<>{}()[\]"'=;*]/g, ' ')
-      .replace(/(\w)\.(?=\w)/g, '$1 dot ')
-      .replace(/_/g, ' '))
-    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/(\w)<(\w+)>/g, '$1 of $2')
+    .replace(/`([^`]*)`/g, (_, code) => {
+      const words = code
+        .replace(/<%=?|%>/g, ' ')
+        .replace(/[<>{}()[\]"'=;*]/g, ' ')
+        .replace(/[_/]/g, ' ');
+      return words.trim() ? words : code;
+    })
+    .replace(/\be\.g\./gi, 'for example')
+    .replace(/\bi\.e\./gi, 'that is')
+    .replace(/https?:\/\//g, '')
+    .replace(/(^|\s)-D(?=[a-z])/g, '$1D ')
+    .replace(/(\w)\.(?=[A-Za-z])/g, '$1 dot ')
+    .replace(/(^|[\s(（「“"・、,])\.(?=[A-Za-z])/g, '$1dot ')
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/([A-Z])([A-Z][a-z]{2,})/g, '$1 $2') // APIKey, not URLs
     .replace(/\s*[—–→]\s*/g, ', ')
     .replace(/[“”]/g, '"')
+    .replace(/[\p{Extended_Pictographic}️]/gu, '')
     .replace(/\s+/g, ' ')
     .trim();
 }

@@ -69,11 +69,11 @@
  * thinking, tool-call, tool-done, tool-result, response, mapped, unmapped, skipped, failed, end).
  * Elements of the tools file have the ids of that file with the prefix "tools-".
  *
- * With `voice: true` in the definition, the walkthrough also speaks (see voice.js): each
- * chapter title, each screen, and each note (its title, then its text sentence by sentence,
- * with the sentence being said marked in the note; quotes are not read). A note then stays
- * until the voice has finished, and at least as long as without it. The player has a button
- * to turn the voice off and on.
+ * The walkthrough also speaks (see voice.js): each chapter title, each screen, and each note
+ * (its title, then its text sentence by sentence, with the sentence being said marked in the
+ * note; quotes are not read). A note then stays until the voice has finished, and at least as
+ * long as without it. The player has a button to turn the voice off and on. `voice: false` in
+ * the definition leaves the voice out of a lesson.
  */
 import { h, append, clear } from '../util.js';
 import { icon } from './icons.js';
@@ -150,7 +150,7 @@ export class Tour {
     this.tracking = 0;
     // the voice, when the lesson has one: `say` gives what is showing as parts to say (in the
     // current language), `speech` is that being said, `sayEls` the sentences of the note on screen
-    this.voice = definition && definition.voice ? new Voice(app.options.speech, () => this.renderPlayer()) : null;
+    this.voice = this.chapters.length && !(definition && definition.voice === false) ? new Voice(app.options.speech, () => this.renderPlayer()) : null;
     this.say = null;
     this.speech = null;
     this.sayEls = [];

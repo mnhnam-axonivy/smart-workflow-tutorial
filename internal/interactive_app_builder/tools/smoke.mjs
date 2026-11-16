@@ -480,7 +480,16 @@ try {
   await page.evaluate(() => window.setLang('en'));
   await showFeaturePage(page, '02');
   await openWalkthrough(page);
-  check(await voiceButton(page) === null, 'lessons without a voice have no voice button');
+  await withApp(page, app => { window.__voice.log.length = 0; app.tour.start(0); });
+  await page.waitForFunction(() => window.__voice.log.length > 0, { timeout: 10000, polling: 20 });
+  check((await voiceButton(page)).on && (await voiceLog(page))[0] === 'Expect result of type', 'the other walkthroughs speak too: Feature 02 says its first chapter');
+  await page.keyboard.press('Escape');
+  await settle(page, 300);
+  await showFeaturePage(page, 'a05');
+  await openWalkthrough(page);
+  await withApp(page, app => { window.__voice.log.length = 0; app.tour.start(0, 1); });
+  await page.waitForFunction(() => window.__voice.log.length > 1, { timeout: 10000, polling: 20 });
+  check((await voiceLog(page)).slice(0, 2).join('|') === 'Cause 2 of 6|The User message was blank, or failed to expand', 'a screen before a cause is said: "Cause 2 of 6", then the cause');
   await page.keyboard.press('Escape');
   check(voiced.problems.length === 0, 'no console errors or warnings' + (voiced.problems.length ? ': ' + voiced.problems.slice(0, 4).join(' | ') : ''));
   await page.close();

@@ -1,9 +1,19 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readdirSync, existsSync } from 'node:fs';
 
 import { Voice, sentences, speakable, pickVoice } from '../runtime/ui/voice.js';
 import { strings } from '../features/feature-01/text.js';
-import { tour } from '../features/feature-01/tour.js';
+
+/** Every lesson with a walkthrough: { id, strings, tour }. */
+const features = new URL('../features/', import.meta.url);
+const lessons = await Promise.all(readdirSync(features)
+  .filter(dir => existsSync(new URL(dir + '/tour.js', features)))
+  .map(async dir => ({
+    id: dir,
+    strings: (await import(new URL(dir + '/text.js', features))).strings,
+    tour: (await import(new URL(dir + '/tour.js', features))).tour
+  })));
 
 const VOICES = [
   { name: 'Microsoft David - English (United States)', lang: 'en-US', default: true },
@@ -59,17 +69,21 @@ const until = async (condition, timeout = 2000) => {
   }
 };
 
-test('sentences: the parts give the text back exactly, and code is never split', () => {
+test('sentences: in every lesson the parts give the text back exactly, and code is never split', () => {
   assert.deepEqual(sentences('Total is JPY 99,000.00. It works, e.g. here. 終わり。次！ `a. b` end'),
     ['Total is JPY 99,000.00. ', 'It works, e.g. here. ', '終わり。', '次！ ', '`a. b` end']);
-  for (const lang of ['en', 'ja']) {
-    Object.keys(strings[lang]).filter(k => /^tour\.\w+\.text$/.test(k)).forEach(key => {
-      const text = strings[lang][key];
+  assert.ok(lessons.length >= 17, 'all walkthroughs are checked');
+  lessons.forEach(lesson => ['en', 'ja'].forEach(lang => {
+    const texts = lesson.strings[lang];
+    Object.keys(texts).filter(k => /^tour\.\w+\.text$/.test(k)).forEach(key => {
+      const text = texts[key];
       const parts = sentences(text);
-      assert.equal(parts.join(''), text, key);
-      parts.forEach(part => assert.equal(part.split('`').length % 2, 1, key + ': a code span is cut in two'));
+      const where = lesson.id + ' ' + lang + ' ' + key;
+      assert.equal(parts.join(''), text, where);
+      parts.forEach(part => assert.equal(part.split('`').length % 2, 1, where + ': a code span is cut in two'));
+      parts.map(speakable).forEach(said => assert.ok(said.length > 0, where + ': a sentence with nothing to say'));
     });
-  }
+  }));
   assert.equal(sentences(strings.en['tour.systemGuess.text']).length, 3);
   assert.equal(sentences(strings.ja['tour.systemGuess.text']).length, 3);
 });
@@ -78,8 +92,16 @@ test('speakable: code is read the way a developer says it; dashes and arrows bec
   assert.equal(speakable('`<%=in.invoiceText%>` is resolved'), 'in dot invoice Text is resolved');
   assert.equal(speakable('stored in `in.summary`.'), 'stored in in dot summary.');
   assert.equal(speakable('every AgenticProcessCall uses `DefaultProvider`'), 'every Agentic Process Call uses Default Provider');
-  assert.equal(speakable('Global configuration — variables.yaml'), 'Global configuration, variables.yaml');
+  assert.equal(speakable('Global configuration — variables.yaml'), 'Global configuration, variables dot yaml');
   assert.equal(speakable('“a single sentence summary” → “a bullet list”'), '"a single sentence summary", "a bullet list"');
+  assert.equal(speakable('The type has to end in `.class`, e.g. `tutorial.InvoiceData.class`.'), 'The type has to end in dot class, for example tutorial dot Invoice Data dot class.');
+  assert.equal(speakable('A Word file (.docx), not .png・.jpg'), 'A Word file (dot docx), not dot png・dot jpg');
+  assert.equal(speakable('a field items of type List<Invoice> and an APIKey, IDocument or URLs'), 'a field items of type List of Invoice and an API Key, I Document or URLs');
+  assert.equal(speakable('The closing `>` is missing'), 'The closing > is missing', 'code of symbols only is read as it is');
+  assert.equal(speakable('`ivy.cms.co("/Files/Documents/InvoiceSample")`'), 'ivy dot cms dot co Files Documents Invoice Sample');
+  assert.equal(speakable('Phoenix at http://localhost:6006 ☕️'), 'Phoenix at localhost:6006');
+  assert.equal(speakable('-Dotel.traces.exporter=otlp'), 'D otel dot traces dot exporter=otlp');
+  assert.equal(speakable('JPY 99,000.00 at 0.0, in Smart Workflow 14.0.0.'), 'JPY 99,000.00 at 0.0, in Smart Workflow 14.0.0.', 'numbers stay numbers');
 });
 
 test('pickVoice: a natural voice first, then the browser vendor\'s, only of the language', () => {
@@ -170,8 +192,6 @@ test('a browser that wants a click first ends the speech at once', async () => {
   assert.deepEqual(engine.said, ['Hello.']);
 });
 
-test('Feature 01 has the voice; other lessons do not yet', async () => {
-  assert.equal(tour.voice, true);
-  const { tour: other } = await import('../features/feature-02/tour.js');
-  assert.ok(!other.voice);
+test('every walkthrough has the voice: none leaves it out', () => {
+  lessons.forEach(lesson => assert.notEqual(lesson.tour.voice, false, lesson.id));
 });
