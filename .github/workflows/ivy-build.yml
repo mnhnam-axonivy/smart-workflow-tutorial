@@ -1,0 +1,33 @@
+name: Ivy projects
+
+# Builds the Axon Ivy projects, so Java that does not compile (tools, guardrails), broken data
+# classes and dependency problems after an upgrade are found before a merge. No process runs
+# and no AI provider is called.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [tutorial, best-practices]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+      - name: Build ${{ matrix.project }}
+        run: mvn -B -ntp verify -f ${{ matrix.project }}/pom.xml

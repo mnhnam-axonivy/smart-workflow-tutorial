@@ -1,0 +1,90 @@
+name: Security
+
+# Free security checks (free because the repository is public):
+#   code      CodeQL reads our own JavaScript, Java and workflows for XSS, injection and similar bugs.
+#             Findings appear under Security > Code scanning.
+#   secrets   TruffleHog looks for API keys and passwords in the commits.
+#   libraries npm audit for the walkthrough builder, Retire.js for the libraries the guide ships.
+#   new dependencies (pull requests only) stops a PR that adds a dependency with a known vulnerability.
+# It runs on every pull request, on main, and once a week, because new vulnerabilities are
+# published for code that has not changed.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '0 3 * * 1' # Mondays, 03:00 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  code:
+    name: Code (CodeQL, ${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write # to upload the findings
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: javascript-typescript
+            build-mode: none
+          - language: java-kotlin
+            build-mode: none # reads the Java sources without building the Ivy projects
+          - language: actions
+            build-mode: none # the workflows in .github/workflows
+    steps:
+      - uses: actions/checkout@v7
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          config-file: ./.github/codeql/codeql-config.yml
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:${{ matrix.language }}
+
+  secrets:
+    name: Secrets (TruffleHog)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # the whole history, so the commits of a push or PR can be scanned
+      # a push or PR: its new commits; the weekly run: the whole history
+      - uses: trufflesecurity/trufflehog@v3.99.9
+        with:
+          # fail on keys that are confirmed to work, or that could not be checked
+          extra_args: --results=verified,unknown
+
+  libraries:
+    name: Libraries (npm audit, Retire.js)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Packages of the walkthrough builder
+        working-directory: internal/interactive_app_builder
+        run: npm audit --audit-level=high
+      # marked, highlight.js and the bundled three.js are files in the repository, which npm audit does not see
+      - name: Libraries the Feature Guide ships
+        run: npx --yes retire@6.1.1 --path tutorial/webContent/resources/js --severity medium
+
+  new-dependencies:
+    name: New dependencies
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: moderate
